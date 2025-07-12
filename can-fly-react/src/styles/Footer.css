@@ -1,0 +1,88 @@
+@font-face {
+    font-family:'KakaoBold' ;
+    src: url("../../public/font/KakaoBigSans-Bold.ttf")format("truetype");
+    
+}
+@font-face {
+    font-family:'KakaoExtra' ;
+    src: url("../../public/font/KakaoBigSans-ExtraBold.ttf")format("truetype");
+}
+@font-face {
+    font-family:'KakaoRegular' ;
+    src: url("../../public/font/KakaoBigSans-Regular.ttf")format("truetype");
+}
+.Footer-container{
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    background-color: #E4E6EB;
+    padding-left: 79px;
+    padding-bottom: 59px;
+    font-weight: 800;
+
+}
+.Footer-title{
+    color: #898989;
+    font-size: 40px;
+    font-family:'KakaoExtra';
+    
+    line-height: normal;
+    padding: 59px 0px 8px 0px;
+   
+
+}
+.Footer-subtitle{
+    font-size: 1.2rem;
+    font-family:'Kakaobold' ;
+    color: #898989;
+
+}
+.Footer-section{
+    display: flex;
+    flex-direction: column;
+    gap:16px;
+}
+
+.info-text-wrapper{
+    display: flex;
+    gap: 20px;
+    font-family: 'KakaoRegular';
+    
+    
+}
+.info-text-1{
+    color: #9A9EA8
+    
+    
+    
+}
+.info-text-2{
+    color: #898989
+    
+    
+}
+.Line{
+    font-size: 20px;
+    gap:10px;
+    display: flex;
+    flex-direction: column;
+
+}
+.Line1{
+    display: flex;
+   gap: 32px;
+    
+    
+}
+
+.Line2{
+    display: flex;
+    gap:32px;
+    
+}
+.Footer-subtitle2{
+    font-size: 1    rem;
+    font-family:'Kakaobold' ;
+    color: #898989
+    
+}

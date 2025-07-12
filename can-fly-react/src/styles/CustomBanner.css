@@ -1,0 +1,11 @@
+.slick-dots{
+    bottom: 25px;
+}
+.slick-prev:before,
+.slick-next:before {
+  content: none;
+  width: 1rem;
+  height: 9.65469rem;
+  flex-shrink: 0;
+  aspect-ratio: 77.24/154.47;
+}

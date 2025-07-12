@@ -1,0 +1,13 @@
+@font-face {
+    font-family:'Kakaobold' ;
+    src: url("../../public/font/KakaoBigSans-Bold.ttf")format("truetype");
+    
+}
+@font-face {
+    font-family:'KakaoExtra' ;
+    src: url("../../public/font/KakaoBigSans-ExtraBold.ttf")format("truetype");
+}
+@font-face {
+    font-family:'KakaoRegular' ;
+    src: url("../../public/font/KakaoBigSans-Regular.ttf")format("truetype");
+}
