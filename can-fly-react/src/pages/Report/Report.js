@@ -33,7 +33,7 @@ const Report = () => {
 
           <div className='report-main-content'>
             <div id='aptitude'>
-              <h2 className='section-title'>적성·흥미 검사 분석 결과</h2>
+              <h2 className='section-title'>적성·미흥 검사 분석 결과</h2>
               <AptitudeAnalysis />
             </div>
             <div id='grades'>성적 추이</div>
