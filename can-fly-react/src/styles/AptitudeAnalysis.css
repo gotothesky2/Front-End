@@ -1,0 +1,56 @@
+.aptitude-analysis-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 16px;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.chart-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.type-table {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.type-box {
+  width: 130px;
+  padding: 1rem;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  font-size: 0.9rem;
+}
+
+.type-box.top1 {
+  border-color: #03178C;
+}
+
+.type-box.top2 {
+  border-color: #f18700;
+}
+
+.scatter-section {
+  margin: 3rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.aptitude-comment {
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 1rem;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+}

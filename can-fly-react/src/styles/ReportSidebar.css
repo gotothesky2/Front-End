@@ -1,0 +1,5 @@
+/* 선택된 버튼은 파란색으로! */
+.report-sidebar-button.active {
+  background-color: #03178C;
+  color: white;
+}

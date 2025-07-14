@@ -2,8 +2,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #fff;
+  background-color: #ffffff;
   margin-top: 105px;
+  padding-left: 1rem;
 }
 
 .report-title-box {
@@ -13,50 +14,14 @@
   font-weight: bold;
 }
 
-.filter-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  background-color: #f8f8f8;
-  padding: 1rem 1.5rem;
-  border-radius: 15px;
-  margin: 0 auto;
-  max-width: 900px;
-  gap: 1rem;
-}
-
-.filter-box label {
-  font-weight: 600;
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9rem;
-}
-
-.filter-box select,
-.filter-box input[type="date"] {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.search-btn {
-  background-color: #1e2a78;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-}
 
 .report-path-text {
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 .report-path-main {
@@ -73,4 +38,117 @@
   color: #261B1A; 
   font-weight: bold;
 }
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  margin: 0 auto;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.filter-box label {
+  display: flex;
+  flex-direction: row; /* ← 가로로 바꿈 */
+  align-items: center;
+  gap: 0.5rem; /* 제목과 값 사이 간격 */
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+
+.filter-box select,
+.filter-box input[type="date"] {
+  background-color: #f2f2f2;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.search-btn {
+  background-color: #03178C;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.report-white-section {
+  background-color: white;
+  padding: 2rem;
+}
+
+.report-gray-section {
+  background-color: #f2f2f2;
+  padding: 3rem 0;
+}
+
+/* 회색 안의 가운데 콘텐츠 */
+.report-inner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+}
+
+.report-sidebar {
+  position: sticky;
+  top: 120px;
+  align-self: flex-start;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 3px 3px 3px  gray;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 220px;
+}
+
+.report-sidebar .sidebar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.report-sidebar button {
+  background-color: #ffffff;
+  border-radius: 15px;
+  border-width: 1.5px;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.report-sidebar button:hover {
+  background-color: #e0e0e0;
+}
+
+.report-content-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  padding-left: 0.5rem;
+}
+
+/* 우측 내용 컨테이너 */
+.report-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  font-size: 50px;
+  font-weight: bold;
+}
+
 
