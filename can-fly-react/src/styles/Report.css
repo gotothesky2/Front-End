@@ -1,0 +1,76 @@
+.report-page-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  margin-top: 105px;
+}
+
+.report-title-box {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background-color: #f8f8f8;
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  margin: 0 auto;
+  max-width: 900px;
+  gap: 1rem;
+}
+
+.filter-box label {
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.filter-box select,
+.filter-box input[type="date"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.search-btn {
+  background-color: #1e2a78;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.report-path-text {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.report-path-main {
+  color: #898989;
+  font-weight: bold;
+}
+
+.report-path-arrow {
+  color: #261B1A; 
+  font-weight: bold;
+}
+
+.report-path-sub {
+  color: #261B1A; 
+  font-weight: bold;
+}
+
