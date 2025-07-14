@@ -1,7 +1,6 @@
 import React from 'react';
 import ReportFilter from './ReportFilter';
 import ReportSidebar from './ReportSidebar';
-import AptitudeAnalysis from './AptitudeAnalysis';
 import '../../styles/Report.css';
 
 const Report = () => {
@@ -32,10 +31,7 @@ const Report = () => {
           <ReportSidebar />
 
           <div className='report-main-content'>
-            <div id='aptitude'>
-              <h2 className='section-title'>적성·미흥 검사 분석 결과</h2>
-              <AptitudeAnalysis />
-            </div>
+            <div id='aptitude'>적성·흥미 검사 분석 결과</div>
             <div id='grades'>성적 추이</div>
             <div id='interest'>관심 학과/학교 분석</div>
             <div id='summary'>종합 분석</div>
