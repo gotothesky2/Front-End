@@ -1,6 +1,7 @@
 import React from 'react';
 import ReportFilter from './ReportFilter';
 import ReportSidebar from './ReportSidebar';
+import AptitudeRadar from './AptitudeRadar';
 
 import '../../styles/Report.css';
 
@@ -33,9 +34,10 @@ const Report = () => {
 
           <div className='report-main-content'>
             <div id='aptitude'>
-              <div style={{ fontWeight: 'bold', fontSize: '20px', marginBottom: '10px' }}>
+              <h3 style={{ fontWeight: 'bold', fontSize: '20px', marginBottom: '10px' }}>
                 적성·흥미 검사 분석 결과
-              </div>
+              </h3>
+              <AptitudeRadar />
               
             </div>
             <div id='grades'>성적 추이</div>
