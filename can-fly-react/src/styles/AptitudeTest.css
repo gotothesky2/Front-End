@@ -94,3 +94,22 @@
 .next-button:hover {
   background-color: #000066;
 }
+
+.banner-with-image {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 110px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.banner-text {
+  max-width: 80%;
+}
+
+.banner-image {
+  margin-top: 50px;
+  width: 200px;
+  height: auto;
+}

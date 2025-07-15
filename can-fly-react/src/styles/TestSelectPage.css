@@ -16,6 +16,8 @@
 }
 
 .card-icon {
+  width: 80px;   /* 너비를 80px로 줄임 */
+  height: auto;
   font-size: 80px;
 }
 
