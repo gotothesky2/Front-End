@@ -1,7 +1,7 @@
 import React from 'react';
 import ReportFilter from './ReportFilter';
 import ReportSidebar from './ReportSidebar';
-import AptitudeRadar from './AptitudeRadar';
+
 import '../../styles/Report.css';
 
 const Report = () => {
@@ -36,7 +36,7 @@ const Report = () => {
               <div style={{ fontWeight: 'bold', fontSize: '20px', marginBottom: '10px' }}>
                 적성·흥미 검사 분석 결과
               </div>
-              <AptitudeRadar />
+              
             </div>
             <div id='grades'>성적 추이</div>
             <div id='interest'>관심 학과/학교 분석</div>
