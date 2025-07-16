@@ -34,7 +34,7 @@ const Report = () => {
 
           <div className='report-main-content'>
             <div id='aptitude'>
-              <h3 style={{ fontWeight: 'bold', fontSize: '20px', marginBottom: '10px' }}>
+              <h3 style={{ fontWeight: 'bold', fontSize: '50px', marginBottom: '10px' }}>
                 적성·흥미 검사 분석 결과
               </h3>
               <AptitudeRadar />
