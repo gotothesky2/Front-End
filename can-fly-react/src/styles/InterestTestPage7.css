@@ -1,0 +1,212 @@
+.interest7-container {
+  max-width: 100%;
+  margin: 50px auto;
+  padding: 0 20px;
+  font-family: sans-serif;
+}
+
+.banner-text {
+  margin-top: 100px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.section {
+  padding: 0 80px;
+  margin-bottom: 50px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.question-text {
+  text-align: left;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.circle-options-7 {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px;
+  margin-bottom: 30px;
+}
+
+.circle-container-7 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.circle-label-7 {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+
+
+.circle-7 {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #aaa;
+  border-radius: 50%;
+  background: #f8f8f8;
+  cursor: pointer;
+}
+
+.circle-7.selected {
+  width: 20px;
+  height: 20px;
+  border: 12px solid #03178C;
+}
+
+/* 네모 박스 선택 */
+.box-options-7 {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.box-options-7.small {
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.box-7 {
+  flex: 1;
+  max-width: 200px;
+  min-height: 60px;
+  border: 2px solid gray;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: gray;
+  cursor: pointer;
+}
+
+.box-7.selected {
+  border: 2px solid #03178C;
+  color: white;
+  background: #03178C;
+}
+
+/* 직업 & 과목 선택 */
+.job-select-7, .subject-select-7 {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.job-box-7, .subject-box-7 {
+  flex: 1;
+  max-width: 300px;
+  min-height: 60px;
+  border: 2px solid #03178C;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: gray;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #03178C;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #000066;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 50px 0;
+}
+
+.save-button {
+  background: white;
+  color: #03178C;
+  border: 2px solid #03178C;
+}
+
+.save-button:hover {
+  background: #f0f0f0;
+}
+
+/* 팝업 모달 */
+.modal {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  display:flex; align-items: center; justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-height: 50vh;   /* 높이 제한 */
+  overflow-y: auto;   /* 스크롤 */
+  border-radius: 24px;
+}
+
+/* 버튼들을 더 크게 */
+.modal-list button {
+  padding: 40px;
+  font-size: 24px;
+  border: 2px solid #000000;
+  background: white;
+  color: #000000;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px; /* 간격 조금 키움 */
+  margin: 30px 0;
+}
+
+.modal-list button:hover {
+  background: #03178C;
+  color: white;
+}
+
+.banner-with-image {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 110px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.banner-text {
+  max-width: 80%;
+  text-align: left;
+
+}
+
+.banner-image {
+  margin-top: 50px;
+  width: 200px;
+  height: auto;
+}

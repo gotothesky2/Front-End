@@ -1,4 +1,4 @@
-.aptitude-container {
+.interest-container {
   max-width: 100%;
   margin: 50px auto;
   padding: 0 20px;
@@ -26,25 +26,25 @@
 }
 
 .questions-wrapper {
-  padding: 0 80px; 
+  padding: 0 80px;
 }
 
 .question-block {
-  margin-bottom: 80px;
+  margin-bottom: 30px;
 }
 
 .question-text {
   text-align: left;
   font-size: 16px;
   margin-bottom: 30px;
-  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .circle-options {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 50px;
+  gap: 80px;
 }
 
 .circle-container {
