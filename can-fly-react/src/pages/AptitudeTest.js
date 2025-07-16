@@ -68,17 +68,16 @@ const AptitudeTest = () => {
           >
             <div className="question-text">{idx + 1}. {q}</div>
             <div className="circle-options">
-              <div className="option-label">〈 전혀 그렇지 않다</div>
-              <div className="options-group">
-                {[1,2,3,4,5,6,7].map(value => (
+              {[1,2,3,4,5,6,7].map((value, i) => (
+                <div key={value} className="circle-container">
                   <div 
-                    key={value}
                     className={`circle ${answers[idx] === value ? 'selected' : ''}`}
                     onClick={() => handleSelect(idx, value)}
                   ></div>
-                ))}
-              </div>
-              <div className="option-label">매우 그렇다 〉</div>
+                  {i === 0 && <div className="circle-label">〈 전혀 그렇지 않다</div>}
+                  {i === 6 && <div className="circle-label">매우 그렇다 〉</div>}
+                </div>
+              ))}
             </div>
           </div>
         ))}

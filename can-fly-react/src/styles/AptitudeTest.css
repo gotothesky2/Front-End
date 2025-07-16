@@ -5,12 +5,23 @@
   font-family: sans-serif;
 }
 
-.banner-text-only {
+.banner-with-image {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 110px;
-  width: 100%;
-  margin-bottom: 50px;
-  padding-bottom: 20px;     /* 선과 텍스트 사이 간격 */
-  border-bottom: 1px solid #333; /* 얇은 검정 선 */
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.banner-text {
+  max-width: 80%;
+}
+
+.banner-image {
+  margin-top: 50px;
+  width: 200px;
+  height: auto;
 }
 
 .questions-wrapper {
@@ -18,35 +29,40 @@
 }
 
 .question-block {
-  margin-bottom: 30px;
+  margin-bottom: 80px;
 }
 
 .question-text {
   text-align: left;
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
+  font-weight: bold;
 }
 
 .circle-options {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 20px;
+  align-items: flex-start;
+  gap: 50px;
 }
 
-.options-group {
-  display: flex;
-  gap: 30px;
+.circle-container {
+  position: relative;
 }
 
-.option-label {
-  font-size: 13px;
+.circle-label {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
   color: #555;
+  white-space: nowrap;
 }
 
 .circle {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border: 2px solid #aaa;
   border-radius: 50%;
   background-color: #f8f8f8;
@@ -55,9 +71,9 @@
 }
 
 .circle.selected {
-  width: 16px;
-  height: 16px;
-  border: 8px solid #191970;
+  width: 20px;
+  height: 20px;
+  border: 12px solid #03178C;
   background-color: #f8f8f8;
 }
 
@@ -79,7 +95,7 @@
 .save-button {
   background-color: white;
   color: #191970;
-  border: 2px solid #191970;
+  border: 2px solid #03178C;
 }
 
 .save-button:hover {
@@ -87,29 +103,10 @@
 }
 
 .next-button {
-  background-color: #191970;
+  background-color: #03178C;
   color: white;
 }
 
 .next-button:hover {
-  background-color: #000066;
-}
-
-.banner-with-image {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 110px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #333;
-}
-
-.banner-text {
-  max-width: 80%;
-}
-
-.banner-image {
-  margin-top: 50px;
-  width: 200px;
-  height: auto;
+  background-color: #03178C;
 }
