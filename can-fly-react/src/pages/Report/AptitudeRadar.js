@@ -47,9 +47,9 @@ const data = {
   datasets: [{
     label: '현재 검사',
     data: [48.1,30.9,100,49.4,43.2,29.6],
-    backgroundColor: 'rgba(113, 41, 185, 0.2)',
-    borderColor: 'rgb(113, 41, 185)',
-    pointBackgroundColor: 'rgb(113, 41, 185)',
+    backgroundColor: 'rgba(41, 41, 185, 0.7)',
+    borderColor: 'rgb(41, 41, 185)',
+    pointBackgroundColor: 'rgb(41, 41, 185)',
     pointBorderColor: '#fff',
     pointRadius: 5,
     borderWidth: 2,

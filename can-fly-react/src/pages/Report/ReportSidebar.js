@@ -1,36 +1,37 @@
-import React, { useState } from 'react';
-import '../../styles/ReportSidebar.css';
-import '../../styles/Report.css';
+import React, { useState } from 'react'
+import '../../styles/ReportSidebar.css'
 
-const sections = [
-  { id: 'aptitude', label: '적성·흥미 검사 분석 결과' },
-  { id: 'grades', label: '성적 추이' },
-  { id: 'interest', label: '관심 학과/학교 분석' },
-  { id: 'summary', label: '종합 분석' },
-];
+export default function ReportSidebar({ initialActive = 'aptitude' }) {
+  const [active, setActive] = useState(initialActive)
 
-const ReportSidebar = () => {
-  const [activeSection, setActiveSection] = useState(null);
-
-  const handleClick = (id) => {
-    setActiveSection(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const items = [
+    { id: 'aptitude', label: '적성·흥미 검사 분석 결과' },
+    { id: 'grades',   label: '성적 추이' },
+    { id: 'interest', label: '관심 학과·학교 분석' },
+    { id: 'summary',  label: '종합 분석' },
+  ]
 
   return (
-    <div className="report-sidebar">
-      <h3 className='sidebar-title'>레포트 목차</h3>
-      {sections.map((section) => (
-        <button
-          key={section.id}
-          className={`report-sidebar-button ${activeSection === section.id ? 'active' : ''}`}
-          onClick={() => handleClick(section.id)}
-        >
-          {section.label}
-        </button>
-      ))}
-    </div>
-  );
-};
+    <aside className="report-sidebar">
+      <h2 className="report-sidebar__title">레포트 목차</h2>
+      <nav className="report-sidebar__nav">
+        {items.map(item => (
+          <button
+            key={item.id}
+            className={
+              `report-sidebar__item${item.id === active ? ' report-sidebar__item--active' : ''}`
+            }
+            onClick={() => {
+              setActive(item.id)  // 클릭한 id를 active로 변경
+              document.getElementById(item.id)
+                      ?.scrollIntoView({ behavior: 'smooth',block: 'start' })
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </aside>
+  )
+}
 
-export default ReportSidebar;
