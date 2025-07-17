@@ -34,7 +34,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 60px;
+  gap: 80px;
   margin-bottom: 30px;
 }
 
@@ -57,32 +57,33 @@
   height: 40px;
   border: 2px solid #aaa;
   border-radius: 50%;
-  background: #f8f8f8;
+  background-color: #f8f8f8;
   cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .circle-7.selected {
   width: 20px;
   height: 20px;
   border: 12px solid #03178C;
+  background-color: #f8f8f8;
 }
 
-/* 네모 박스 선택 */
 .box-options-7 {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 5px;
   margin-bottom: 30px;
 }
 
 .box-options-7.small {
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 5px;
 }
 
+/* 네모 박스 */
 .box-7 {
-  flex: 1;
-  max-width: 200px;
+  width: 450px;  /* 양옆 박스 길이 크게 */
   min-height: 60px;
   border: 2px solid gray;
   border-radius: 8px;
@@ -94,23 +95,30 @@
   cursor: pointer;
 }
 
+/* 아래 계열 선택 박스(작게) */
+.box-options-7.small .box-7 {
+  width: 122px; /* 아래 박스만 길이 줄임 */
+}
+
+/* 선택된 상태 */
 .box-7.selected {
   border: 2px solid #03178C;
   color: white;
   background: #03178C;
 }
 
+
 /* 직업 & 과목 선택 */
 .job-select-7, .subject-select-7 {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 5px;
   margin-bottom: 30px;
 }
 
 .job-box-7, .subject-box-7 {
   flex: 1;
-  max-width: 300px;
+  max-width: 800px;
   min-height: 60px;
   border: 2px solid #03178C;
   border-radius: 8px;
@@ -120,6 +128,12 @@
   font-weight: bold;
   color: gray;
 }
+
+.subject-box-7 {
+  flex: none;
+  width: 395px;
+}
+
 
 button {
   padding: 10px 20px;
@@ -137,7 +151,7 @@ button:hover {
 .button-group {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 5px;
   margin: 50px 0;
 }
 
@@ -169,7 +183,7 @@ button:hover {
 
 /* 버튼들을 더 크게 */
 .modal-list button {
-  padding: 40px;
+  padding: 30px;
   font-size: 24px;
   border: 2px solid #000000;
   background: white;
@@ -185,10 +199,38 @@ button:hover {
   margin: 30px 0;
 }
 
+.modal-list button.selected {
+  background: #03178C;
+  color: white;
+}
+
 .modal-list button:hover {
   background: #03178C;
   color: white;
 }
+
+.modal-content h4 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modal-close-btn {
+  display: block;
+  margin-left: auto;  /* 오른쪽 정렬 */
+  padding: 12px 30px;
+  font-size: 20px;
+  background: #03178C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  background: #000066;
+}
+
 
 .banner-with-image {
   display: flex;
@@ -197,6 +239,7 @@ button:hover {
   margin-top: 110px;
   padding-bottom: 20px;
   border-bottom: 1px solid #333;
+  margin-bottom: 50px;
 }
 
 .banner-text {
