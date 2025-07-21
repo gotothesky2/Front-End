@@ -1,5 +1,5 @@
 // src/pages/Report/Report.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReportFilter   from './ReportFilter';
 import ReportSidebar  from './ReportSidebar';
 import AptitudeRadar  from './AptitudeRadar';
@@ -9,8 +9,29 @@ import '../../styles/Report.css';
 import AptitudeText from './AptitudeText';
 import ScoreTrend from './ScoreTrend';
 import ScoreTrendText from './ScoreTrendText';
+import InterestChart from './InterestChart';
+import ComprehensiveAnalysis from './ComprehensiveAnalysis';
+
+
 
 const Report = () => {
+    // 관심 학과/학교 분석 데이터 관리 (더미 혹은 fetch)
+  const [interestData, setInterestData] = useState([]);
+
+  useEffect(() => {
+    // TODO: 실제 API가 준비되면 아래 fetch를 사용하세요
+    // fetch('/api/report/interest')
+    //   .then(res => res.json())
+    //   .then(setInterestData);
+
+    // 백엔드 준비 전에는 더미 데이터 세팅
+    setInterestData([
+      { school: '한국항공대학교', dept: '소프트웨어학과', rate: 89 },
+      { school: '한국항공대학교', dept: '컴퓨터공학과',   rate: 85 },
+      { school: '연세대학교',       dept: '신학과',       rate: 74 },
+      { school: '연세대학교',       dept: '의예과',       rate: 1  }
+    ]);
+  }, []);
   return (
     <>
       {/* 흰색 배경 영역 */}
@@ -70,11 +91,29 @@ const Report = () => {
               }}
             >
               성적 추이
-            </div>
+              </div>
               <ScoreTrend />
               <ScoreTrendText />
-              <div id="interest">관심 학과/학교 분석</div>
-              <div id="summary">종합 분석</div>
+              <div
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: '50px',
+                  marginBottom: '10px',
+              }}
+            >
+              관심 학과/학교 분석
+              </div>
+              <InterestChart interestData={interestData} />
+              <div
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: '50px',
+                  marginBottom: '10px',
+              }}
+            >
+              종합 분석
+              </div>
+              <ComprehensiveAnalysis />
             </div>
           </div>
         </div>

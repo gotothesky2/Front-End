@@ -1,0 +1,13 @@
+/* src/styles/ComprehensiveAnalysis.css */
+
+.comprehensive-analysis__list {
+  margin: 0;
+  padding-left: 24px; /* 숫자형 리스트 들여쓰기 */
+}
+
+.comprehensive-analysis__item {
+  margin-bottom: 12px;
+  line-height: 3.0;
+  font-size: 16px;
+  color: #261B1A;
+}
