@@ -16,17 +16,18 @@ header {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%; /* 너비를 120rem에서 100%로 변경해 반응형으로 */
-  height: 6.5625rem;
+  width: 130rem; /* 너비를 120rem에서 100%로 변경해 반응형으로 */
+  height: 6.5625rem;  
   box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 1rem; /* 패딩을 더 일반적인 값으로 조정 */
   font-family: 'KakaoExtra', sans-serif;
-  z-index: 1000; /* z-index를 높여 다른 요소 위에 표시 */
+  
   background-color: #f2f2f2;
   border-bottom: 1px solid var(--dark-gray, #9A9EA8);
+  
 }
 
 header[data-page='Home'] {
@@ -68,5 +69,10 @@ header[data-page='Home'] .header-logo a {
 
 header[data-page='Home'] .header-logo span {
   color: #f2f2f2; /* 홈페이지에서 텍스트 색상 */
+}
+/* header.css 내부 가장 아래쪽에 추가 */
+
+body:not([data-page='Home']) {
+  padding-top: 6.5625rem;
 }
 

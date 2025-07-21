@@ -1,0 +1,130 @@
+.mypage-container {
+background: rgba(242, 242, 242, 0.24);
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2rem;
+  font-family: "Noto Sans KR", sans-serif;
+  width: 130rem;
+}
+
+.mypage-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  
+}
+
+.mypage-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  height: 7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 1.5rem;
+background: #FFF;
+box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  
+}
+
+/* 토큰 카드 */
+.mypage-card.token {
+  grid-column: span 2;
+  height: 7rem;
+  align-items: center;
+  text-align: center;
+}
+
+.mypage-token-title {
+  font-size: 0.9rem;
+  color: gray;
+}
+
+.mypage-token-value {
+  font-size: 2rem;
+  color: #1e40af;
+  font-weight: bold;
+}
+
+/* 레포트 카드 */
+.mypage-card.report {
+  align-items: center;
+  text-align: center;
+}
+
+.mypage-report-title {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: gray;
+}
+
+.mypage-report-circle {
+  width: 60px;
+  height: 60px;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s;
+}
+
+.percentage {
+  font-size: 0.4rem;
+  fill: #000;
+}
+
+/* 프로필 카드 */
+.mypage-profile {
+  width: 16rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mypage-avatar {
+  width: 80px;
+  height: 80px;
+  background-color: #ddd;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.mypage-name {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.mypage-info {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+
+.mypage-edit-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}

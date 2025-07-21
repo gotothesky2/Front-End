@@ -1,5 +1,6 @@
 import React from "react";
 import "../../styles/Login.css";
+import { Link, useLocation } from 'react-router-dom';
 
 const Login = ({ onLogin, isLoggedIn }) => {
   const userName = "사용자"; // 더미 사용자 이름, API로 대체 가능
@@ -8,8 +9,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
     month: "long",
     day: "numeric",
     weekday: "long",
-  }); // 2025년 7월 16일 수요일 (현재 시간: 2025-07-16 00:37 KST)
-
+  }); 
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
@@ -67,7 +67,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
 
       <div className="profile-bottom">
         <button className="profile-btn left" >충전하기</button>
-        <button className="profile-btn right" >마이페이지</button>
+        <Link to ="/Mypage" className="profile-btn right"  >마이페이지</Link>
       </div>
     </div>
   </div>
