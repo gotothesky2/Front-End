@@ -1,0 +1,181 @@
+.token-page-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 80px 20px 0;
+  font-family: 'Pretendard', sans-serif;
+  color: #333;
+}
+
+.top-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.token-info-box {
+  flex: 1;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  border: 1px solid #ccc;
+}
+
+.token-info-box strong {
+  font-size: 24px;
+  color: #03178C;
+}
+
+.token-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.token-description-box {
+  flex: 2;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.token-description-box h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.token-description-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.token-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.token-horizontal img {
+  width: 20px;
+  height: 20px;
+}
+
+.token-horizontal span {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+.tab-menu {
+  display: flex;
+  gap: 24px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.tab-menu span {
+  cursor: pointer;
+  color: #999;
+  position: relative;
+}
+
+.tab-menu span.active {
+  color: #03178C;
+}
+
+.tab-menu span.active::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #03178C;
+}
+
+.charge-columns {
+  display: flex;
+  gap: 24px;
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.token-package {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #ccc;
+  max-width: 300px;
+}
+
+.token-count {
+  font-size: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.token-count img {
+  width: 20px;
+  height: 20px;
+}
+
+.price-button {
+  background: #03178C;
+  color: #f8f8f8;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.price-button:hover {
+  background: #021064;
+}
+
+.charge-history table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.charge-history th,
+.charge-history td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+}
+
+.charge-history th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.charge-history td:nth-child(5) {
+  color: #03178C;
+  font-weight: bold;
+}
