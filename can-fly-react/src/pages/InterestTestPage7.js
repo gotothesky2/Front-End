@@ -10,7 +10,7 @@ const InterestTestPage7 = () => {
     2: [null, null, null],
     3: ["", ""],
     4: [["", ""], ["", ""]],
-    5: Array(8).fill(null),
+    5: Array(1).fill(null),
     6: Array(9).fill(null)
   });
 
@@ -76,6 +76,7 @@ const InterestTestPage7 = () => {
     }
 
     alert("제출되었습니다.");
+    navigate('/test'); 
     window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -102,13 +103,16 @@ const InterestTestPage7 = () => {
             <div key={i}>
               <div className="question-text">{`1-${i+1}. 질문 내용`}</div>
               <div className="circle-options-7">
-                {[1,2,3,4,5].map((val,j)=>(
-                  <div key={i} ref={el => questionRefs.current[`5-${i+1}`] = el}>
-
-                    <div className={`circle-7 ${answers[1][i]===val ? 'selected':''}`} onClick={()=>handleSelect(1,i,val)}></div>
-                    {j===0&&<div className="circle-label-7">〈 매우 싫어한다</div>}
-                    {j===2&&<div className="circle-label-7">보통</div>}
-                    {j===4&&<div className="circle-label-7">매우 좋아한다 〉</div>}
+                {[1,2,3,4,5].map((val,j)=>( 
+                  <div key={val} className="circle-container-7">
+                    <div 
+                      ref={el => questionRefs.current[`1-${i+1}`] = el}  // ✅ 수정됨
+                      className={`circle-7 ${answers[1][i] === val ? 'selected' : ''}`}
+                      onClick={() => handleSelect(1, i, val)}
+                    ></div>
+                    {j === 0 && <div className="circle-label-7">〈 매우 싫어한다</div>}
+                    {j === 2 && <div className="circle-label-7">보통</div>}
+                    {j === 4 && <div className="circle-label-7">매우 좋아한다 〉</div>}
                   </div>
                 ))}
               </div>
