@@ -1,0 +1,54 @@
+/* TestSelectPage.css */
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-icon {
+  width: 80px;   /* 너비를 80px로 줄임 */
+  height: auto;
+  font-size: 80px;
+}
+
+.card-link {
+  color: #03178C;
+  margin-top: 10px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 200px;
+}
+
+.cards {
+  display: flex;
+  gap: 50px;
+}
+
+.back-button {
+  margin-top: 60px;
+  margin-bottom: 60px;
+  padding: 10px 20px;
+  background-color: #03178C;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #03178C;
+}
