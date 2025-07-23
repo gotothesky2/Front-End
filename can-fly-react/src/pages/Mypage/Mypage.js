@@ -6,10 +6,34 @@ const Mypage = () => {
     <div className="mypage-container">
       <div className="mypage-cards">
         {/* 첫 번째 줄 */}
-        <div className="mypage-card">적성 검사 결과 &gt;</div>
-          <div className="mypage-card">성적 입력 내역 &gt;</div>
-          <div className="mypage-card">관심 분야 / 학과 선택 &gt;</div>
-          <div className="mypage-card">레포트 모아보기 &gt;</div>
+        <div className="mypage-card">
+          적성 검사 결과 &gt;
+          <img
+            src={`${process.env.PUBLIC_URL}/img/main_step1.jpg`}
+            className="mypage-step"
+          />
+        </div>
+        <div className="mypage-card">
+          성적 입력 내역 &gt;
+          <img
+            src={`${process.env.PUBLIC_URL}/img/main_step2.jpg`}
+            className="mypage-step"
+          />
+        </div>
+        <div className="mypage-card">
+          관심 분야 / 학과 선택 &gt;
+          <img
+            src={`${process.env.PUBLIC_URL}/img/main_step3.jpg`}
+            className="mypage-step"
+          />
+        </div>
+        <div className="mypage-card">
+          레포트 모아보기 &gt;
+          <img
+            src={`${process.env.PUBLIC_URL}/img/main_step4.jpg`}
+            className="mypage-step"
+          />
+        </div>
           
 
         {/* 두 번째 줄 */}

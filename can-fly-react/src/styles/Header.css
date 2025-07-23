@@ -75,7 +75,5 @@ body[data-page='Home'] {
   padding-top: 0;
 }
 
-body:not([data-page='Home']) {
-  padding-top: 6.5625rem;
-}
+
 

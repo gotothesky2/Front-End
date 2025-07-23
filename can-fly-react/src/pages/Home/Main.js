@@ -26,12 +26,14 @@ const steps = [
       </>
     ),
     action: "선택 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step3.jpg`} />
   },
   {
     step: "STEP 4",
     title: "종합분석",
     description: "학기레포트",
     action: "생성 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step4.jpg`} />
   },
 ];
 
