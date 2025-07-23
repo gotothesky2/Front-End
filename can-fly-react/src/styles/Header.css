@@ -1,0 +1,81 @@
+@font-face {
+  font-family: 'KakaoBold';
+  src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: 'KakaoExtra';
+  src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: 'KakaoRegular';
+  src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; /* 반응형 적용 */
+  height: 6.5625rem;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  font-family: 'KakaoExtra', sans-serif;
+  background-color: #f2f2f2;
+  border-bottom: 1px solid var(--dark-gray, #9A9EA8);
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+/* 홈일 때: 투명 배경 + 흐림 효과 + 경계선 제거 */
+header[data-page='Home'] {
+  background-color: rgba(242, 242, 242, 0.24);
+  
+  border-bottom: none;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.header-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #261B1A;
+}
+
+header[data-page='Home'] .header-logo a {
+  color: #f2f2f2;
+}
+
+.logo-image {
+  width: 4rem;
+  height: 4.375rem;
+  margin: 1.13px 2.37px 1.06px 4.88px;
+}
+
+.header-logo span {
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-family: 'KakaoExtra', sans-serif;
+  color: #261B1A;
+}
+
+header[data-page='Home'] .header-logo span {
+  color: #f2f2f2;
+}
+
+/* Home 페이지가 아닐 경우에만 패딩 적용 */
+body[data-page='Home'] {
+  padding-top: 0;
+}
+
+body:not([data-page='Home']) {
+  padding-top: 6.5625rem;
+}
+

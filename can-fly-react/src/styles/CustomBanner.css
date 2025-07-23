@@ -1,0 +1,26 @@
+.banner-container {
+  width: 100%;
+  
+  position: relative;
+}
+
+.slick-dots {
+  bottom: 25px;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  content: none; /* CustomArrow로 대체 */
+}
+
+.slick-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.slick-prev,
+.slick-next {
+  width: 144px; /* CustomArrow 이미지 크기와 일치 */
+  height: 144px;
+}

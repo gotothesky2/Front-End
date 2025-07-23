@@ -1,0 +1,152 @@
+.report-page-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  margin-top: 105px;
+  padding-left: 1rem;
+}
+
+.report-title-box {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+
+.report-path-text {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.report-path-main {
+  color: #898989;
+  font-weight: bold;
+}
+
+.report-path-arrow {
+  color: #261B1A; 
+  font-weight: bold;
+}
+
+.report-path-sub {
+  color: #261B1A; 
+  font-weight: bold;
+}
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  margin: 0 auto;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.filter-box label {
+  display: flex;
+  flex-direction: row; /* ← 가로로 바꿈 */
+  align-items: center;
+  gap: 0.5rem; /* 제목과 값 사이 간격 */
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+
+.filter-box select,
+.filter-box input[type="date"] {
+  background-color: #f2f2f2;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.search-btn {
+  background-color: #03178C;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.report-white-section {
+  background-color: white;
+  padding: 2rem;
+}
+
+.report-gray-section {
+  background-color: #f2f2f2;
+  padding: 3rem 0;
+}
+
+/* 회색 안의 가운데 콘텐츠 */
+.report-inner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+ 
+}
+
+.report-sidebar {
+  position: sticky;
+  top: 120px;
+  align-self: flex-start;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 3px 3px 3px  gray;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 220px;
+}
+
+.report-content-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  
+}
+
+/* 우측 내용 컨테이너 */
+.report-main-content {
+  flex: 1 1 0;
+  min-width:0;
+  width: 100%;
+}
+
+/* 레이더 + 카드 영역을 나란히 정렬 */
+.aptitude-section {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+}
+
+.aptitude-section__chart {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+
+.aptitude-section__chart,
+.aptitude-section__cards {
+  flex: 1 1 0;  /* grow:1, shrink:1, basis:0 */
+  min-width: 0; /* 중요: 내부가 작아지도록 허용 */
+}
+
+
+

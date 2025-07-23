@@ -1,0 +1,103 @@
+@font-face {
+    font-family: 'Kakaobold';
+    src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: 'KakaoExtra';
+    src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: 'KakaoRegular';
+    src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
+
+.Main-container {
+  display: flex;
+  flex-direction: column;
+  font-family: 'KakaoExtra';
+  width: 25%;
+  background-color: #F2f2f2;
+ padding: 3.75rem 2.5rem;
+ gap: 2.625rem;
+ border-radius: 1.4095rem;
+ margin-left: 2rem;
+ width: 77.875rem;
+ 
+ margin-top: 2.5rem;
+}
+
+.Main-start {
+  font-size: 2.5rem; 
+  font-weight: 800;
+  
+  color: #261B1A;
+}
+
+.Main-steps-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem; 
+  width: 100%;
+  max-width: 75rem; 
+}
+
+.Main-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem; 
+  border: 0.0625rem solid #ccc; 
+  border-radius: 0.5rem; 
+  background-color: #ffffff;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* 0 2px 4px */
+  text-align: left; 
+  width: max-content ;
+  font-family: "KakaoRegular";
+  width: 16.25rem;
+height: 28.75rem;
+
+  
+}
+
+.Main-step-number {
+  font-size: 1.125rem;
+  font-weight: 800;
+  margin-bottom:0.62rem;
+  color: #03178c;
+ 
+}
+
+.Main-step-title {
+  font-size: 1.125rem; 
+  font-weight: bold;
+  color: #261B1a;
+  font-weight: 800;
+  margin-bottom:0.62rem;
+}
+
+.Main-step-icon {
+  
+}
+
+.Main-step-description {
+  font-size: 2.5rem;
+  
+font-weight: 800;
+  font-weight: 800;
+  margin-bottom: 1.25rem; 
+}
+
+.Main-step-action {
+  font-size: 1.25rem; 
+  font-weight: 800;
+  color: #03178c;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.Main-step-action:hover {
+  
+}
