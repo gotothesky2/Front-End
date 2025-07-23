@@ -78,8 +78,15 @@ height: 28.75rem;
 }
 
 .Main-step-icon {
-  
+  position: relative;
+  top: 8rem;     /* 위로 2rem 이동 */
+  left: 5rem;
 }
+.Main-step:nth-child(3) .Main-step-icon {
+  top: 6rem;
+  left: 4rem;
+}
+
 
 .Main-step-description {
   font-size: 2.5rem;

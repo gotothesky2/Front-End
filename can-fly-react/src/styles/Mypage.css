@@ -6,8 +6,8 @@
   gap: 2rem;
   padding: 2rem;
   font-family: "Noto Sans KR", sans-serif;
-  width: 126rem;
   font-size: 1.5rem;
+  margin-top: 6rem;
 }
 
 /* 카드 정렬 */
@@ -30,6 +30,12 @@
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
   font-weight: 800;
+}
+.mypage-step{
+  width: 9.72188rem;
+  height: 11.4375rem;
+  margin-left: 5rem;
+  margin-top: 2rem;
 }
 
 /* 토큰 카드 */
