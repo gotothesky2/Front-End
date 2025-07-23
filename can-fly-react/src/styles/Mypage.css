@@ -1,71 +1,87 @@
+/* 공통 container */
 .mypage-container {
-background: rgba(242, 242, 242, 0.24);
+  background: rgba(242, 242, 242, 0.24);
   display: flex;
   justify-content: space-between;
   gap: 2rem;
   padding: 2rem;
   font-family: "Noto Sans KR", sans-serif;
-  width: 130rem;
+  width: 126rem;
+  font-size: 1.5rem;
 }
 
+/* 카드 정렬 */
 .mypage-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  
+  gap: 2.19rem;
 }
 
+/* 공통 카드 스타일 */
 .mypage-card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  height: 7rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  font-size: 1rem;
-  font-weight: 500;
+  width: 18.75rem;
+  height: 18.75rem;
+  padding: 2.5rem 2.19rem;
+  background: #FFF;
   border-radius: 1.5rem;
-background: #FFF;
-box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  font-weight: 800;
 }
 
 /* 토큰 카드 */
 .mypage-card.token {
   grid-column: span 2;
-  height: 7rem;
-  align-items: center;
-  text-align: center;
+  width: 39.6875rem;
+  height: 18.75rem;
+  
+  flex-shrink: 0;
 }
 
 .mypage-token-title {
-  font-size: 0.9rem;
-  color: gray;
+  color: 261B1A;
+  margin-left: 0.3rem;
 }
 
 .mypage-token-value {
-  font-size: 2rem;
+  font-size: 6.25rem;
   color: #1e40af;
   font-weight: bold;
+  margin-left: 9rem;
+  
+}
+.mypage-token {
+  display: flex;
+  align-items: center;
+  gap: 0rem; /* 아이콘과 텍스트 사이 간격 */
+}
+
+.mypage-token .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.mypage-token-recharge{
+  margin-left: 17rem;
+  color: #084DA6;
 }
 
 /* 레포트 카드 */
 .mypage-card.report {
-  align-items: center;
-  text-align: center;
+  
+  
 }
 
 .mypage-report-title {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: gray;
+  color: #261B1A;
 }
 
 .mypage-report-circle {
-  width: 60px;
-  height: 60px;
+  width: 8.5rem;
+  height: 8.5rem;
+  margin-left: 3rem;
 }
 
 .circle-bg {
@@ -76,7 +92,7 @@ box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
 
 .circle {
   fill: none;
-  stroke: #2563eb;
+  stroke: #084DA6;
   stroke-width: 3.8;
   stroke-linecap: round;
   transition: stroke-dasharray 0.3s;
@@ -87,9 +103,14 @@ box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
   fill: #000;
 }
 
-/* 프로필 카드 */
+/* ====================== */
+/* 프로필 카드 스타일 조정 */
+/* ====================== */
+
 .mypage-profile {
-  width: 16rem;
+  margin-right: 3rem;
+  width: 25.375rem;
+  height: 40.875rem;
   background: white;
   border-radius: 1rem;
   padding: 2rem;
@@ -97,34 +118,41 @@ box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-.mypage-avatar {
-  width: 80px;
-  height: 80px;
-  background-color: #ddd;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-}
+
 
 .mypage-name {
+  font-size: 1.7rem;
   font-weight: bold;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-}
-
-.mypage-info {
-  font-size: 0.9rem;
-  margin-bottom: 0.3rem;
+  margin: 1rem 0 1.5rem;
   color: #333;
 }
 
-.mypage-edit-btn {
+.mypage-info {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.6rem;
+  text-align: left;
+  width: 100%;
+  line-height: 1.8;
   margin-top: 1rem;
-  padding: 0.5rem 1rem;
+}
+
+.mypage-info strong {
+  font-weight: bold;
+}
+
+.mypage-edit-btn {
+  margin-top: auto;
+  padding: 0.6rem 1.2rem;
   border: none;
-  background-color: #2563eb;
+  background-color: #084DA6;
   color: white;
   border-radius: 0.5rem;
+  font-size: 1rem;
   cursor: pointer;
+  align-self: center;
 }

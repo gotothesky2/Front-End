@@ -7,12 +7,14 @@ const steps = [
     title: "적성/흥미",
     description: "적성검사",
     action: "적성검사 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step1.jpg`} />
   },
   {
     step: "STEP 2",
     title: "내신/모의고사",
     description: "성적 입력",
     action: "성적입력 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step2.jpg`} />
   },
   {
     step: "STEP 3",
@@ -44,7 +46,7 @@ const Main = () => {
             <div className="Main-step-title">{step.title}</div>
             <div className="Main-step-description">{step.description}</div>
             <div className="Main-step-action">{step.action}</div>
-            <div className="Main-step-icon"></div> 
+            <div className="Main-step-icon">{step.icon}</div> 
           </div>
         ))}
       </div>
