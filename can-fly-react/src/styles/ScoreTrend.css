@@ -1,0 +1,22 @@
+.score-trend__tabs button,
+.score-trend__subs button {
+  margin: 0 6px 10px 0;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+canvas {
+  width: 100% !important;
+  height: 300px;
+}
+
+.score-trend__tabs button.active,
+.score-trend__subs button.active {
+  background-color: #0339A6;  /* 내부 배경 */
+  border-color:     #261B1A;
+  color: #fff;               /* 텍스트는 흰색으로 */
+  font-weight: bold;
+}
+
