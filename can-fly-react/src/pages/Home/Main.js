@@ -6,13 +6,15 @@ const steps = [
     step: "STEP 1",
     title: "적성/흥미",
     description: "적성검사",
-    action: "적성검사 하기",
+    action: "적성검사 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step1.jpg`} />
   },
   {
     step: "STEP 2",
     title: "내신/모의고사",
     description: "성적 입력",
-    action: "성적입력 하기",
+    action: "성적입력 하기 >",
+    icon: <img src={`${process.env.PUBLIC_URL}/img/main_step2.jpg`} />
   },
   {
     step: "STEP 3",
@@ -23,13 +25,13 @@ const steps = [
         학과선택
       </>
     ),
-    action: "선택 하기",
+    action: "선택 하기 >",
   },
   {
     step: "STEP 4",
     title: "종합분석",
     description: "학기레포트",
-    action: "생성 하기",
+    action: "생성 하기 >",
   },
 ];
 
@@ -43,8 +45,8 @@ const Main = () => {
             <div className="Main-step-number">{step.step}</div>
             <div className="Main-step-title">{step.title}</div>
             <div className="Main-step-description">{step.description}</div>
-            <button className="Main-step-action">{step.action}</button>
-            <div className="Main-step-icon"></div> 
+            <div className="Main-step-action">{step.action}</div>
+            <div className="Main-step-icon">{step.icon}</div> 
           </div>
         ))}
       </div>
