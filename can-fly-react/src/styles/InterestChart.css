@@ -1,0 +1,45 @@
+/* 전체를 감싸는 컨테이너 */
+.interest-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 카드들 사이 여백 */
+}
+
+/* 각 카드(wrapper) */
+.interest-item-wrapper {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px 24px;
+}
+
+/* 왼쪽 레이블: 볼드 + 폰트 크기 */
+.interest-item-label {
+  flex: 0 0 280px;
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* 가운데 차트 영역: flex-grow로 늘려서 막대가 가운데에서 최대한 채워짐 */
+.interest-item-chart {
+  flex: 1;
+  height: 24px;  /* 막대 높이에 맞춰 조정 */
+  margin: 0 16px;
+}
+.interest-item-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 오른쪽 퍼센트 텍스트: 볼드 + 폰트 크게 */
+.interest-item-rate {
+  flex: 0 0 auto;
+  font-weight: bold;
+  font-size: 24px;
+  white-space: nowrap;
+}
+
+

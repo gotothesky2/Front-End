@@ -1,0 +1,10 @@
+/* src/styles/ReportScatter.css */
+.reportscatter-wrapper {
+  /* wrapper 자체에 여백을 추가할 수도 있지만,
+     layout.padding 으로 충분히 커버됩니다 */
+  width: 100%;
+  height: 350px;     /* 320 → 350 으로 좀 더 높여주면 더 안전 */
+  margin-top: 40px;
+  overflow: visible; /* canvas 밖 그려진 것도 잘 보이게 */
+}
+
