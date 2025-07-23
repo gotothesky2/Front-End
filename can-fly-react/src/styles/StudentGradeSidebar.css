@@ -1,0 +1,45 @@
+.sidebar-box {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.sidebar-box h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ccc; /* ✅ 얇은 구분선 추가 */
+}
+
+.sidebar-box p {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin: 0.6rem 0 0.3rem;
+}
+
+.sidebar-box button {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  border: 1px solid #261B1A;  /* ✅ 기본 검정 테두리 */
+  border-radius: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s ease; /* ✅ 부드러운 전환 */
+}
+
+.sidebar-box button:hover {
+  border-color: #0339A6; /* ✅ hover 시 파란색 테두리 */
+  background-color: #ffffff;
+}
+
+.sidebar-box .selected {
+  background-color: #0339A6;
+  color: white;
+  border: 1px solid #0339A6; /* ✅ 선택된 버튼도 파란 테두리 */
+}
