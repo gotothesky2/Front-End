@@ -12,6 +12,7 @@ import AptitudeTest from './pages/AptitudeTest';
 import InterestTest from './pages/InterestTest';
 import InterestTestPage7 from './pages/InterestTestPage7';
 import TokenChargePage from './pages/TokenChargePage';
+import TestCompletePage from './pages/TestCompletePage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/interesttest" element={<InterestTest />} />
         <Route path="/interesttestpage7" element={<InterestTestPage7 />} />
         <Route path="/tokencharge" element={<TokenChargePage />} />
+        <Route path="/testcomplete" element={<TestCompletePage/>}/>
       </Routes>
       <Footer/>
     </Router>
