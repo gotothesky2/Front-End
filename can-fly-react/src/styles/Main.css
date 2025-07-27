@@ -55,7 +55,7 @@
   text-align: left; 
   width: max-content ;
   font-family: "KakaoRegular";
-  width: 16.25rem;
+  
 height: 28.75rem;
 
   
@@ -81,6 +81,8 @@ height: 28.75rem;
   position: relative;
   top: 8rem;     /* 위로 2rem 이동 */
   left: 5rem;
+  width: 9rem;
+  height: 11rem;
 }
 .Main-step:nth-child(3) .Main-step-icon {
   top: 6rem;
