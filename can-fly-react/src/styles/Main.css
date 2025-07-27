@@ -19,15 +19,14 @@
   flex-direction: column;
   font-family: 'KakaoExtra';
   background-color: #F2f2f2;
- padding: 52px 40px;
- gap: 42px;
- border-radius: 22.55px;
+  padding: 52px 40px;
+  gap: 42px;
+  border-radius: 22.55px;
 }
 
 .Main-start {
   font-size: 2.5rem; 
   font-weight: 800;
-  
   color: #261B1A;
 }
 
@@ -41,7 +40,6 @@
 .Main-step {
   display: flex;
   flex-direction: column;
-  flex: 1;
   gap: 24px;
   padding: 32px; 
   border-radius: 24px; 
@@ -50,9 +48,8 @@
   text-align: left; 
   width: max-content ;
   font-family: "KakaoRegular";
-  
-height: 28.75rem;
   position: relative;
+  flex: 1;
 }
 
 .Main-step-content {
@@ -74,19 +71,11 @@ height: 28.75rem;
 }
 
 .Main-step-icon {
-  position: relative;
-  top: 8rem;     /* 위로 2rem 이동 */
-  left: 5rem;
-  width: 9rem;
-  height: 11rem;
-}
-.Main-step:nth-child(3) .Main-step-icon {
-  top: 6rem;
-  left: 4rem;
   position: absolute;
   bottom: 16px;
   right: 16px;
 }
+
 
 .Main-step-icon img {
   width: 150px;
