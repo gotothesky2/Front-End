@@ -15,17 +15,13 @@
 
 .Main-container {
   display: flex;
+  width: 70%;
   flex-direction: column;
   font-family: 'KakaoExtra';
-  width: 25%;
   background-color: #F2f2f2;
- padding: 3.75rem 2.5rem;
- gap: 2.625rem;
- border-radius: 1.4095rem;
- margin-left: 2rem;
- width: 77.875rem;
- 
- margin-top: 2.5rem;
+ padding: 52px 40px;
+ gap: 42px;
+ border-radius: 22.55px;
 }
 
 .Main-start {
@@ -38,18 +34,17 @@
 .Main-steps-container {
   display: flex;
   flex-direction: row;
-  gap: 1.25rem; 
-  width: 100%;
-  max-width: 75rem; 
+  gap: 24px;
+  height: 460px;
 }
 
 .Main-step {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 1.25rem; 
-  border: 0.0625rem solid #ccc; 
-  border-radius: 0.5rem; 
+  flex: 1;
+  gap: 24px;
+  padding: 32px; 
+  border-radius: 24px; 
   background-color: #ffffff;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* 0 2px 4px */
   text-align: left; 
@@ -57,24 +52,25 @@
   font-family: "KakaoRegular";
   
 height: 28.75rem;
+  position: relative;
+}
 
-  
+.Main-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .Main-step-number {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 800;
-  margin-bottom:0.62rem;
   color: #03178c;
- 
 }
 
 .Main-step-title {
-  font-size: 1.125rem; 
-  font-weight: bold;
+  font-size: 1rem; 
   color: #261B1a;
   font-weight: 800;
-  margin-bottom:0.62rem;
 }
 
 .Main-step-icon {
@@ -87,26 +83,26 @@ height: 28.75rem;
 .Main-step:nth-child(3) .Main-step-icon {
   top: 6rem;
   left: 4rem;
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
 }
 
+.Main-step-icon img {
+  width: 150px;
+  height: auto;
+}
 
 .Main-step-description {
-  font-size: 2.5rem;
-  
-font-weight: 800;
+  font-size: 2rem;
   font-weight: 800;
-  margin-bottom: 1.25rem; 
 }
 
 .Main-step-action {
-  font-size: 1.25rem; 
+  font-size: 1.125rem; 
   font-weight: 800;
   color: #03178c;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
-}
-
-.Main-step-action:hover {
-  
 }
