@@ -1,0 +1,89 @@
+/* 전체 패널 래퍼 */
+.panel-container {
+  display: flex;
+  gap: 2%;
+  width: 100%;
+  padding: 2rem;
+  background-color: #f2f2f2;
+  box-sizing: border-box;
+  margin-top: 6rem;
+}
+
+/* 개별 패널 */
+.panel {
+  flex: 1;
+  background: white;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 제목 */
+.panel-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 추천 / 나의 목록 소제목 */
+.panel-subtitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* 항목 */
+.panel-item {
+  background: #f8f8f8;
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+/* 잠금된 항목 */
+.panel-locked {
+  background: #ececec;
+  border-radius: 0.5rem;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  padding: 2rem 1rem;
+  line-height: 1.4;
+}
+
+/* 전체 잠금된 박스 */
+.panel-locked.full {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* 추가 버튼 */
+.panel-add {
+  text-align: center;
+  color: #084DA6;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.panel-add-top {
+  color: #084DA6;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
