@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import '../styles/StudentGradeModal.css';
 
-const subjectCategories = ['국어', '수학', '영어', '사회', '과학', '체육', '예술'];
+const subjectCategories = ['국어', '수학', '영어', '사회', '과학'];
 const achievementOptions = ['A', 'B', 'C', 'D', 'E', 'P'];
 
 const StudentGradeModalRow = ({ row, index, isEditing, onChange }) => {
