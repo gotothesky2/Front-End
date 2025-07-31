@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/TokenModal.css';
 
 const TokenModal = ({ onClose, amount, price }) => {
-  const [selected, setSelected] = useState('card'); // 예시: 카드 선택 화면
+  const [selected, setSelected] = useState('card'); // 기본 선택값: 카드
 
   const methodLabel = selected === 'account'
     ? '계좌간편결제'

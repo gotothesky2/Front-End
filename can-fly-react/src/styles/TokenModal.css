@@ -91,6 +91,7 @@
   border: 1px solid #ccc;
   padding: 16px;
   border-radius: 8px;
+  margin-bottom: 14px;
 }
 
 .tm-radio-row {
@@ -139,10 +140,6 @@
   color: #999;
 }
 
-.tm-mt12 { margin-top: 12px; }
-.tm-mt16 { margin-top: 16px; }
-.tm-mt24 { margin-top: 24px; }
-
 .tm-link {
   color: #03178C;
   font-weight: bold;
@@ -169,3 +166,13 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* 유용한 공통 유틸 클래스 */
+.tm-mt12 { margin-top: 12px; }
+.tm-mt16 { margin-top: 16px; }
+.tm-mt24 { margin-top: 24px; }
+
+.hidden {
+  display: none;
+}
+

@@ -1,0 +1,190 @@
+@font-face {
+  font-family: 'Kakaobold';
+  src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoExtra';
+  src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoRegular';
+  src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
+
+.Login-container {
+  display: flex;
+  width: 30%;
+  justify-content: center;
+  align-items: center;
+}
+
+.Login-card {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding: 38px;
+    gap: 24px;
+    border-radius: 24px;
+    border: 1px solid var(--black, #261B1A);
+    background: #FFF;
+    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.Login-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.Login-card-title {
+  font-size: 1.5rem; 
+  font-weight: 800;
+  color: #261b1a;
+}
+
+.Login-card-icon {
+ width: 8.1875rem;
+ height: 8.09838rem;
+ flex-shrink: 0;
+ aspect-ratio: 131.00/129.57;
+}
+
+.Login-card-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 0rem 0rem 24px 24px;
+  border-top: 1px solid var(--black, #261B1A);
+}
+
+.Login-kakao-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.Login-kakao-icon {
+  width: 2.1875rem; 
+  height: 2.1875rem; 
+  background-color: #fee500; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 0.875rem; 
+  font-weight: bold;
+}
+
+.Login-kakao-text {
+  color: var(--black, #261B1A);
+  text-align: center;
+  font-family: "KakaoExtra";
+  font-size: 1.6rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+  letter-spacing: 0.08rem;
+}
+.profile-card-container {
+  display: flex;
+  width: 30%;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-card {
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  background-color: #0066cc;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 42px 0px;
+  gap: 32px;
+}
+
+
+.profile-image img {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background-color: #ccc;
+  object-fit: cover;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  gap: 8px;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.profile-row-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2rem;
+}
+
+.profile-row .icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 하단 버튼 영역 */
+.profile-bottom {
+  display: flex;
+  background-color: #002b80;
+  height: 25%;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-btn {
+  display: flex;
+  flex: 1;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: none;
+  color: white;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 0;
+}
+
+.profile-btn.left,
+.profile-btn.right {
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+

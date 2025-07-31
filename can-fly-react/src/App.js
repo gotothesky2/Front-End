@@ -6,6 +6,7 @@ import StudentGrade from './pages/GradeInput/StudentGrade';
 import ExamGrade from './pages/GradeInput/ExamGrade';
 import Footer from './components/Footer';
 import Header from './components/Header';
+import Mypage from './pages/Mypage/Mypage';
 import TestSelectPage from './pages/TestSelectPage';
 import AptitudeTest from './pages/AptitudeTest';
 import InterestTest from './pages/InterestTest';
@@ -20,6 +21,7 @@ function App() {
        <Header/>
      
       <Routes>
+        <Route path='/Mypage' element ={<Mypage />} />
         <Route path="/" element={<Home />} />
         <Route path="/test" element={<TestSelectPage />} />
         <Route path="/aptitudetest" element={<AptitudeTest />} />

@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/StudentGrade.css';
+
 import StudentGradeSidebar from '../../components/StudentGradeSidebar';
-import StudentGradeModal from '../../components/StudentGradeModal';
+import StudentGradeModal   from '../../components/StudentGradeModal';
+import StudentGradeHeader  from '../../components/StudentGradeHeader';
+import StudentGradeTable   from '../../components/StudentGradeTable';
+import StudentGradeTrend   from '../../components/StudentGradeTrend';
+
+console.log({
+  StudentGradeSidebar,
+  StudentGradeModal,
+  StudentGradeHeader,
+  StudentGradeTable,
+  StudentGradeTrend
+});
 
 // 기본 한 줄 초기값 생성 함수
 const defaultRow = () => ({
@@ -22,13 +34,10 @@ const defaultRow = () => ({
 
 const STORAGE_KEY = 'hackathon_termData';
 
-const StudentGrade = () => {
-  // 1) 모달 열림/닫힘
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // 2) 선택된 학기
-  const [selectedTerm, setSelectedTerm] = useState('');
-  // 3) term별 저장된 데이터: localStorage에서 한 번만 초기화
-  const [termData, setTermData] = useState(() => {
+export default function StudentGrade() {
+  const [isModalOpen, setIsModalOpen]     = useState(false);
+  const [selectedTerm, setSelectedTerm]   = useState('');
+  const [termData, setTermData]           = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : {};
@@ -36,38 +45,28 @@ const StudentGrade = () => {
       return {};
     }
   });
-  // 4) 모달에서 편집 중인 행들
-  const [modalRows, setModalRows] = useState([defaultRow()]);
+  const [modalRows, setModalRows]         = useState([defaultRow()]);
 
-  // termData가 바뀔 때마다 localStorage에 저장
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(termData));
   }, [termData]);
 
-  // 사이드바 학기 클릭 → 팝업 열기
   const handleOpenModal = term => {
     setSelectedTerm(term);
     setModalRows(termData[term] ? [...termData[term]] : [defaultRow()]);
     setIsModalOpen(true);
   };
 
-  // 팝업 저장 → termData 업데이트 + 모달 닫기
   const handleSave = rows => {
-    setTermData(prev => ({
-      ...prev,
-      [selectedTerm]: rows
-    }));
+    setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
     setIsModalOpen(false);
   };
 
-  // 팝업 닫기
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const handleCloseModal = () => setIsModalOpen(false);
 
   return (
     <>
-      {/* 상단 흰색영역 */}
+      {/* 상단 화이트 헤더 */}
       <div className="grade-page-container">
         <div className="grade-white-section">
           <div className="grade-path-text">
@@ -81,32 +80,32 @@ const StudentGrade = () => {
         </div>
       </div>
 
-      {/* 회색 배경 + 사이드바 + 메인 */}
+      {/* 그레이 배경 + 사이드바 + 메인 */}
       <div className="grade-gray-section">
         <div className="grade-inner-container">
+
           <div className="grade-sidebar-container">
             <StudentGradeSidebar onOpenModal={handleOpenModal} />
           </div>
+
           <div className="grade-main-content">
-            <h3>
-              {selectedTerm
-                ? `${selectedTerm}에 저장된 석차등급`
-                : '학기를 선택해 주세요'}
-            </h3>
-            <ul>
-              {(termData[selectedTerm] || []).map(r => (
-                <li key={r.id}>
-                  {r.subjectCategory} – {r.subject}: 석차등급{' '}
-                  {r.rank || '미입력'}
-                </li>
-              ))}
-            </ul>
-            {/* 나중에 주요교과분석 테이블과 그래프를 넣으시면 됩니다 */}
+            {/* 인사 + 가이드 버튼 */}
+            <StudentGradeHeader userName="전성환" />
+
+            <div className="grade-table-header">
+              <span className="grade-table-tab">주요교과 분석</span>
+              <div className="grade-table-underline" />
+            </div>
+            
+
+            {/* Figma 디자인대로 테이블 렌더링 */}
+            <StudentGradeTable termData={termData} />
+
+            <StudentGradeTrend termData={termData} />
           </div>
         </div>
       </div>
 
-      {/* 모달 연동 */}
       <StudentGradeModal
         term={selectedTerm}
         isOpen={isModalOpen}
@@ -117,9 +116,9 @@ const StudentGrade = () => {
       />
     </>
   );
-};
+}
 
-export default StudentGrade;
+
 
 
 

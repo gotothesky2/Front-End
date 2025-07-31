@@ -1,13 +1,14 @@
-@font-face {
-    font-family:'Kakaobold' ;
-    src: url("../../public/font/KakaoBigSans-Bold.ttf")format("truetype");
-    
+.home-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #e5e7eb;
+  font-family: "KakaoExtra";
+  min-width: 1380px; /* 이거 왜 App.css min-width: 1400px 안 먹는 거지 */
 }
-@font-face {
-    font-family:'KakaoExtra' ;
-    src: url("../../public/font/KakaoBigSans-ExtraBold.ttf")format("truetype");
-}
-@font-face {
-    font-family:'KakaoRegular' ;
-    src: url("../../public/font/KakaoBigSans-Regular.ttf")format("truetype");
+
+.home-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  padding: 40px 30px;
 }
