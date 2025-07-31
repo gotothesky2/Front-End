@@ -102,7 +102,10 @@ const TokenModal = ({ onClose, amount, price }) => {
 
           {/* 동의 영역 */}
           <div className="tm-card tm-mt16">
-            <span>거래정보제공 동의: <a href="#" className="tm-link">입시혁명</a></span>
+            <span>
+                 거래정보제공 동의: <span className="tm-link">입시혁명</span>
+            </span>
+
           </div>
 
           {/* 하단 안내문 */}
