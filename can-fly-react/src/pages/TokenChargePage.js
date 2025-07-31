@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import '../styles/TokenChargePage.css';
+import TokenModal from './TokenModal';
 
 const TokenChargePage = () => {
   const [tab, setTab] = useState('charge');
+  const [modalInfo, setModalInfo] = useState(null); // { amount: 10, price: 1000 }
 
   const leftPackages = [
     { amount: 1, price: 100 },
@@ -17,8 +19,21 @@ const TokenChargePage = () => {
     { amount: 200, price: 20000 },
   ];
 
+  const handleChargeClick = (amount, price) => {
+    setModalInfo({ amount, price });
+  };
+
   return (
     <div className="token-page-container">
+      {/* 모달 */}
+      {modalInfo && (
+        <TokenModal
+          amount={modalInfo.amount}
+          price={modalInfo.price}
+          onClose={() => setModalInfo(null)}
+        />
+      )}
+
       <div className="top-section">
         <div className="token-info-box">
           <img src="/img/token.png" alt="token" className="token-icon" />
@@ -43,24 +58,28 @@ const TokenChargePage = () => {
         <div className="charge-columns">
           <div className="column">
             {leftPackages.map((pkg, i) => (
-                <div key={i} className="token-package">
-                    <div className="token-horizontal">
-                    <img src="/img/token.png" alt="token" />
-                    <span>토큰 {pkg.amount}개</span>
-                    <button className="price-button">{pkg.price.toLocaleString()}원</button>
-                    </div>
+              <div key={i} className="token-package">
+                <div className="token-horizontal">
+                  <img src="/img/token.png" alt="token" />
+                  <span>토큰 {pkg.amount}개</span>
+                  <button className="price-button" onClick={() => handleChargeClick(pkg.amount, pkg.price)}>
+                    {pkg.price.toLocaleString()}원
+                  </button>
                 </div>
-                ))}
+              </div>
+            ))}
           </div>
           <div className="column">
             {rightPackages.map((pkg, i) => (
               <div key={i} className="token-package">
-                    <div className="token-horizontal">
-                    <img src="/img/token.png" alt="token" />
-                    <span>토큰 {pkg.amount}개</span>
-                    <button className="price-button">{pkg.price.toLocaleString()}원</button>
-                    </div>
+                <div className="token-horizontal">
+                  <img src="/img/token.png" alt="token" />
+                  <span>토큰 {pkg.amount}개</span>
+                  <button className="price-button" onClick={() => handleChargeClick(pkg.amount, pkg.price)}>
+                    {pkg.price.toLocaleString()}원
+                  </button>
                 </div>
+              </div>
             ))}
           </div>
         </div>
