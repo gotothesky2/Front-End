@@ -13,10 +13,12 @@ import InterestTest from './pages/InterestTest';
 import InterestTestPage7 from './pages/InterestTestPage7';
 import TokenChargePage from './pages/TokenChargePage';
 import TestCompletePage from './pages/TestCompletePage';
+import { BrowserRouter as Router } from "react-router-dom";
+import { CookiesProvider } from "react-cookie";
 
 function App() {
   return (
-  
+  <CookiesProvider>
     <Router>
        <Header/>
      
@@ -35,7 +37,7 @@ function App() {
       </Routes>
       <Footer/>
     </Router>
-    
+  </CookiesProvider>
   
   );
 }
