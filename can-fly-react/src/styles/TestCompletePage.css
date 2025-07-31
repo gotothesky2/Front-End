@@ -1,0 +1,88 @@
+.test-complete-page {
+  padding-top: 100px; /* 헤더 고정 고려 */
+  display: flex;
+  justify-content: center;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.test-complete-container {
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.complete-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.complete-title .blue {
+  color: #03178C;
+}
+
+.complete-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 32px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.guide-button {
+  border: 1.5px solid #03178C;
+  background: white;
+  color: #03178C;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.result-button {
+  background: #03178C;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 60px 20px;
+  margin-bottom: 40px;
+  background: #fafafa;
+}
+
+.upload-icon {
+  font-size: 20px;
+  color: #03178C;
+  margin-bottom: 12px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #666;
+}
+
+.save-button {
+  background: #03178C;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}

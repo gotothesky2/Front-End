@@ -159,7 +159,7 @@ const InterestTestPage7 = () => {
                 <div className="job-box-7" onClick={()=>setShowJobModal({open:true,index:idx})}>
                   {answers[3][idx] || `직업을 선택해주세요.`}
                 </div>
-                <button onClick={()=>setShowJobModal({open:true,index:idx})}>직업 선택</button>
+                <button className="page7button" onClick={()=>setShowJobModal({open:true,index:idx})}>직업 선택</button>
               </div>
             </div>
           ))}
@@ -177,7 +177,7 @@ const InterestTestPage7 = () => {
                     {answers[4][sectionIdx][idx] || `${idx+1}순위 과목`}
                   </div>
                 ))}
-                <button onClick={()=>setShowSubjectModal({open:true, section:sectionIdx})}>과목 선택</button>
+                <button className="page7button" onClick={()=>setShowSubjectModal({open:true, section:sectionIdx})}>과목 선택</button>
               </div>
             </div>
           ))}
@@ -238,7 +238,7 @@ const InterestTestPage7 = () => {
             <h4>직업 선택</h4>
             <div className="modal-list">
               {Array.from({length:62}).map((_,i)=>(
-                <button key={i} onClick={()=>{
+                <button className="page7button" key={i} onClick={()=>{
                   const updated = {...answers};
                   updated[3][showJobModal.index] = `직업 ${i+1}`;
                   setAnswers(updated);
