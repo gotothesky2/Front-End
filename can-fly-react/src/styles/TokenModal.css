@@ -1,4 +1,4 @@
-.modal-overlay {
+.tm-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,29 +11,27 @@
   z-index: 1000;
 }
 
-.payment-modal {
-  width: 380px;               /* 좀 더 길게 */
-  background: #f9f9f9;
+.tm-modal {
+  width: 380px;
+  background: #fff;
   border-radius: 10px;
-  border: 1px solid #ccc;
   padding: 20px;
   box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
 }
 
-.modal-header {
-  position: relative; 
+.tm-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
   font-size: 22px;
   font-weight: bold;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 12px;
-  height: 50px; 
+  height: 50px;
 }
 
-
-.modal-header .close-btn {
+.tm-close {
   position: absolute;
   right: 0;
   top: 50%;
@@ -44,39 +42,51 @@
   cursor: pointer;
 }
 
+.tm-body {
+  margin-top: 20px;
+}
 
-.price-section {
-  margin: 24px 0 12px;
+.tm-price-left strong {
   font-size: 20px;
 }
 
-.price-section .token {
-  font-size: 15px;
-  color: #888;
-  margin-top: 4px;
-}
-
-.pay-amount {
-  display: flex;
-  justify-content: space-between;
-  margin: 12px 0;
-  font-weight: bold;
-  font-size: 15px;
-}
-
-.payment-methods {
-  margin-top: 10px;
-}
-
-.payment-methods label {
+.tm-token-line {
   display: flex;
   align-items: center;
-  margin: 14px 0 8px;
-  font-weight: 500;
-  font-size: 15px;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 14px;
+  color: #888;
 }
 
-.pay-box {
+.tm-token-dot {
+  width: 8px;
+  height: 8px;
+  background: #f5c000;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.tm-row {
+  display: flex;
+  align-items: center;
+}
+
+.tm-between {
+  justify-content: space-between;
+}
+
+.tm-section-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tm-amount-blue {
+  color: #03178C;
+  font-weight: 600;
+}
+
+.tm-card {
   background: #fff;
   border: 1px solid #ccc;
   padding: 16px;
@@ -84,68 +94,85 @@
   margin-bottom: 14px;
 }
 
-.register-box button {
-  width: 100%;
-  padding: 12px;
+.tm-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.tm-divider {
+  border-bottom: 1px solid #ddd;
+  margin: 12px 0;
+}
+
+.tm-register-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.tm-register-btn {
   background: #f2f2f2;
   border: none;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   cursor: pointer;
 }
 
-.pay-detail {
-  background: #fff;
-  padding: 14px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  margin-top: 18px;
+.tm-plus {
+  font-size: 22px;
+  color: #03178C;
 }
 
-.pay-detail .row {
-  display: flex;
-  justify-content: space-between;
-  margin: 6px 0;
+.tm-chevron {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
 }
 
-.agreement {
-  font-size: 13px;
-  margin-top: 16px;
-  color: #333;
-  line-height: 1.6;
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
-
-.agreement a {
+.tm-link {
   color: #03178C;
   font-weight: bold;
   text-decoration: none;
 }
 
-.info-text {
+.tm-footnote {
   font-size: 12px;
   color: #555;
-  margin-top: 8px;
+  margin-top: 12px;
   text-align: center;
+  line-height: 1.5;
 }
 
-.pay-button {
+.tm-pay-btn {
   width: 100%;
-  padding: 16px;
+  margin-top: 20px;
   background: #03178C;
-  color: white;
+  color: #fff;
   font-size: 17px;
   font-weight: bold;
+  padding: 16px;
   border: none;
-  margin-top: 20px;
   border-radius: 8px;
   cursor: pointer;
 }
 
+/* 유용한 공통 유틸 클래스 */
+.tm-mt12 { margin-top: 12px; }
+.tm-mt16 { margin-top: 16px; }
+.tm-mt24 { margin-top: 24px; }
+
 .hidden {
   display: none;
 }
+
