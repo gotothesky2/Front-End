@@ -1,4 +1,4 @@
-const BASE_URL = 'http://canfly.ap-northeast-2.elasticbeanstalk.com';
+const BASE_URL = 'http://canfly.ap-northeast-2.elasticbeanstalk.com/';
 
 const config = {
     API_URL: BASE_URL,
@@ -18,10 +18,12 @@ const config = {
     MOCK: {
         ALL_DETAIL: `${BASE_URL}/users/grades/mock`,
         REGISTER: `${BASE_URL}/users/grades/mock`,
-        SPECIFIC_DETAIL: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
+        SPECIFIC_DETAIL: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         SCORE_REGISTER: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
         DELETE_MOCK: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
         SPECIFIC_SCORE_DETAIL: (mockId, mockScoreId) => `${BASE_URL}/users/grades/mock/${mockId}/${mockScoreId}`,
     },
-    
+
 };
+
+export default config;
