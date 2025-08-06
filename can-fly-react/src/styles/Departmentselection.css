@@ -93,3 +93,50 @@
   justify-content: center;
   height: 180px;
 }
+.Departmentselection-popup {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 16px;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+.Departmentselection-popup-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.Departmentselection-popup-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.Departmentselection-popup-search input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.Departmentselection-popup-search button {
+  padding: 6px 10px;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.Departmentselection-popup-section {
+  margin-top: 12px;
+}

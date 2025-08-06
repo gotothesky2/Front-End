@@ -1,18 +1,15 @@
-// components/AddDepartmentModal.jsx
 import React from "react";
+import "../../styles/AddDepartmentModal.css"; // 변경된 CSS 경로
 import HeartToggle from "./HeartToggle";
-import "../../styles/AddDepartmentModal.css";
 
-const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, search, onSearch }) => {
+const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, search, onSearch, onOpenUniversityPopup }) => {
   if (!show) return null;
 
-  const filtered = departments.filter((d) =>
-    d.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = departments.filter(d => d.includes(search));
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span>학과 검색</span>
           <button onClick={onClose}>✕</button>
@@ -23,21 +20,28 @@ const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, se
             type="text"
             placeholder="학과명을 입력해주세요"
             value={search}
-            onChange={(e) => onSearch(e.target.value)}
+            onChange={e => onSearch(e.target.value)}
           />
-          <button className="search-btn">🔍</button>
+          <button>🔍</button>
         </div>
 
-        <div className="modal-subtitle">학과 목록</div>
         <div className="modal-body">
-          {filtered.map((item, index) => (
-            <div className="modal-item" key={index}>
+          <div className="modal-subtitle">학과 목록</div>
+          {filtered.map((item, idx) => (
+            <div
+              className="modal-item"
+              key={idx}
+              onClick={() => onOpenUniversityPopup(item)} // 🔹 학과 클릭 → 대학 팝업
+            >
               <HeartToggle
                 selected={selected.includes(item)}
-                onToggle={() => onToggle(item)}
+                onToggle={(e) => {
+                  e.stopPropagation();
+                  onToggle(item);
+                }}
               />
               {item}
-              <span style={{ marginLeft: "auto" }}>›</span>
+              <span>›</span>
             </div>
           ))}
         </div>
@@ -45,5 +49,6 @@ const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, se
     </div>
   );
 };
+
 
 export default AddDepartmentModal;
