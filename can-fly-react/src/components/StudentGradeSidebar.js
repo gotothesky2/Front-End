@@ -24,6 +24,10 @@ const StudentGradeSidebar = ({ onOpenModal }) => {
         <p>3학년</p>
         <button onClick={() => onOpenModal('3학년 1학기')}>3학년 1학기 입력</button>
         <button onClick={() => onOpenModal('3학년 2학기')}>3학년 2학기 입력</button>
+        <p>비교과</p>
+        <button onClick={() => onOpenModal('3학년 1학기')}>입력</button>
+        <p>학생부 성적 업로드</p>
+        <button onClick={() => onOpenModal('3학년 1학기')}>입력</button>
       </div>
     </>
   );

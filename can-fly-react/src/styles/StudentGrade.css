@@ -55,11 +55,206 @@
   margin: 0 auto;
 }
 
+.grade-gray-section .grade-inner-container {
+  display: flex;
+  align-items: flex-start;
+}
+
 .grade-sidebar-container {
-  width: 200px;
-  margin-right: 2rem;
+  flex: 0 0 240px;
+  margin-right: 24px;
 }
 
 .grade-main-content {
-  flex-grow: 1;
+  flex: 1 1 auto;
+}
+
+.grade-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.grade-header__username{
+    color: #03178c;
+}
+
+.grade-header__message {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000; 
+}
+
+.grade-header__guide-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  background-color: #ffffff;
+  border: 2px solid #03178c;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.grade-header__guide-btn:hover {
+  background-color: #f0f4ff;
+}
+
+
+/* 표 컨테이너는 가로 꽉 채우기 */
+.grade-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+/* 테이블 전체 너비 고정, 칸 너비 동일 분배 */
+.grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* 헤더 셀 */
+.grade-table th {
+  background-color: #03178C;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 8px;
+  border: 1px solid #e1e3e8;
+}
+
+/* 본문 셀 */
+.grade-table td {
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid #e1e3e8;
+  color: #333;
+}
+
+/* 왼쪽 학년 레이블 */
+.grade-label {
+  background-color: #fff;
+  color: #03178C;
+  font-weight: 600;
+  border: 1px solid #e1e3e8;
+}
+
+/* 테이블 위 종합분석 타이틀 */
+.grade-table-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+  color: #03178C;
+}
+
+/* 1) 탭형 헤더 */
+.grade-table-header {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.grade-table-tab {
+  padding: 8px 16px;
+  background-color: #03178C;        /* 네이비 배경 */
+  color: #fff;                      /* 흰 텍스트 */
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px 8px 0 0;       /* 위쪽만 둥글게 */
+}
+
+.grade-table-underline {
+  flex: 1;                          /* 나머지 영역 채우기 */
+  height: 2px;                      /* 선 두께 */
+  background-color: #03178C;
+  align-self: flex-end;        /* 같은 네이비 색 선 */
+}
+
+.grade-table tbody td {
+  background-color: #ffffff;
+}
+
+/* ─────────── 1) 섹션 래퍼 ─────────── */
+.grade-trend-section {
+  margin-top: 2rem;
+}
+
+/* ─────────── 1-1) 헤더 탭 ─────────── */
+.grade-chart-header {
+  display: flex;
+  align-items: flex-end;
+       /* underline 과 컨테이너 경계 붙이기 */
+}
+
+.grade-chart-tab {
+  padding: 8px 16px;
+  background-color: #03178C;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px 8px 0 0;
+}
+
+.grade-chart-underline {
+  flex: 1;
+  height: 2px;
+  background-color: #03178C;
+  align-self: flex-end;
+}
+
+/* ─────────── 2) 흰 박스 컨테이너 ─────────── */
+.grade-trend-container {
+  position: relative;
+  background-color: #fff;
+  border-radius: 0 8px 8px 8px; /* 좌상단은 헤더 탭이 덮으니 0으로 */
+  padding: 16px;
+  padding-bottom: 72px;       /* 탭이 박스 안에 들어가도록 여유 */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+/* ─────────── 2-1) 차트 영역 ─────────── */
+.grade-trend-chart {
+  width: 100%;
+  height: 300px;               /* 필요에 따라 조절 */
+  margin-bottom: 16px;
+}
+
+/* ─────────── 2-2) 탭 버튼 ─────────── */
+.grade-trend-tabs {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.grade-trend-tab {
+  flex: 1;
+  padding: 8px 0;
+  margin: 0 4px;
+  background: #fff;
+  border: 1px solid #03178C;
+  border-radius: 0 0 8px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #03178C;
+}
+
+.grade-trend-tab:first-child {
+  margin-left: 0;
+}
+.grade-trend-tab:last-child {
+  margin-right: 0;
+}
+
+/* ─────────── 3) 탭 active 스타일 ─────────── */
+.grade-trend-tab.active {
+  background-color: #03178C;
+  color: #fff;
 }

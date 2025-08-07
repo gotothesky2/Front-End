@@ -13,11 +13,15 @@ import InterestTest from './pages/InterestTest';
 import InterestTestPage7 from './pages/InterestTestPage7';
 import TokenChargePage from './pages/TokenChargePage';
 import TestCompletePage from './pages/TestCompletePage';
+
 import Departmentselection from './pages/Departmentselection/Departmentselection';
+
+import { CookiesProvider } from "react-cookie";
+
 
 function App() {
   return (
-  
+  <CookiesProvider>
     <Router>
        <Header/>
      
@@ -37,7 +41,7 @@ function App() {
       </Routes>
       <Footer/>
     </Router>
-    
+  </CookiesProvider>
   
   );
 }
