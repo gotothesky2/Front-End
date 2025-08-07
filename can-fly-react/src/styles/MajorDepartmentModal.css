@@ -1,0 +1,115 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: #fff;
+  width: 320px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 4px 20px rgba(0,0,0,0.15);
+  z-index: 2001;
+  position: relative;
+  max-height: 90vh; /* 화면 90% 제한 */
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-search {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-search input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto; /* 스크롤 가능 */
+  padding: 16px;
+  background-color: #f9fafb;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.modal-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.05);
+}
+
+.modal-item:hover {
+  background: #f3f4f6;
+}
+
+.modal-item img {
+  margin-right: 8px;
+}
+
+.modal-item span:last-child {
+  margin-left: auto;
+  font-size: 18px;
+  color: #1e3a8a;
+}
+
+.no-data {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 10px;
+}
+.search-btn{
+  height: 20px;
+  width: 20px;
+}

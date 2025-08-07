@@ -13,7 +13,11 @@ import InterestTest from './pages/InterestTest';
 import InterestTestPage7 from './pages/InterestTestPage7';
 import TokenChargePage from './pages/TokenChargePage';
 import TestCompletePage from './pages/TestCompletePage';
+
+import Departmentselection from './pages/Departmentselection/Departmentselection';
+
 import { CookiesProvider } from "react-cookie";
+
 
 function App() {
   return (
@@ -33,6 +37,7 @@ function App() {
         <Route path="/interesttestpage7" element={<InterestTestPage7 />} />
         <Route path="/tokencharge" element={<TokenChargePage />} />
         <Route path="/testcomplete" element={<TestCompletePage/>}/>
+        <Route path="/Departmentselection" element={<Departmentselection/>}/>
       </Routes>
       <Footer/>
     </Router>
