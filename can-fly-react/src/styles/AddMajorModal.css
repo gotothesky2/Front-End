@@ -37,10 +37,14 @@
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
+ .close-btn {
+  all: unset; /* ← 모든 기본 스타일 제거 */
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 }
 
 .modal-body {
@@ -74,4 +78,8 @@
   margin-left: auto;
   font-size: 18px;
   color: #1e3a8a;
+}
+.close-icon{
+  height: 32px;
+  width: 32px;
 }

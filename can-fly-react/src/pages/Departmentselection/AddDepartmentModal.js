@@ -12,7 +12,11 @@ const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, se
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span>학과 검색</span>
-          <button onClick={onClose}>✕</button>
+          <button onClick={onClose}><img
+              src={`${process.env.PUBLIC_URL}/icon/exit_icon.svg`}
+              alt="닫기"
+              className="close-icon"
+            /></button>
         </div>
 
         <div className="modal-search">
@@ -22,7 +26,9 @@ const AddDepartmentModal = ({ show, onClose, departments, selected, onToggle, se
             value={search}
             onChange={e => onSearch(e.target.value)}
           />
-          <button>🔍</button>
+          <button><img 
+          src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
+          className="search-icon"/></button>
         </div>
 
         <div className="modal-body">

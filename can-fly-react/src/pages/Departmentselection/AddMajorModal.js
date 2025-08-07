@@ -12,7 +12,12 @@ const AddMajorModal = ({ show, onClose, allMajors, myMajors, onToggle, onOpenMaj
         {/* 헤더 */}
         <div className="modal-header">
           <span>계열 목록</span>
-          <button onClick={onClose} className="close-btn">✕</button>
+          <button onClick={onClose} className="close-btn">
+            <img
+              src={`${process.env.PUBLIC_URL}/icon/exit_icon.svg`}
+              alt="닫기"
+              className="close-icon"
+            /></button>
         </div>
 
         {/* 본문 */}

@@ -82,3 +82,25 @@
 .modal-item img {
   margin-right: 8px;
 }
+.close-icon{
+  height: 32px;
+  width: 32px;
+}
+.modal-header button {
+  all: unset; /* 모든 기본 스타일 제거 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-icon{
+  height: 25px;
+  width: 25px;
+}
+.modal-search button {
+  all: unset; /* 모든 기본 스타일 제거 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -110,3 +110,11 @@
   color: #888;
   margin: 6px 0 10px 0;
 }
+.close-icon {
+  width: 32px;
+  height: 32px;
+}
+.search-icon{
+  width: 20px;
+  height: 20px;
+}

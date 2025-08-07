@@ -23,7 +23,11 @@ const DepartmentUniversityModal = ({ show, onClose, departmentName }) => {
         {/* 헤더 */}
         <div className="modal-header">
           <span>{departmentName}</span>
-          <button onClick={onClose}>✕</button>
+          <button onClick={onClose}><img
+              src={`${process.env.PUBLIC_URL}/icon/exit_icon.svg`}
+              alt="닫기"
+              className="close-icon"
+            /></button>
         </div>
 
         {/* 검색창 */}
@@ -33,7 +37,9 @@ const DepartmentUniversityModal = ({ show, onClose, departmentName }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="search-btn">🔍</button>
+          <button className="search-btn"><img 
+          src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
+          className="search-icon"/></button>
         </div>
 
         {/* 본문 */}

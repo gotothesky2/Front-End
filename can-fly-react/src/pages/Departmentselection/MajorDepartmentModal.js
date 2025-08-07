@@ -27,7 +27,11 @@ const MajorDepartmentModal = ({
         {/* 헤더 */}
         <div className="modal-header">
           <span>{title}</span>
-          <button onClick={onClose} className="close-btn">✕</button>
+          <button onClick={onClose} className="close-btn"><img
+              src={`${process.env.PUBLIC_URL}/icon/exit_icon.svg`}
+              alt="닫기"
+              className="close-icon"
+            /></button>
         </div>
 
         {/* 검색창 */}
@@ -37,7 +41,9 @@ const MajorDepartmentModal = ({
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <button className="search-btn">🔍</button>
+          <button className="search-btn"><img 
+          src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
+          className="search-icon"/></button>
         </div>
 
         {/* 스크롤 가능한 본문 */}
