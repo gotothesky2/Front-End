@@ -15,6 +15,7 @@ import ComprehensiveAnalysis from './ComprehensiveAnalysis';
 
 
 const Report = () => {
+  
     // 관심 학과/학교 분석 데이터 관리 (더미 혹은 fetch)
   const [interestData, setInterestData] = useState([]);
 

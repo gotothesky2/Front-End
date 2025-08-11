@@ -1,3 +1,4 @@
+// src/pages/GradeInput/StudentGrade.js
 import React, { useState, useEffect } from 'react';
 import '../../styles/StudentGrade.css';
 
@@ -7,15 +8,9 @@ import StudentGradeHeader  from '../../components/StudentGradeHeader';
 import StudentGradeTable   from '../../components/StudentGradeTable';
 import StudentGradeTrend   from '../../components/StudentGradeTrend';
 
-console.log({
-  StudentGradeSidebar,
-  StudentGradeModal,
-  StudentGradeHeader,
-  StudentGradeTable,
-  StudentGradeTrend
-});
+// API 모듈
+import { registerReport, registerReportScores } from '../../api/report';
 
-// 기본 한 줄 초기값 생성 함수
 const defaultRow = () => ({
   id: Date.now(),
   checked: false,
@@ -46,10 +41,28 @@ export default function StudentGrade() {
     }
   });
   const [modalRows, setModalRows]         = useState([defaultRow()]);
+  const [reportId, setReportId]           = useState(null); // 내신 보고서 ID
+  const [loading, setLoading]             = useState(false);
 
+  // termData가 바뀌면 로컬 스토리지에 저장
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(termData));
   }, [termData]);
+
+  // 페이지 최초 진입 시 reportId 생성/조회
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!reportId) {
+          const res = await registerReport(); // 보고서 생성 (백엔드 구조에 맞게 변경)
+          setReportId(res.id); // Swagger 응답에 맞게 res.id 부분 확인
+        }
+      } catch (err) {
+        console.error(err);
+        alert('내신 보고서 생성에 실패했습니다.');
+      }
+    })();
+  }, [reportId]);
 
   const handleOpenModal = term => {
     setSelectedTerm(term);
@@ -57,9 +70,25 @@ export default function StudentGrade() {
     setIsModalOpen(true);
   };
 
-  const handleSave = rows => {
-    setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
-    setIsModalOpen(false);
+  const handleSave = async (rows) => {
+    if (!reportId) {
+      alert('보고서 ID를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    try {
+      setLoading(true);
+      // 1) 백엔드에 저장
+      await registerReportScores(reportId, selectedTerm, rows);
+
+      // 2) 로컬 상태 반영
+      setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert('저장에 실패했습니다: ' + (err.response?.data?.message || '알 수 없는 오류'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
@@ -89,18 +118,14 @@ export default function StudentGrade() {
           </div>
 
           <div className="grade-main-content">
-            {/* 인사 + 가이드 버튼 */}
             <StudentGradeHeader userName="전성환" />
 
             <div className="grade-table-header">
               <span className="grade-table-tab">주요교과 분석</span>
               <div className="grade-table-underline" />
             </div>
-            
 
-            {/* Figma 디자인대로 테이블 렌더링 */}
             <StudentGradeTable termData={termData} />
-
             <StudentGradeTrend termData={termData} />
           </div>
         </div>
@@ -114,9 +139,17 @@ export default function StudentGrade() {
         onClose={handleCloseModal}
         onSave={handleSave}
       />
+
+      {loading && (
+        <div className="loading-backdrop">
+          <div className="loading-spinner" />
+          <p>저장 중...</p>
+        </div>
+      )}
     </>
   );
 }
+
 
 
 

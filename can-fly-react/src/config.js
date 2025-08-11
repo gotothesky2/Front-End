@@ -1,4 +1,4 @@
-const BASE_URL = 'http://canfly.ap-northeast-2.elasticbeanstalk.com/';
+const BASE_URL = 'http://canfly.ap-northeast-2.elasticbeanstalk.com';
 
 const config = {
     API_URL: BASE_URL,
@@ -20,10 +20,10 @@ const config = {
         ALL_DETAIL: `${BASE_URL}/users/grades/mock`,
         REGISTER: `${BASE_URL}/users/grades/mock`,
         SPECIFIC_DETAIL: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
-        SCORE_REGISTER: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
-        DELETE_MOCK: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
+        SCORE_REGISTER: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
+        DELETE_MOCK: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         SPECIFIC_SCORE_DETAIL: (mockId, mockScoreId) => `${BASE_URL}/users/grades/mock/${mockId}/${mockScoreId}`,
-        EDIT_INFORMATION_MOCK: mockId => `${BASE_URL}/users/grades/mock/${mockId}`,
+        EDIT_INFORMATION_MOCK: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         EDIT_SCORE: (mockId, mockScoreId) => `${BASE_URL}/users/grades/mock/${mockId}/${mockScoreId}`,
     },
 
@@ -31,10 +31,10 @@ const config = {
         ALL_DETAIL_REPORT: `${BASE_URL}/users/grades/report`,
         REGISTER_REPORT: `${BASE_URL}/users/grades/report`,
         SPECIFIC_DETAIL_REPORT: (reportId) => `${BASE_URL}/users/grades/report/${reportId}`,
-        SCORE_REGISTER_REPORT: reportId => `${BASE_URL}/users/grades/reprt/${reportId}`,
-        DELETE_REPORT: reportId => `${BASE_URL}/users/grades/report/${reportId}`,
+        SCORE_REGISTER_REPORT: (reportId) => `${BASE_URL}/users/grades/report/${reportId}`,
+        DELETE_REPORT: (reportId) => `${BASE_URL}/users/grades/report/${reportId}`,
         SPECIFIC_SCORE_DETAIL_REPORT: (reportId, reportScoreId) => `${BASE_URL}/users/grades/mock/${reportId}/${reportScoreId}`,
-        EDIT_INFORMATION_REPORT: reportId => `${BASE_URL}/users/grades/mock/${reportId}`,
+        EDIT_INFORMATION_REPORT: (reportId) => `${BASE_URL}/users/grades/mock/${reportId}`,
         EDIT_SCORE_REPORT: (reportId, reportScoreId) => `${BASE_URL}/users/grades/mock/${reportId}/${reportScoreId}`,
     },
 

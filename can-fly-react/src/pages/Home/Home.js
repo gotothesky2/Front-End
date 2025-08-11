@@ -5,7 +5,7 @@ import Main from "./Main";
 import Login from "./Login";
 import Header from "../../components/Header";
 
-import { post } from "../../Api";           // axios wrapper
+import api, { post, get, put, del } from "../../api/Api";
 import config from "../../config"; // API endpoint 정의
 import { Cookies } from "react-cookie";     // 쿠키 저장용
 
