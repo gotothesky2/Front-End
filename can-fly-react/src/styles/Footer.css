@@ -22,13 +22,13 @@
 }
 .Footer-title{
     color: #898989;
-    font-size: 40px;
+    font-size: 20px;
     font-family:'KakaoExtra';
     line-height: normal;
     padding: 59px 0px 8px 0px;
 }
 .Footer-subtitle{
-    font-size: 1.2rem;
+    font-size: 16px;
     font-family:'Kakaobold' ;
     color: #898989;
 
@@ -58,7 +58,7 @@
     
 }
 .Line{
-    font-size: 20px;
+    font-size: 16px;
     gap:10px;
     display: flex;
     flex-direction: column;
@@ -77,7 +77,7 @@
     
 }
 .Footer-subtitle2{
-    font-size: 1    rem;
+    font-size: 12px;
     font-family:'Kakaobold' ;
     color: #898989
     
