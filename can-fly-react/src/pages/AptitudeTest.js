@@ -86,13 +86,14 @@ useEffect(() => {
         <hr />
         {currentQuestions.map((q, idx) => {
           const absoluteIndex = page * QUESTIONS_PER_PAGE + idx;
+
           return (
             <div
               key={absoluteIndex}
               className="question-block"
               ref={el => questionRefs.current[absoluteIndex] = el}
             >
-              <div className="question-text">{absoluteIndex + 1}. {q.qestnCntnt}</div>
+              <div className="question-text">{absoluteIndex + 1}. {q.question}</div>
               <div className="circle-options">
                 {[1, 2, 3, 4, 5, 6, 7].map((value, i) => (
                   <div key={value} className="circle-container">
