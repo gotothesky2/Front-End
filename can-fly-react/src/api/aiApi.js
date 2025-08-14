@@ -15,7 +15,8 @@ const cookies = new Cookies();
 // 요청 인터셉터: accessToken 있으면 붙이기
 ai.interceptors.request.use((cfg) => {
   const token = cookies.get("accessToken");
-  if (token) cfg.headers.Authorization = `${token}`;
+  console.log("???", token);
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
 
@@ -42,6 +43,24 @@ const parse = (res) => {
 export const aiGet = async (endpoint, params = {}, options = {}) => {
   const res = await ai.get(endpoint, { params, ...options });
   return parse(res);
+};
+
+export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    const response = await ai.post(endpoint, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      ...options,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export default ai;
