@@ -80,7 +80,10 @@ const Login = ({ onLogin, isLoggedIn }) => {
         </div>
 
         <div className="profile-bottom">
-          <button className="profile-btn left">충전하기</button>
+          {/* 충전하기 -> /TokenChargePage 링크로 변경 */}
+          <Link to="/TokenCharge" className="profile-btn left">
+            충전하기
+          </Link>
           <Link to="/Mypage" className="profile-btn right">
             마이페이지
           </Link>
