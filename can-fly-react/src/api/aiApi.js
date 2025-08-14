@@ -37,8 +37,27 @@ const parse = (res) => {
   return res.data;
 };
 
+//GET
 export const aiGet = async (endpoint, params = {}, options = {}) => {
   const res = await ai.get(endpoint, { params, ...options });
+  return parse(res);
+};
+
+//POST
+export const aiPost = async (endpoint, data = {}, options = {}) => {
+  const res = await ai.post(endpoint, data, { ...options });
+  return parse(res);
+};
+
+//DELETE
+export const aiDelete = async (endpoint, params = {}, options = {}) => {
+  const res = await ai.delete(endpoint, { params, ...options });
+  return parse(res);
+};
+
+// PUT
+export const aiPut = async (endpoint, data = {}, options = {}) => {
+  const res = await ai.put(endpoint, data, { ...options });
   return parse(res);
 };
 
