@@ -1,0 +1,157 @@
+.report-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.report-modal {
+  background: #f2f2f2;
+  border-radius: 8px;
+  width: 420px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.report-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.report-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.report-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.report-modal-body {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section h3 {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.selects {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* 학년/학기 간격 */
+}
+
+/* 레이블 + select 를 한 줄에 */
+.inline-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 글자는 가로로 유지 */
+.inline-label-text {
+  display: inline-block;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* 드롭다운 크기 크게 */
+.selects select {
+  min-width: 70px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  appearance: none;
+  background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23333' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") no-repeat calc(100% - 10px) center;
+  background-color: #fff;
+}
+
+/* 라디오 버튼 */
+.radios {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+}
+
+/* 토큰 카드 스타일 */
+.tokens {
+  display: flex;
+  gap: 16px;
+}
+
+.token-item {
+  flex: 1;
+  background: #fff;
+  padding: 12px 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.token-label {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.token-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 확인 텍스트 */
+.confirm-text {
+  text-align: center;
+  font-size: 16px;
+  margin: 24px 0 16px;
+}
+
+/* 버튼들 */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn.confirm {
+  background: #1c237e;
+  color: #fff;
+}
+
+.btn.cancel {
+  background: #E4E6EB;
+}
+
+/* 에러 텍스트 */
+.error-text {
+  margin-top: 14px;
+  text-align: center;
+  color: #d32f2f;
+  font-size: 13px;
+}
+
