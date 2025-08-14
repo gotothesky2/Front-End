@@ -4,12 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const Login = ({ onLogin, isLoggedIn }) => {
   const userName = "사용자"; // 더미 사용자 이름, API로 대체 가능
-  const currentDate = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
+  
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
@@ -85,7 +80,10 @@ const Login = ({ onLogin, isLoggedIn }) => {
         </div>
 
         <div className="profile-bottom">
-          <button className="profile-btn left">충전하기</button>
+          {/* 충전하기 -> /TokenChargePage 링크로 변경 */}
+          <Link to="/TokenCharge" className="profile-btn left">
+            충전하기
+          </Link>
           <Link to="/Mypage" className="profile-btn right">
             마이페이지
           </Link>

@@ -36,6 +36,13 @@
   box-sizing: border-box;
   overflow: hidden;
 }
+.mypage-card-title-link { text-decoration: none; color: inherit; cursor: pointer; }
+
+
+.mypage-card-link,
+.mypage-token-recharge { text-decoration: none; color: inherit; }
+
+
 
 /* 카드 내부 이미지 */
 .mypage-step {

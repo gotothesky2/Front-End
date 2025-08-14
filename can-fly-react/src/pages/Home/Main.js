@@ -1,6 +1,7 @@
 // src/pages/Main.js
 
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "../../styles/Main.css";
 import ReportModal from "../../components/ReportModal";
 
@@ -41,6 +42,9 @@ const steps = [
   },
 ];
 
+// STEP 1~3 이동 경로만 정의 (STEP 4는 링크 없음)
+const actionLinks = ["/AptitudeTest", "/GradeInput", "/Departmentselection"];
+
 const Main = () => {
   const [isReportOpen, setReportOpen] = useState(false);
 
@@ -55,16 +59,24 @@ const Main = () => {
               <div className="Main-step-title">{step.title}</div>
               <div className="Main-step-description">{step.description}</div>
             </div>
-            {/* 4번째 스텝에서만 모달 열기 */}
+
+            {/* STEP 4는 기존 로직 그대로 유지(모달) / STEP 1~3만 링크 */}
             <div
               className="Main-step-action"
               onClick={() => {
-                if (index === 3) setReportOpen(true);
+                if (index === 3) setReportOpen(true); // STEP 4만 모달 오픈
               }}
               style={{ cursor: index === 3 ? "pointer" : "default" }}
             >
-              {step.action}
+              {index < 3 ? (
+                <Link to={actionLinks[index]} className="Main-step-action-link">
+                  {step.action}
+                </Link>
+              ) : (
+                step.action
+              )}
             </div>
+
             <div className="Main-step-icon">{step.icon}</div>
           </div>
         ))}
@@ -82,4 +94,3 @@ const Main = () => {
 };
 
 export default Main;
-
