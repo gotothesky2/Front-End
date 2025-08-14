@@ -1,18 +1,21 @@
 // src/api/aiApi.js
-import axios from 'axios';
-import { Cookies } from 'react-cookie';
-import AIconfig from './AIconfig';
+import axios from "axios";
+import { Cookies } from "react-cookie";
 
 const ai = axios.create({
-  baseURL: 'http://43.200.79.118', // 예: 'http://43.200.79.118'  (docs 주소 아님!)
-  timeout: 15000,
+  baseURL: "http://43.200.79.118", // 예: 'http://43.200.79.118'  (docs 주소 아님!)
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: false,
 });
 
 const cookies = new Cookies();
 
 // 요청 인터셉터: accessToken 있으면 붙이기
 ai.interceptors.request.use((cfg) => {
-  const token = cookies.get('accessToken');
+  const token = cookies.get("accessToken");
+  console.log("???", token);
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
@@ -22,8 +25,8 @@ ai.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      cookies.remove('accessToken', { path: '/' });
-      window.location.href = '/login';
+      cookies.remove("accessToken", { path: "/" });
+      window.location.href = "/login";
     }
     return Promise.reject(err);
   }
@@ -31,8 +34,8 @@ ai.interceptors.response.use(
 
 // 공통 파서(파일/204 대비)
 const parse = (res) => {
-  const ct = (res.headers['content-type'] || '').toLowerCase();
-  if (ct.includes('application/json')) return res.data;
+  const ct = (res.headers["content-type"] || "").toLowerCase();
+  if (ct.includes("application/json")) return res.data;
   if (res.status === 204) return null;
   return res.data;
 };
@@ -40,24 +43,6 @@ const parse = (res) => {
 //GET
 export const aiGet = async (endpoint, params = {}, options = {}) => {
   const res = await ai.get(endpoint, { params, ...options });
-  return parse(res);
-};
-
-//POST
-export const aiPost = async (endpoint, data = {}, options = {}) => {
-  const res = await ai.post(endpoint, data, { ...options });
-  return parse(res);
-};
-
-//DELETE
-export const aiDelete = async (endpoint, params = {}, options = {}) => {
-  const res = await ai.delete(endpoint, { params, ...options });
-  return parse(res);
-};
-
-// PUT
-export const aiPut = async (endpoint, data = {}, options = {}) => {
-  const res = await ai.put(endpoint, data, { ...options });
   return parse(res);
 };
 
