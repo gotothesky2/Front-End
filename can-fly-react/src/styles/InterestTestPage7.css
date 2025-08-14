@@ -51,7 +51,6 @@
   white-space: nowrap;
 }
 
-
 .circle-7 {
   width: 40px;
   height: 40px;
@@ -83,7 +82,7 @@
 
 /* 네모 박스 */
 .box-7 {
-  width: 450px;  /* 양옆 박스 길이 크게 */
+  width: 450px;
   min-height: 60px;
   border: 2px solid gray;
   border-radius: 8px;
@@ -95,9 +94,8 @@
   cursor: pointer;
 }
 
-/* 아래 계열 선택 박스(작게) */
 .box-options-7.small .box-7 {
-  width: 122px; /* 아래 박스만 길이 줄임 */
+  width: 122px;
 }
 
 /* 선택된 상태 */
@@ -106,7 +104,6 @@
   color: white;
   background: #03178C;
 }
-
 
 /* 직업 & 과목 선택 */
 .job-select-7, .subject-select-7 {
@@ -133,7 +130,6 @@
   flex: none;
   width: 395px;
 }
-
 
 .page7button {
   padding: 10px 20px;
@@ -165,73 +161,7 @@ button:hover {
   background: #f0f0f0;
 }
 
-/* 팝업 모달 */
-.modal {
-  position: fixed; top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
-  display:flex; align-items: center; justify-content: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  max-height: 50vh;   /* 높이 제한 */
-  overflow-y: auto;   /* 스크롤 */
-  border-radius: 24px;
-}
-
-/* 버튼들을 더 크게 */
-.modal-list button {
-  padding: 30px;
-  font-size: 24px;
-  border: 2px solid #000000;
-  background: white;
-  color: #000000;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.modal-list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 15px; /* 간격 조금 키움 */
-  margin: 30px 0;
-}
-
-.modal-list button.selected {
-  background: #03178C;
-  color: white;
-}
-
-.modal-list button:hover {
-  background: #03178C;
-  color: white;
-}
-
-.modal-content h4 {
-  font-size: 32px;
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.modal-close-btn {
-  display: block;
-  margin-left: auto;  /* 오른쪽 정렬 */
-  padding: 12px 30px;
-  font-size: 20px;
-  background: #03178C;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.modal-close-btn:hover {
-  background: #000066;
-}
-
-
+/* 배너 */
 .banner-with-image {
   display: flex;
   align-items: center;
@@ -245,7 +175,6 @@ button:hover {
 .banner-text {
   max-width: 80%;
   text-align: left;
-
 }
 
 .banner-image {
@@ -253,3 +182,94 @@ button:hover {
   width: 200px;
   height: auto;
 }
+
+/* ────────────────────────── */
+/* 팝업 모달 (디자인 개선)     */
+/* ────────────────────────── */
+.modal {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.55);
+  display:flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 22px 22px 26px;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* 정사각형 느낌 */
+.modal-square {
+  width: 620px;     /* 정사각형에 가깝게 */
+  height: 620px;
+  max-width: 92vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 우상단 닫기 버튼 */
+.modal-x {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #222;
+}
+.modal-x:hover { color: #03178C; }
+
+.modal-content h4 {
+  font-size: 20px;
+  margin: 6px 0 12px;
+  text-align: left;
+}
+
+/* 버튼 그리드(더 촘촘하게) */
+.modal-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+
+/* 모달 전용 tighter grid */
+.modal-grid-tight {
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* 버튼 작게 */
+}
+
+/* 버튼 자체를 작게 + 가로글자 */
+.modal-btn,
+.modal-list button {
+  padding: 10px 8px;           /* 작게 */
+  font-size: 13px;             /* 글자 작게 */
+  border: 1px solid #C9CED6;
+  background: #F7F8FA;
+  color: #1F2937;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 8px;
+  writing-mode: horizontal-tb; /* 가로 */
+  white-space: nowrap;
+}
+
+.modal-btn.selected,
+.modal-list button.selected {
+  background: #03178C;
+  color: #fff;
+  border-color: #03178C;
+}
+
+.modal-btn:hover,
+.modal-list button:hover {
+  background: #E6EBF5;
+}
+
