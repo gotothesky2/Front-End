@@ -13,7 +13,7 @@ import { Cookies } from "react-cookie"; // 쿠키 저장용
 const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("사용자"); // 필요시 실제 사용자 이름 저장
-  const [cookies, setCookie] = useCookies(["accessToken"]);
+  const [cookies, setCookie, removeCookie] = useCookies(["accessToken"]);
 
   const handleLogin = async () => {
     try {
@@ -29,7 +29,7 @@ const Home = () => {
 
   // 로그아웃 처리 함수
   const handleLogout = () => {
-    cookies.remove("accessToken", { path: "/" });
+    removeCookie("accessToken", { path: "/" });
     setIsLoggedIn(false);
   };
 
