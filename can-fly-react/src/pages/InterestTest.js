@@ -1,47 +1,206 @@
-import React, { useState, useRef, useEffect } from 'react';
+// src/pages/InterestTest.jsx
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import '../styles/InterestTest.css';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const PAGE_SIZE = 20;
+const API_BASE = 'http://localhost:4000'; // 배포 시 .env 사용 권장
+
+// 디버그용 안전 stringify
+const safeJson = (obj, len = 1000) => {
+  try {
+    const s = JSON.stringify(obj, null, 2);
+    return s.length > len ? s.slice(0, len) + ' ... (truncated)' : s;
+  } catch {
+    return String(obj);
+  }
+};
+
+// 응답 어디에 있든 문항 배열 찾아오기
+const findQuestionArrays = (root, maxDepth = 6) => {
+  const results = [];
+  const seen = new Set();
+  const stack = [{ node: root, depth: 0, path: '$' }];
+  while (stack.length) {
+    const { node, depth, path } = stack.pop();
+    if (!node || typeof node !== 'object' || seen.has(node) || depth > maxDepth) continue;
+    seen.add(node);
+    if (Array.isArray(node) && node.length) {
+      const it = node[0];
+      if (it && typeof it === 'object') {
+        const keys = Object.keys(it);
+        const looksV2 = keys.includes('no') || keys.includes('choices');
+        const looksV1 =
+          keys.includes('qitemNo') || keys.includes('question') || keys.some(k => /^answer(?:Score)?\d{2}$/i.test(k));
+        if (looksV2 || looksV1) results.push({ path, arr: node });
+      }
+    }
+    for (const [k, v] of Object.entries(node)) {
+      if (v && typeof v === 'object') stack.push({ node: v, depth: depth + 1, path: `${path}.${k}` });
+    }
+  }
+  return results;
+};
+
+// v2 정규화
+const normalizeV2Item = (q) => {
+  const choices = Array.isArray(q.choices) ? q.choices : [];
+  let options = choices
+    .filter(c => c && (c.val !== undefined || c.text !== undefined))
+    .map(c => ({ label: String(c.text ?? c.val ?? ''), score: String(c.val ?? '') }))
+    .filter(o => o.score !== '');
+  // v2인데 choices가 없을 수도 있으니 1~5 기본 생성
+  if (options.length === 0) {
+    options = Array.from({ length: 5 }, (_, i) => ({ label: String(i + 1), score: String(i + 1) }));
+  }
+  return {
+    qitemNo: Number(q.no ?? q.qno ?? q.id ?? 0),
+    question: String(q.text ?? q.title ?? q.qstnCn ?? '').trim(),
+    options,
+  };
+};
+
+// v1 정규화 (답항이 전부 null이면 1~5 기본 생성)
+const normalizeV1Item = (it) => {
+  const qitemNo = Number(it.qitemNo ?? it.qitemno ?? it.qItemNo ?? it.no ?? 0);
+  const question = String(it.question ?? it.qstnCn ?? it.title ?? '').trim();
+
+  const options = [];
+  for (let i = 1; i <= 10; i++) {
+    const pad = String(i).padStart(2, '0');
+    const label =
+      it[`answer${pad}`] ??
+      it[`answr${pad}`] ??
+      it[`answer_${pad}`] ??
+      it[`answr_${pad}`];
+    const scoreRaw =
+      it[`answerScore${pad}`] ??
+      it[`answrScore${pad}`] ??
+      it[`score${pad}`];
+
+    // label/score가 부분적으로라도 있으면 그대로 사용
+    if (label !== undefined && label !== null && String(label).trim() !== '') {
+      const score =
+        (scoreRaw !== undefined && scoreRaw !== null && String(scoreRaw) !== '')
+          ? String(scoreRaw)
+          : String(i); // 점수 없으면 순번 대체
+      options.push({ label: String(label), score });
+    }
+  }
+
+  // 여기! 답항이 전부 null인 케이스 → 1~5 기본 생성
+  const finalOptions = options.length === 0
+    ? Array.from({ length: 5 }, (_, i) => ({ label: String(i + 1), score: String(i + 1) }))
+    : options;
+
+  return { qitemNo, question, options: finalOptions };
+};
 
 const InterestTest = () => {
   const navigate = useNavigate();
 
-  const questionSets = [
-    { title: "일반 흥미", questions: Array.from({ length: 20 }, (_, i) => `일반 흥미 문제 ${i + 1}`) },
-    { title: "일반 흥미", questions: Array.from({ length: 20 }, (_, i) => `일반 흥미 문제 ${i + 21}`) },
-    { title: "일반 흥미", questions: Array.from({ length: 20 }, (_, i) => `일반 흥미 문제 ${i + 41}`) },
-    { title: "선호 직업", questions: Array.from({ length: 20 }, (_, i) => `선호 직업 문제 ${i + 61}`) },
-    { title: "선호 직업", questions: Array.from({ length: 20 }, (_, i) => `선호 직업 문제 ${i + 81}`) },
-    { title: "선호 직업", questions: Array.from({ length: 20 }, (_, i) => `선호 직업 문제 ${i + 101}`) },
-  ];
-
+  const [allQuestions, setAllQuestions] = useState([]);
   const [page, setPage] = useState(0);
-  const questions = questionSets[page].questions;
-  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+  const [answers, setAnswers] = useState([]);
   const questionRefs = useRef([]);
 
   useEffect(() => {
-    setAnswers(Array(questions.length).fill(null));
-  }, [page]);
+    const fetchQuestions = async () => {
+      try {
+        const url = `${API_BASE}/api/interest/questions?q=34`;
+        const res = await axios.get(url);
 
-  const handleSelect = (qIdx, value) => {
+        console.log('[interest raw keys]', Object.keys(res.data || {}));
+        console.log('[interest raw preview]', safeJson(res.data, 1500));
+
+        // 대표 후보
+        const primaryCandidates = [];
+        if (Array.isArray(res.data?.result?.questions)) primaryCandidates.push({ path: '$.result.questions', arr: res.data.result.questions });
+        if (Array.isArray(res.data?.RESULT)) primaryCandidates.push({ path: '$.RESULT', arr: res.data.RESULT });
+
+        // 후보다 없으면 깊이 탐색
+        const discovered = findQuestionArrays(res.data);
+        const candidates = [...primaryCandidates, ...discovered];
+
+        if (!candidates.length) {
+          alert('문항 파싱 결과가 0개입니다. 콘솔의 [interest raw preview]를 확인하세요.');
+          setAllQuestions([]);
+          return;
+        }
+
+        // 가장 긴 배열 사용
+        candidates.sort((a, b) => (b.arr?.length || 0) - (a.arr?.length || 0));
+        const picked = candidates[0];
+        console.log('[interest] picked path:', picked.path, 'count:', picked.arr.length);
+
+        // 포맷 감지 후 정규화
+        const first = picked.arr[0] || {};
+        const isV2 = 'no' in first || 'choices' in first;
+        const normalized = (isV2 ? picked.arr.map(normalizeV2Item) : picked.arr.map(normalizeV1Item))
+          .filter(q => q.qitemNo && q.question && q.options.length > 0);
+
+        console.log('[interest normalized count]', normalized.length);
+        if (normalized.length === 0) {
+          alert('문항 파싱 결과가 0개입니다. 콘솔의 [interest raw preview]를 확인하세요.');
+        }
+
+        setAllQuestions(normalized);
+      } catch (err) {
+        console.log('fetch error:', err?.response?.status, err?.response?.data || err.message);
+        alert('질문 불러오기에 실패했습니다.');
+      }
+    };
+    fetchQuestions();
+  }, []);
+
+  const pageQuestions = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return allQuestions.slice(start, end);
+  }, [allQuestions, page]);
+
+  useEffect(() => {
+    if (allQuestions.length === 0) return;
+    setAnswers(Array(pageQuestions.length).fill(null));
+    questionRefs.current = [];
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page, allQuestions.length]);
+
+  if (allQuestions.length === 0) {
+    return (
+      <div className="interest-container">
+        <div className="questions-wrapper">문항을 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  const handleSelect = (qIdx, optIdx) => {
     const newAnswers = [...answers];
-    newAnswers[qIdx] = value;
+    newAnswers[qIdx] = optIdx;
     setAnswers(newAnswers);
+
+    const q = pageQuestions[qIdx];
+    const picked = q.options[optIdx];
+    if (!picked) return;
+
+    const mapKey = 'interestAnswersV2';
+    const prev = JSON.parse(localStorage.getItem(mapKey) || '{}');
+    prev[q.qitemNo] = picked.score; // { "1": "1".."5" }
+    localStorage.setItem(mapKey, JSON.stringify(prev));
   };
 
-  const checkUnansweredAndScroll = () => {
-    const unansweredIndex = answers.findIndex(ans => ans === null);
-    if (unansweredIndex !== -1) {
-      window.alert(`${unansweredIndex + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`);
-      questionRefs.current[unansweredIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const checkUnansweredAndGo = () => {
+    const idx = answers.findIndex(v => v === null);
+    if (idx !== -1) {
+      alert(`${idx + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`);
+      questionRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (page < Math.ceil(allQuestions.length / PAGE_SIZE) - 1) {
+      setPage(p => p + 1);
     } else {
-      if (page < questionSets.length - 1) {
-        setPage(page + 1);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
-        // 마지막 페이지면 다음 페이지(interesttestpage7)로 이동
-        navigate('/interesttestpage7');
-      }
+      navigate('/interesttestpage7');
     }
   };
 
@@ -60,25 +219,29 @@ const InterestTest = () => {
       </div>
 
       <div className="questions-wrapper">
-        <h3>{questionSets[page].title} 페이지</h3>
+        <h3>{`페이지 ${page + 1}`}</h3>
         <p className="small-guide">각 항목을 잘 읽고 자신에게 해당하는 정도를 선택해주세요.</p>
-        <hr></hr>
-        {questions.map((q, idx) => (
-          <div 
-            key={idx} 
+        <hr />
+
+        {pageQuestions.map((q, idx) => (
+          <div
+            key={q.qitemNo}
             className="question-block"
-            ref={el => questionRefs.current[idx] = el}
+            ref={el => (questionRefs.current[idx] = el)}
           >
-            <div className="question-text">{idx + 1}. {q}</div>
+            <div className="question-text">
+              {idx + 1}. {q.question}
+            </div>
+
             <div className="circle-options">
-              {[1,2,3,4,5].map((value, i) => (
-                <div key={value} className="circle-container">
-                  <div 
-                    className={`circle ${answers[idx] === value ? 'selected' : ''}`}
-                    onClick={() => handleSelect(idx, value)}
-                  ></div>
+              {q.options.map((opt, i) => (
+                <div key={i} className="circle-container">
+                  <div
+                    className={`circle ${answers[idx] === i ? 'selected' : ''}`}
+                    onClick={() => handleSelect(idx, i)}
+                  />
                   {i === 0 && <div className="circle-label">〈 매우 싫어한다</div>}
-                  {i === 4 && <div className="circle-label">매우 좋아한다 〉</div>}
+                  {i === q.options.length - 1 && <div className="circle-label">매우 좋아한다 〉</div>}
                 </div>
               ))}
             </div>
@@ -86,9 +249,11 @@ const InterestTest = () => {
         ))}
 
         <div className="button-group">
-          <button className="save-button">임시 저장</button>
-          <button className="next-button" onClick={checkUnansweredAndScroll}>
-            다음 페이지 &gt;
+          <button className="save-button" onClick={() => alert('임시 저장되었습니다. (브라우저 저장)')}>
+            임시 저장
+          </button>
+          <button className="next-button" onClick={checkUnansweredAndGo}>
+            {page < Math.ceil(allQuestions.length / PAGE_SIZE) - 1 ? '다음 페이지 >' : '7페이지로 >'}
           </button>
         </div>
       </div>
