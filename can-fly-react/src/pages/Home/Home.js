@@ -30,7 +30,6 @@ const Home = () => {
   // 로그아웃 처리 함수
   const handleLogout = () => {
     removeCookie("accessToken", { path: "/" });
-    // 로그아웃 api 호출
     setIsLoggedIn(false);
   };
 
