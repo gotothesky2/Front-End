@@ -4,12 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const Login = ({ onLogin, isLoggedIn }) => {
   const userName = "사용자"; // 더미 사용자 이름, API로 대체 가능
-  const currentDate = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
+  
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
