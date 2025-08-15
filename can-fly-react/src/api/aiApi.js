@@ -46,4 +46,24 @@ export const aiGet = async (endpoint, params = {}, options = {}) => {
   return parse(res);
 };
 
+//PDF 업로드
+export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    const response = await ai.post(endpoint, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      ...options,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export default ai;
