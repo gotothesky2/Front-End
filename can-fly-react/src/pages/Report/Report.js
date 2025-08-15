@@ -1,4 +1,3 @@
-// src/pages/Report/Report.js
 import React, { useState, useEffect } from "react";
 import ReportFilter from "./ReportFilter";
 import ReportSidebar from "./ReportSidebar";
@@ -16,14 +15,13 @@ import { aiGet } from "../../api/aiApi";
 import AIconfig from "../../api/AIconfig";
 
 const Report = () => {
-  // 관심 학과/학교 분석 데이터 관리 (더미 혹은 fetch)
   const [interestData, setInterestData] = useState([]);
+  const [hmtId, setHmtId] = useState(null); // ★ hmtId 상태 추가
 
   useEffect(() => {
-    // TODO: 실제 API가 준비되면 아래 fetch를 사용하세요
-    fetchDiscussions();
+    fetchMyHmt(); // 흥미검사 목록/정보 가져오기
 
-    // 백엔드 준비 전에는 더미 데이터 세팅
+    // 임시 더미 데이터
     setInterestData([
       { school: "한국항공대학교", dept: "소프트웨어학과", rate: 89 },
       { school: "한국항공대학교", dept: "컴퓨터공학과", rate: 85 },
@@ -32,10 +30,18 @@ const Report = () => {
     ]);
   }, []);
 
-  const fetchDiscussions = async () => {
+  const fetchMyHmt = async () => {
     try {
-      const data = await aiGet(AIconfig.INTEREST.MY_HMT);
-      console.log("정보 조회 성공:", data);
+      const res = await aiGet(AIconfig.INTEREST.MY_HMT);
+      console.log("정보 조회 성공:", res);
+
+      // res.data가 배열인지 단건인지 확인 필요
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        // 예: 최근 항목 id 사용
+        setHmtId(res.data[0].id);
+      } else if (res.data?.id) {
+        setHmtId(res.data.id);
+      }
     } catch (error) {
       console.error("정보 조회 실패:", error);
       alert("정보 조회에 실패했습니다. 다시 시도해주세요.");
@@ -44,7 +50,6 @@ const Report = () => {
 
   return (
     <>
-      {/* 흰색 배경 영역 */}
       <div className="report-page-container">
         <div className="report-white-section">
           <div className="report-path-text">
@@ -58,68 +63,44 @@ const Report = () => {
         </div>
       </div>
 
-      {/* 회색 배경 영역 */}
       <div className="report-gray-section">
-        {/* 필터 전용 컨테이너 */}
         <div className="report-inner-container">
           <ReportFilter />
         </div>
 
-        {/* 메인 콘텐츠 컨테이너 */}
         <div className="report-inner-container report-content-layout">
           <ReportSidebar active="aptitude" />
-
           <div className="report-contents">
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "50px",
-                marginBottom: "10px",
-              }}
-            >
+            <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
               적성·흥미 검사 분석 결과
             </div>
 
             <div className="report-main-content">
               <section className="aptitude-section">
                 <div className="aptitude-section__chart">
-                  <AptitudeRadar />
+                  {/* hmtId가 있어야만 차트 렌더 */}
+                  {hmtId ? <AptitudeRadar hmtId={hmtId} /> : <div>검사 데이터 없음</div>}
                 </div>
                 <div className="aptitude-section__cards">
                   <RiaSecCards />
                 </div>
               </section>
+
               <ReportScatter />
               <AptitudeText />
 
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "50px",
-                  marginBottom: "10px",
-                }}
-              >
+              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
                 성적 추이
               </div>
               <ScoreTrend />
               <ScoreTrendText />
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "50px",
-                  marginBottom: "10px",
-                }}
-              >
+
+              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
                 관심 학과/학교 분석
               </div>
               <InterestChart interestData={interestData} />
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "50px",
-                  marginBottom: "10px",
-                }}
-              >
+
+              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
                 종합 분석
               </div>
               <ComprehensiveAnalysis />
@@ -132,3 +113,4 @@ const Report = () => {
 };
 
 export default Report;
+
