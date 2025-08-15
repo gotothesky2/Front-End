@@ -79,13 +79,15 @@ export default function AptitudeRadar({ hmtId }) {
 
   useEffect(() => {
     // hmtId가 아직 없다면(업로드 직후 생성 전 등) 로딩만 끄고 대기
+    
     if (!hmtId) { setLoading(false); return; }
 
     (async () => {
       try {
         setLoading(true);
         setErr('');
-        const result = await fetchInterestById(hmtId);
+        const result = await fetchInterestById(4);
+        console.log('...',result);
         const arr = toRiasecArray(result);
         setScores(arr);
       } catch (e) {
