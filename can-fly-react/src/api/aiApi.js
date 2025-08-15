@@ -40,11 +40,13 @@ const parse = (res) => {
   return res.data;
 };
 
+//GET
 export const aiGet = async (endpoint, params = {}, options = {}) => {
   const res = await ai.get(endpoint, { params, ...options });
   return parse(res);
 };
 
+//PDF 업로드
 export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
   try {
     const formData = new FormData();
@@ -62,5 +64,6 @@ export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
     throw error;
   }
 };
+
 
 export default ai;
