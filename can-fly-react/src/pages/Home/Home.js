@@ -31,23 +31,87 @@ const Home = () => {
   const handleLogout = () => {
     removeCookie("accessToken", { path: "/" });
     setIsLoggedIn(false);
+    setUserName("사용자");
   };
 
+  // 1) URL에서 accessToken 회수 → 쿠키 저장
+  // (요청에 따라 URL 정리/토큰 가리기는 하지 않습니다.)
   useEffect(() => {
     const url = window.location.href; // 현재 브라우저 주소
-    const params = new URLSearchParams(new URL(url).search);
+    const parsed = new URL(url);
+    const params = new URLSearchParams(parsed.search);
     const accessToken = params.get("accessToken");
 
-    console.log("???", accessToken);
-
     if (accessToken) {
+      // 로그인 상태 설정
       setIsLoggedIn(true);
+
+      // 쿠키 저장 (7일)
       setCookie("accessToken", accessToken, {
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
       });
+
+      // ⛔️ 토큰을 URL에서 제거하지 않습니다. (replaceState 제거)
+    } else if (cookies.accessToken) {
+      // 이미 쿠키에 토큰이 있으면 로그인 유지
+      setIsLoggedIn(true);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 최초 1회
+
+  // 2) 쿠키의 토큰이 생기거나 로그인 상태가 바뀌면 /auth/me로 이름 조회
+  useEffect(() => {
+    const token = cookies.accessToken;
+    if (!isLoggedIn || !token) return;
+
+    let ignore = false;
+
+    const fetchMe = async () => {
+      try {
+        // config.API_URL이 있다면 사용, 없으면 서버 기본값
+        const base =
+          (config && (config.API_URL || config.API_BASE_URL)) ||
+          "http://canfly.ap-northeast-2.elasticbeanstalk.com";
+
+        const res = await fetch(`${base}/auth/me`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        if (ignore) return;
+
+        // 백엔드 응답 필드명에 맞춰 이름 추출 (여러 케이스 대비)
+        const name =
+          data?.name ||
+          data?.username ||
+          data?.nickname ||
+          data?.nickName ||
+          data?.user?.name ||
+          "사용자";
+
+        setUserName(name);
+      } catch (err) {
+        console.error("내 정보 조회 실패:", err);
+        // 실패 시 처리 필요하면 아래 주석 해제
+        // removeCookie("accessToken", { path: "/" });
+        // setIsLoggedIn(false);
+        // setUserName("사용자");
+      }
+    };
+
+    fetchMe();
+    return () => {
+      ignore = true;
+    };
+  }, [isLoggedIn, cookies.accessToken, removeCookie]);
 
   return (
     <div className="home-container">
@@ -55,7 +119,8 @@ const Home = () => {
       <Banner />
       <div className="home-content">
         <Main isLoggedIn={isLoggedIn} />
-        <Login onLogin={handleLogin} isLoggedIn={isLoggedIn} />
+        {/* userName을 Login으로 전달 */}
+        <Login onLogin={handleLogin} isLoggedIn={isLoggedIn} userName={userName} />
       </div>
     </div>
   );

@@ -1,10 +1,8 @@
 // src/api/client.js
-//성적입력(학생부 성적)에서 쓰이는 것
 import axios from 'axios';
-import config from '../config';
 
 const client = axios.create({
-  baseURL: 'http://canfly.ap-northeast-2.elasticbeanstalk.com', // "http://canfly.ap-northeast-2.elasticbeanstalk.com"
+  baseURL: 'http://canfly.ap-northeast-2.elasticbeanstalk.com',
   timeout: 10000,
 });
 
