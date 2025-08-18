@@ -1,20 +1,47 @@
-import React from "react";
+// src/pages/Mypage.jsx
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Mypage.css";
+import { fetchMe } from "../../api/client"; // /auth/me 호출 헬퍼
 
 const LINKS = {
-  aptitudeResult: "/TestResult",         // 적성 검사 결과
-  scoresHistory: "/GradeInput",          // 성적 입력 내역
-  departments: "/Departmentselection",   // 관심 분야/학과 선택
-  reports: "/ReportOverview",            // 레포트 모아보기
-  tokenCharge: "/TokenCharge",           // 토큰 충전
+  aptitudeResult: "/TestResult",
+  scoresHistory: "/GradeInput",
+  departments: "/Departmentselection",
+  reports: "/ReportOverview",
+  tokenCharge: "/TokenCharge",
 };
 
+const cleanName = (raw) =>
+  String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim();
+
 const Mypage = () => {
+  const [profile, setProfile] = useState({
+    name: "사용자",
+    email: "unknown@example.com",
+  });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetchMe();
+        const data = res?.data || {};
+
+        setProfile({
+          name: cleanName(data.name),
+          email: data.email || "unknown@example.com",
+        });
+      } catch (err) {
+        console.error("프로필 불러오기 실패:", err);
+      }
+    };
+    loadProfile();
+  }, []);
+
   return (
     <div className="mypage-container">
       <div className="mypage-cards">
-        {/* 첫 번째 줄 - 텍스트만 링크 */}
+        {/* 첫 번째 줄 */}
         <div className="mypage-card">
           <Link to={LINKS.aptitudeResult} className="mypage-card-title-link">
             적성 검사 결과 &gt;
@@ -103,10 +130,10 @@ const Mypage = () => {
         <div className="mypage-avatar">
           <img src={`${process.env.PUBLIC_URL}/img/image 6.jpg`} alt="프로필" />
         </div>
-        <div className="mypage-name">전성환 님</div>
+        <div className="mypage-name">{profile.name} 님</div>
         <div className="mypage-info">· 고등학교: 멋사고등학교</div>
         <div className="mypage-info">· 학년: 3학년 2학기</div>
-        <div className="mypage-info">· Email: tgidgks@naver.com</div>
+        <div className="mypage-info">· Email: {profile.email}</div>
         <div className="mypage-info">· 생일: 2001.01.30</div>
         <button className="mypage-edit-btn">개인정보 수정</button>
       </div>

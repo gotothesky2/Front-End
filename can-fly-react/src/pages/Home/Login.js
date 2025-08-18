@@ -1,10 +1,9 @@
+// src/pages/Login.jsx
 import React from "react";
 import "../../styles/Login.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const Login = ({ onLogin, isLoggedIn }) => {
-  const userName = "사용자"; // 더미 사용자 이름, API로 대체 가능
-  
+const Login = ({ onLogin, isLoggedIn, userName }) => {
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
@@ -38,6 +37,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
     );
   }
 
+  // 로그인 상태: 실제 사용자 이름 표시
   return (
     <div className="profile-card-container">
       <div className="profile-card">
@@ -49,7 +49,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
             />
           </div>
           <div className="profile-details">
-            <div className="profile-name">전성환 님</div>
+            <div className="profile-name">{userName} 님</div>
             <div className="profile-row-wrapper">
               <div className="profile-row">
                 <img
@@ -80,7 +80,6 @@ const Login = ({ onLogin, isLoggedIn }) => {
         </div>
 
         <div className="profile-bottom">
-          {/* 충전하기 -> /TokenChargePage 링크로 변경 */}
           <Link to="/TokenCharge" className="profile-btn left">
             충전하기
           </Link>
