@@ -1,3 +1,18 @@
+
+@font-face {
+  font-family: 'Kakaobold';
+  src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoExtra';
+  src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoRegular';
+  src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
 /* 전체 컨테이너 */
 .mypage-container {
   display: flex;
@@ -179,3 +194,7 @@
   font-size: 1rem;
   cursor: pointer;
 }
+
+
+
+
