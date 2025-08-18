@@ -16,8 +16,11 @@ const DataLabelPlugin = {
     const ds = chart.data.datasets[0];
     if (!meta?.data || !ds?.data) return;
     meta.data.forEach((point, idx) => {
+      if (!point || typeof point.getProps !== 'function') return;
       const val = `${ds.data[idx]}%`;
-      const { x, y } = point.getProps(['x', 'y'], true);
+      const props = point.getProps?.(['x','y'], true);
+      if (!props) return;
+      const { x, y } = props;
       ctx.save();
       ctx.fillStyle = '#333';
       ctx.font = 'bold 12px sans-serif';

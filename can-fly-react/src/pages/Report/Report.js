@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReportFilter from "./ReportFilter";
 import ReportSidebar from "./ReportSidebar";
 import AptitudeRadar from "./AptitudeRadar";
@@ -13,13 +13,37 @@ import ComprehensiveAnalysis from "./ComprehensiveAnalysis";
 
 import { aiGet } from "../../api/aiApi";
 import AIconfig from "../../api/AIconfig";
+import { Link } from "react-router-dom";
 
 const Report = () => {
+     // ▼ 각 섹션을 가리킬 ref
+   const aptitudeRef = useRef(null);
+   const gradesRef   = useRef(null);
+   const interestRef = useRef(null);
+   const summaryRef  = useRef(null);
+
+   // 고정 헤더가 있다면 살짝 위로 여백을 두고 스크롤하려면 offset 사용
+   const scrollToSection = (id) => {
+     const map = {
+       aptitude: aptitudeRef,
+       grades:   gradesRef,
+       interest: interestRef,
+       summary:  summaryRef,
+     };
+     const el = map[id]?.current;
+     if (!el) return;
+      // 고정 헤더 + 여백만큼 보정(필요에 따라 100~160px 사이로 조정)
+     const HEADER_OFFSET = 120;
+     const top = el.getBoundingClientRect().top + window.pageYOffset - HEADER_OFFSET;
+     window.scrollTo({ top, behavior: "smooth" });
+   };
   const [interestData, setInterestData] = useState([]);
   const [hmtId, setHmtId] = useState(null); // ★ hmtId 상태 추가
+  const [cstId, setCstId] = useState(null); // ★ cstId 상태 추가
 
   useEffect(() => {
     fetchMyHmt(); // 흥미검사 목록/정보 가져오기
+    fetchMyCst(); // 적성검사 목록/정보 가져오기
 
     // 임시 더미 데이터
     setInterestData([
@@ -43,8 +67,24 @@ const Report = () => {
         setHmtId(res.data.id);
       }
     } catch (error) {
-      console.error("정보 조회 실패:", error);
-      alert("정보 조회에 실패했습니다. 다시 시도해주세요.");
+      console.error("흥미검사 조회 실패:", error);
+    }
+  };
+
+  const fetchMyCst = async () => {
+    try {
+      const res = await aiGet(AIconfig.APTITUDE.MY_CST);
+      console.log("정보 조회 성공:", res);
+
+      // res.data가 배열인지 단건인지 확인 필요
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        // 예: 최근 항목 id 사용
+        setCstId(res.data[0].id);
+      } else if (res.data?.id) {
+        setCstId(res.data.id);
+      }
+    } catch (error) {
+      console.error("적성검사 조회 실패:", error);
     }
   };
 
@@ -53,7 +93,7 @@ const Report = () => {
       <div className="report-page-container">
         <div className="report-white-section">
           <div className="report-path-text">
-            <span className="report-path-main">마이페이지</span>
+            <Link to="/Mypage" className="report-path-main report-path-link">마이페이지</Link>
             <span className="report-path-arrow">&nbsp;&gt;&nbsp;</span>
             <span className="report-path-sub">레포트 모아보기</span>
           </div>
@@ -69,39 +109,55 @@ const Report = () => {
         </div>
 
         <div className="report-inner-container report-content-layout">
-          <ReportSidebar active="aptitude" />
+          <ReportSidebar initialActive="aptitude" onJump={scrollToSection} />
           <div className="report-contents">
+                 {/* 적성·흥미 검사 분석 결과 */}
+          <div ref={aptitudeRef} style={{ scrollMarginTop: '140px' }}>
             <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
               적성·흥미 검사 분석 결과
             </div>
-
-            <div className="report-main-content">
+          </div>
+          <div className="report-main-content">
+           
               <section className="aptitude-section">
                 <div className="aptitude-section__chart">
                   {/* hmtId가 있어야만 차트 렌더 */}
-                  {hmtId ? <AptitudeRadar hmtId={hmtId} /> : <div>검사 데이터 없음</div>}
+                  {hmtId ? <AptitudeRadar hmtId={hmtId} /> : <div>흥미검사 데이터 없음</div>}
                 </div>
                 <div className="aptitude-section__cards">
-                  <RiaSecCards />
+                  {hmtId ? <RiaSecCards hmtId={hmtId} /> : null}
                 </div>
               </section>
 
-              <ReportScatter />
+              {cstId ? <ReportScatter cstId={cstId} /> : <div className="reportscatter-wrapper">적성검사 데이터 없음</div>}
               <AptitudeText />
 
-              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
-                성적 추이
+                            {/* 성적 추이 */}
+              <div ref={gradesRef} style={{ scrollMarginTop: '140px' }}>
+                <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
+                  성적 추이
+                </div>
               </div>
+
+              
               <ScoreTrend />
               <ScoreTrendText />
 
-              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
-                관심 학과/학교 분석
+                            {/* 관심 학과·학교 분석 */}
+              <div ref={interestRef} style={{ scrollMarginTop: '140px' }}>
+                <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
+                  관심 학과/학교 분석
+                </div>
               </div>
+
+              
               <InterestChart interestData={interestData} />
 
-              <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
-                종합 분석
+                            {/* 종합 분석 */}
+              <div ref={summaryRef} style={{ scrollMarginTop: '140px' }}>
+                <div style={{ fontWeight: "bold", fontSize: "50px", marginBottom: "10px" }}>
+                  종합 분석
+                </div>
               </div>
               <ComprehensiveAnalysis />
             </div>

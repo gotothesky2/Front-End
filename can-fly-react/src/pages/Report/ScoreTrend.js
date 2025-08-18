@@ -11,9 +11,8 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import '../../styles/ScoreTrend.css';  // 스타일은 자유롭게 커스터마이징
+import '../../styles/ScoreTrend.css';
 
-// Chart.js에 필요한 컨트롤러·엘리먼트 등록
 Chart.register(
   LineController,
   LineElement,
@@ -27,8 +26,9 @@ Chart.register(
 
 export default function ScoreTrend() {
   const canvasRef = useRef(null);
-  const [mode, setMode] = useState('grade');       // 'grade' | 'mock'
-  const [subject, setSubject] = useState('국어');  // 모의고사 과목
+  const chartRef = useRef(null);
+  const [mode, setMode] = useState('grade');
+  const [subject, setSubject] = useState('국어');
 
   // 더미 데이터
   const gradeData = [
@@ -49,56 +49,95 @@ export default function ScoreTrend() {
       { exam: '3학년 9월', pct: 94 },
     ],
     수학: [
-        { exam: '1학년 6월', pct: 50 },
-        { exam: '1학년 9월', pct: 80 },
-        { exam: '2학년 6월', pct: 9 },
-        { exam: '2학년 9월', pct: 8 },
-        { exam: '3학년 6월', pct: 15 },
-        { exam: '3학년 9월', pct: 93 },
+      { exam: '1학년 6월', pct: 50 },
+      { exam: '1학년 9월', pct: 80 },
+      { exam: '2학년 6월', pct: 9 },
+      { exam: '2학년 9월', pct: 8 },
+      { exam: '3학년 6월', pct: 15 },
+      { exam: '3학년 9월', pct: 93 },
     ],
     영어: [
-        { exam: '1학년 6월', pct: 81 },
-        { exam: '1학년 9월', pct: 42 },
-        { exam: '2학년 6월', pct: 13 },
-        { exam: '2학년 9월', pct: 54 },
-        { exam: '3학년 6월', pct: 34 },
-        { exam: '3학년 9월', pct: 99 },
+      { exam: '1학년 6월', pct: 81 },
+      { exam: '1학년 9월', pct: 42 },
+      { exam: '2학년 6월', pct: 13 },
+      { exam: '2학년 9월', pct: 54 },
+      { exam: '3학년 6월', pct: 34 },
+      { exam: '3학년 9월', pct: 99 },
     ],
     탐구1: [
-        { exam: '1학년 6월', pct: 20 },
-        { exam: '1학년 9월', pct: 40 },
-        { exam: '2학년 6월', pct: 60 },
-        { exam: '2학년 9월', pct: 80 },
-        { exam: '3학년 6월', pct: 90 },
-        { exam: '3학년 9월', pct: 94 },
+      { exam: '1학년 6월', pct: 20 },
+      { exam: '1학년 9월', pct: 40 },
+      { exam: '2학년 6월', pct: 60 },
+      { exam: '2학년 9월', pct: 80 },
+      { exam: '3학년 6월', pct: 90 },
+      { exam: '3학년 9월', pct: 94 },
     ],
-    탐구2: [      
-        { exam: '1학년 6월', pct: 30 },
-        { exam: '1학년 9월', pct: 20 },
-        { exam: '2학년 6월', pct: 10 },
-        { exam: '2학년 9월', pct: 50 },
-        { exam: '3학년 6월', pct: 30 },
-        { exam: '3학년 9월', pct: 40 },
+    탐구2: [
+      { exam: '1학년 6월', pct: 30 },
+      { exam: '1학년 9월', pct: 20 },
+      { exam: '2학년 6월', pct: 10 },
+      { exam: '2학년 9월', pct: 50 },
+      { exam: '3학년 6월', pct: 30 },
+      { exam: '3학년 9월', pct: 40 },
     ],
   };
 
+  // ▼ 라벨에 붙일 접미사 선택
+  //  - '%' 없애려면: const SUFFIX = '';
+  //  - '점'을 붙이려면: const SUFFIX = '점';
+  //  - 모드별로 다르게: 예) 학년별=점, 모의고사=없음
+  const SUFFIX = '';
+
+  // ▼ 이 차트 전용 라벨 플러그인 (전역 DataLabelPlugin 차단용)
+  const pointValueLabels = {
+    id: 'pointValueLabels',
+    afterDatasetsDraw(chart) {
+      try {
+        const ds0 = chart.data?.datasets?.[0];
+        const meta = chart.getDatasetMeta?.(0);
+        const ctx = chart.ctx;
+        if (!ds0 || !meta?.data?.length || !ctx) return;
+
+        meta.data.forEach((pt, i) => {
+          if (!pt || typeof pt.getProps !== 'function') return;
+          const { x, y } = pt.getProps(['x', 'y']); // final=true 사용 안 함(언마운트 안전)
+          if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+          const val = Number(ds0.data?.[i] ?? 0);
+          ctx.save();
+          ctx.font = '12px sans-serif';
+          ctx.fillStyle = '#333';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(`${Number.isFinite(val) ? val : 0}${SUFFIX}`, x, y - 8);
+          ctx.restore();
+        });
+      } catch {
+        /* 언마운트 경합 시 조용히 무시 */
+      }
+    }
+  };
+
   useEffect(() => {
-    const ctx = canvasRef.current.getContext('2d');
-    // 기존 차트 파괴
-    if (canvasRef.current._chart) {
-      canvasRef.current._chart.destroy();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
     }
 
-    // 라벨과 값 선택
+    const ctx = canvas.getContext('2d');
+
     const labels = mode === 'grade'
       ? gradeData.map(d => d.term)
       : mockData[subject].map(d => d.exam);
+
     const dataValues = mode === 'grade'
       ? gradeData.map(d => d.score)
       : mockData[subject].map(d => d.pct);
 
-    // 차트 인스턴스 생성
-    canvasRef.current._chart = new Chart(ctx, {
+    chartRef.current = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
@@ -114,29 +153,30 @@ export default function ScoreTrend() {
           borderWidth: 2
         }]
       },
+      plugins: [pointValueLabels], // ★ 로컬 라벨러 사용
       options: {
         responsive: true,
-        scales: {
-          y: { min: 0, max: 100 }
-        },
+        animation: false,
+        scales: { y: { min: 0, max: 100 } },
         plugins: {
           legend: { display: false },
-          title: {
-            display: false
-          }
+          // ★ 전역 라벨 플러그인(레이더용) 무력화
+          DataLabelPlugin: false,
+          datalabels: false
         }
       }
     });
 
-    // 언마운트 시 파괴
     return () => {
-      canvasRef.current._chart.destroy();
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
     };
-  }, [mode, subject]);
+  }, [mode, subject]); // SUFFIX는 mode로부터 계산되므로 별도 dep 필요 없음
 
   return (
     <div className="score-trend">
-      {/* 상단 탭 */}
       <div className="score-trend__tabs">
         <button
           className={mode === 'grade' ? 'active' : ''}
@@ -152,10 +192,8 @@ export default function ScoreTrend() {
         </button>
       </div>
 
-      {/* 차트 캔버스 */}
-      <canvas ref={canvasRef}></canvas>
+      <canvas ref={canvasRef} />
 
-      {/* 하단 과목/전교과 탭 */}
       <div className="score-trend__subs">
         {mode === 'grade'
           ? <button className="active">전교과</button>
@@ -173,3 +211,5 @@ export default function ScoreTrend() {
     </div>
   );
 }
+
+

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import '../../styles/ReportSidebar.css'
 
-export default function ReportSidebar({ initialActive = 'aptitude' }) {
+export default function ReportSidebar({ initialActive = 'aptitude', onJump }) {
   const [active, setActive] = useState(initialActive)
 
   const items = [
@@ -23,8 +23,7 @@ export default function ReportSidebar({ initialActive = 'aptitude' }) {
             }
             onClick={() => {
               setActive(item.id)  // 클릭한 id를 active로 변경
-              document.getElementById(item.id)
-                      ?.scrollIntoView({ behavior: 'smooth',block: 'start' })
+              onJump?.(item.id)
             }}
           >
             {item.label}

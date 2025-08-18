@@ -1,75 +1,64 @@
+// src/pages/Report/ReportScatter.js (핵심만)
 import React, { useEffect, useMemo, useState } from 'react';
 import { Scatter } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  LinearScale,
-  CategoryScale,
-  PointElement,
-  Tooltip,
-  Legend,
+  Chart as ChartJS, LinearScale, CategoryScale, PointElement, Tooltip, Legend,
 } from 'chart.js';
 import '../../styles/ReportScatter.css';
-
 import { fetchAptitudeById, toSkillScoreList } from '../../services/aptitude';
 
-// 라벨 플러그인: x값(점수)만 숫자로 출력
-const scatterLabelPlugin = {
-  id: 'scatterLabelPlugin',
-  afterDraw(chart) {
-    if (chart.config.type !== 'scatter') return;
-    const ctx = chart.ctx;
-    const meta = chart.getDatasetMeta(0);
-    const values = chart.data.datasets[0].data;
+ const scatterLabelPlugin = {
+   id: 'scatterLabelPlugin',
+   // 언마운트 타이밍에 좀 더 안전한 훅
+   afterDatasetsDraw(chart) {
+     try {
+       if (!chart || chart.config?.type !== 'scatter') return;
+       const ctx = chart.ctx;
+      const ds0 = chart.data?.datasets?.[0];
+       const meta = chart.getDatasetMeta ? chart.getDatasetMeta(0) : null;
+       if (!ctx || !ds0 || !meta?.data?.length) return;
 
-    meta.data.forEach((point, idx) => {
-      const xVal = Number(values[idx]?.x ?? 0);
-      const { x, y } = point.getProps(['x', 'y'], true);
-      ctx.save();
-      ctx.font = '12px sans-serif';
-      ctx.fillStyle = '#333';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${xVal}%`, x + 6, y);
-      ctx.restore();
-    });
-  }
-};
+       meta.data.forEach((point, idx) => {
+         // point 또는 getProps가 사라졌을 수 있음
+         if (!point || typeof point.getProps !== 'function') return;
+         const v = ds0.data?.[idx];
+         const xVal = Number(v?.x ?? 0);
+         const props = point.getProps?.(['x', 'y'], true);
+         if (!props) return;
+         const { x, y } = props;
+         if (!isFinite(x) || !isFinite(y)) return;
+
+         ctx.save();
+         ctx.font = '12px sans-serif';
+         ctx.fillStyle = '#333';
+         ctx.textAlign = 'left';
+         ctx.textBaseline = 'middle';
+        ctx.fillText(`${isFinite(xVal) ? xVal.toFixed(1) : '0.0'}%`, x + 6, y);
+         ctx.restore();
+       });
+     } catch (e) {
+       // 언마운트 중 race condition 방지: 조용히 무시
+     }
+   }
+ };
 
 ChartJS.register(LinearScale, CategoryScale, PointElement, Tooltip, Legend);
 
 export default function ReportScatter({ cstId }) {
-  const [rows, setRows] = useState([]); // [{skill, score}]
+  const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
   useEffect(() => {
-    // 개발 중 cstId가 없으면 더미로 모양만 확인(완성 후 제거 가능)
-    if (!cstId) {
-      setRows([
-        { skill: '신체·운동능력', score: 3.2 },
-        { skill: '손재능',        score: 3.2 },
-        { skill: '공간지각력',    score: 47.2 },
-        { skill: '음악능력',      score: 64.9 },
-        { skill: '창의력',        score: 62.4 },
-        { skill: '언어능력',      score: 62.3 },
-        { skill: '수리·논리력',   score: 8.6 },
-        { skill: '자기성찰능력',  score: 26.3 },
-        { skill: '대인관계능력',  score: 50.8 },
-        { skill: '자연친화력',    score: 48.2 },
-        { skill: '예술시각능력',  score: 19.9 },
-      ]);
-      setLoading(false);
-      return;
-    }
-
+    if (!cstId) { setRows([]); setLoading(false); return; }
     (async () => {
       try {
         setLoading(true);
         setErr('');
-        const res = await fetchAptitudeById(cstId); // GET /cst/:id
-        setRows(toSkillScoreList(res));
+        const data = await fetchAptitudeById(cstId);   // { mathScore, ... }
+        setRows(toSkillScoreList(data));               // → [{ skill, score }]
       } catch (e) {
-        setErr(e?.response?.data?.message || '흥미검사 결과 불러오기 실패');
+        setErr(e?.response?.data?.message || '적성검사 결과 불러오기 실패');
       } finally {
         setLoading(false);
       }
@@ -79,7 +68,7 @@ export default function ReportScatter({ cstId }) {
   const data = useMemo(() => ({
     datasets: [{
       label: '능력 점수',
-      data: rows.map(d => ({ x: d.score, y: d.skill })), // x=숫자, y=문자열
+      data: rows.map(({ score, skill }) => ({ x: Number(score), y: String(skill) })),
       backgroundColor: '#0339A6',
       pointRadius: 6,
     }],
@@ -89,10 +78,10 @@ export default function ReportScatter({ cstId }) {
     responsive: true,
     maintainAspectRatio: false,
     layout: { padding: { top: 30, left: 10, right: 10 } },
+    animation: false,
     scales: {
       x: {
-        type: 'linear',
-        min: 0, max: 100,
+        type: 'linear', min: 0, max: 100,
         title: { display: true, text: 'Score', font: { size: 14 } },
         ticks: { stepSize: 20, font: { size: 12 } },
         grid: { color: '#eee', drawBorder: false },
@@ -106,12 +95,11 @@ export default function ReportScatter({ cstId }) {
       },
     },
     plugins: {
+      DataLabelPlugin: false,
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label(ctx) {
-            return `${ctx.raw.y}: ${ctx.raw.x}%`;
-          }
+          label: (ctx) => `${ctx.raw.y}: ${Number(ctx.raw.x).toFixed(1)}%`,
         }
       }
     }
@@ -126,6 +114,7 @@ export default function ReportScatter({ cstId }) {
     </div>
   );
 }
+
 
 
 
