@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Mypage.css";
-import { fetchMe } from "../../api/client"; // /auth/me 호출 헬퍼
+import { fetchMe, fetchTokenCount } from "../../api/client"; // 토큰 조회 헬퍼 추가
 
 const LINKS = {
   aptitudeResult: "/TestResult",
@@ -15,18 +15,25 @@ const LINKS = {
 const cleanName = (raw) =>
   String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim();
 
+// ✅ 학기 계산: 3~8월은 1학기, 나머지는 2학기
+const getSemester = () => {
+  const month = new Date().getMonth() + 1; // 1~12
+  return month >= 3 && month <= 7 ? "1학기" : "2학기";
+};
+
 const Mypage = () => {
   const [profile, setProfile] = useState({
     name: "사용자",
     email: "unknown@example.com",
   });
+  const [token, setToken] = useState(0);
+  const [semester] = useState(getSemester()); // 페이지 로드 시점 기준으로 고정
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const res = await fetchMe();
         const data = res?.data || {};
-
         setProfile({
           name: cleanName(data.name),
           email: data.email || "unknown@example.com",
@@ -35,7 +42,19 @@ const Mypage = () => {
         console.error("프로필 불러오기 실패:", err);
       }
     };
+
+    const loadToken = async () => {
+      try {
+        const { token, error } = await fetchTokenCount();
+        if (error) console.error("토큰 조회 실패:", error);
+        setToken(token);
+      } catch (err) {
+        console.error("토큰 불러오기 실패:", err);
+      }
+    };
+
     loadProfile();
+    loadToken();
   }, []);
 
   return (
@@ -99,7 +118,7 @@ const Mypage = () => {
               충전하기 &gt;
             </Link>
           </div>
-          <div className="mypage-token-value">100개</div>
+          <div className="mypage-token-value">{token}개</div>
         </div>
 
         <div className="mypage-card report">
@@ -132,7 +151,7 @@ const Mypage = () => {
         </div>
         <div className="mypage-name">{profile.name} 님</div>
         <div className="mypage-info">· 고등학교: 멋사고등학교</div>
-        <div className="mypage-info">· 학년: 3학년 2학기</div>
+        <div className="mypage-info">· 학년: 3학년 {semester}</div>
         <div className="mypage-info">· Email: {profile.email}</div>
         <div className="mypage-info">· 생일: 2001.01.30</div>
         <button className="mypage-edit-btn">개인정보 수정</button>
