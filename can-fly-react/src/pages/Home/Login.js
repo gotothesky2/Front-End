@@ -2,31 +2,33 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/Login.css";
 import { Link } from "react-router-dom";
-import { fetchTokenCount } from "../../api/client"; // ← 토큰 조회 헬퍼 불러오기
+import { fetchTokenCount, fetchSchoolGradeSex } from "../../api/client"; // ← 추가
 
 const Login = ({ onLogin, isLoggedIn, userName }) => {
   const [token, setToken] = useState(0);
-  const [semester, setSemester] = useState("1학기"); // 학기 상태 추가
+  const [semester, setSemester] = useState("1학기");
+  const [school, setSchool] = useState({ highschool: "", gradeNum: null }); // ← 고등학교/학년
 
   useEffect(() => {
     if (isLoggedIn) {
-      const load = async () => {
+      (async () => {
+        // 토큰
         const { token, error } = await fetchTokenCount();
-        if (error) {
-          console.error("토큰 조회 실패:", error);
-        }
-        setToken(token); // 기본적으로 0 토큰
-      };
-      load();
+        if (error) console.error("토큰 조회 실패:", error);
+        setToken(token);
+
+        // 고등학교/학년
+        const { ok, highschool, gradeNum, error: sErr } =
+          await fetchSchoolGradeSex();
+        if (!ok && sErr) console.error("학교/학년 조회 실패:", sErr);
+        setSchool({ highschool: highschool || "", gradeNum: gradeNum ?? null });
+      })();
     }
 
-    // 학기 계산 (3~8월: 1학기, 나머지: 2학기)
-    const month = new Date().getMonth() + 1; // 1~12월
-    if (month >= 3 && month <= 7) {
-      setSemester("1학기");
-    } else {
-      setSemester("2학기");
-    }
+    // 학기 계산 (3~7월: 1학기, 나머지: 2학기) — 기존 로직 유지
+    const month = new Date().getMonth() + 1;
+    if (month >= 3 && month <= 7) setSemester("1학기");
+    else setSemester("2학기");
   }, [isLoggedIn]);
 
   if (!isLoggedIn) {
@@ -62,7 +64,7 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
     );
   }
 
-  // 로그인 상태: 실제 사용자 이름 + 토큰 표시
+  // 로그인 상태
   return (
     <div className="profile-card-container">
       <div className="profile-card">
@@ -82,7 +84,7 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
                   alt="학교"
                   className="icon"
                 />
-                <span>멋사고등학교</span>
+                <span>{school.highschool || "고등학교 미입력"}고등학교</span>
               </div>
               <div className="profile-row">
                 <img
@@ -90,7 +92,9 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
                   alt="학년"
                   className="icon"
                 />
-                <span>3학년 {semester}</span>
+                <span>
+                  {school.gradeNum ?? "-"}학년 {semester}
+                </span>
               </div>
               <div className="profile-row">
                 <img

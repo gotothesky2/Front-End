@@ -7,17 +7,19 @@ const EduProfileModal = ({
   open,
   onClose,
   onSave,
-  defaultSchool = "",
-  defaultGrade = "",
+  defaultHighschool = "",
+  defaultGradeNum = "",
   defaultZipcode = "",
   defaultAddress = "",
   defaultAddressDetail = "",
+  defaultSex = "", // MAN/WOMAN
 }) => {
-  const [school, setSchool] = useState(defaultSchool);
-  const [grade, setGrade] = useState(defaultGrade);
+  const [highschool, setHighschool] = useState(defaultHighschool);
+  const [gradeNum, setGradeNum] = useState(defaultGradeNum);
   const [zipcode, setZipcode] = useState(defaultZipcode);
   const [address, setAddress] = useState(defaultAddress);
   const [addressDetail, setAddressDetail] = useState(defaultAddressDetail);
+  const [sex, setSex] = useState(defaultSex);
 
   const dialogRef = useRef(null);
 
@@ -26,19 +28,26 @@ const EduProfileModal = ({
   }, [open]);
 
   useEffect(() => {
-    // 모달 열릴 때 기본값 반영(부모에서 바뀔 수 있으니 동기화)
     if (!open) return;
-    setSchool(defaultSchool);
-    setGrade(defaultGrade);
+    setHighschool(defaultHighschool);
+    setGradeNum(defaultGradeNum);
     setZipcode(defaultZipcode);
     setAddress(defaultAddress);
     setAddressDetail(defaultAddressDetail);
-  }, [open, defaultSchool, defaultGrade, defaultZipcode, defaultAddress, defaultAddressDetail]);
+    setSex(defaultSex);
+  }, [
+    open,
+    defaultHighschool,
+    defaultGradeNum,
+    defaultZipcode,
+    defaultAddress,
+    defaultAddressDetail,
+    defaultSex,
+  ]);
 
   if (!open) return null;
 
   const handleSearchPostCode = () => {
-    // window.daum.Postcode는 index.html에 스크립트가 삽입되어 있어야 동작
     if (!window.daum || !window.daum.Postcode) {
       alert("우편번호 검색 스크립트가 로드되지 않았습니다.");
       return;
@@ -47,7 +56,6 @@ const EduProfileModal = ({
       oncomplete: function (data) {
         setZipcode(normalize(data.zonecode));
         setAddress(normalize(data.roadAddress || data.jibunAddress));
-        // 상세주소 포커스 주기
         setTimeout(() => {
           const el = document.getElementById("edu-address-detail");
           if (el) el.focus();
@@ -58,11 +66,12 @@ const EduProfileModal = ({
 
   const handleSubmit = () => {
     onSave?.({
-      school: normalize(school),
-      grade: normalize(grade),
+      highschool: normalize(highschool),
+      gradeNum: normalize(gradeNum),
       zipcode: normalize(zipcode),
       address: normalize(address),
       addressDetail: normalize(addressDetail),
+      sex: normalize(sex),
     });
     onClose?.();
   };
@@ -91,31 +100,55 @@ const EduProfileModal = ({
         </div>
 
         <div className="edu-body">
-          {/* 학력 */}
+          {/* 고등학교 */}
           <div className="edu-field">
             <input
               id="edu-school"
               className="edu-input"
               type="text"
-              value={school}
-              onChange={(e) => setSchool(e.target.value)}
-              placeholder=""
+              value={highschool}
+              onChange={(e) => setHighschool(e.target.value)}
             />
             <label className="edu-label" htmlFor="edu-school">고등학교</label>
-            
           </div>
 
+          {/* 학년 */}
           <div className="edu-field">
             <input
               id="edu-grade"
               className="edu-input"
               type="text"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              placeholder=""
+              value={gradeNum}
+              onChange={(e) => setGradeNum(e.target.value)}
             />
             <label className="edu-label" htmlFor="edu-grade">학년</label>
-            
+          </div>
+
+          {/* 성별 */}
+          <div className="edu-field">
+            <span className="edu-label">성별</span>
+            <div className="edu-radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="sex"
+                  value="MAN"
+                  checked={sex === "MAN"}
+                  onChange={(e) => setSex(e.target.value)}
+                />
+                남자(MAN)
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="sex"
+                  value="WOMAN"
+                  checked={sex === "WOMAN"}
+                  onChange={(e) => setSex(e.target.value)}
+                />
+                여자(WOMAN)
+              </label>
+            </div>
           </div>
 
           {/* 주소 */}
@@ -143,7 +176,6 @@ const EduProfileModal = ({
               type="text"
               value={address}
               readOnly
-              placeholder=""
             />
           </div>
 
