@@ -79,12 +79,12 @@ export const requestLogout = async () => {
 };
 
 /** 4) 프로필 수정 (PUT /users/me/profile)
- *    - 모달에서 넘어온 키(gradaeNum)를 서버 키(gradeNum)로 매핑
+ 
  *    - 성공: { ok:true, data }, 실패: { ok:false, error, status }
  */
 export const updateUserProfile = async ({
   highschool,
-  gradaeNum, // 로컬 키명
+  gradeNum, // 로컬 키명
   sex,
   zipcode,
   address,
@@ -93,7 +93,7 @@ export const updateUserProfile = async ({
   try {
     const payload = {
       highschool,
-      gradeNum: gradaeNum, // 서버 기대 키명
+      gradeNum: gradeNum, // 서버 기대 키명
       sex,
       zipcode,
       address,
