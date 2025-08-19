@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Mypage.css";
-import { fetchMe, fetchTokenCount } from "../../api/client"; // 토큰 조회 헬퍼 추가
+import { fetchMe, fetchTokenCount, fetchSchoolGradeSex } from "../../api/client"; // ← 고등학교/학년/성별 조회 추가
 
 const LINKS = {
   aptitudeResult: "/TestResult",
@@ -15,10 +15,18 @@ const LINKS = {
 const cleanName = (raw) =>
   String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim();
 
-// ✅ 학기 계산: 3~8월은 1학기, 나머지는 2학기
+// ✅ 학기 계산: 3~7월은 1학기, 나머지는 2학기
 const getSemester = () => {
   const month = new Date().getMonth() + 1; // 1~12
   return month >= 3 && month <= 7 ? "1학기" : "2학기";
+};
+
+// ✅ 성별 표시 매핑: 서버값(MAN/WOMAN 등) → 남자/여자
+const sexLabel = (s) => {
+  const v = String(s || "").toUpperCase();
+  if (v === "MAN" || v === "M") return "남자";
+  if (v === "WOMAN" || v === "FEMALE" || v === "W") return "여자";
+  return "미입력";
 };
 
 const Mypage = () => {
@@ -28,6 +36,11 @@ const Mypage = () => {
   });
   const [token, setToken] = useState(0);
   const [semester] = useState(getSemester()); // 페이지 로드 시점 기준으로 고정
+
+  // ← 여기 추가: 고등학교/학년/성별 상태
+  const [highschool, setHighschool] = useState("");
+  const [gradeNum, setGradeNum] = useState(null);
+  const [sex, setSex] = useState("");
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -53,8 +66,23 @@ const Mypage = () => {
       }
     };
 
+    // ← 여기 추가: 고등학교/학년/성별 조회
+    const loadSchool = async () => {
+      try {
+        const { ok, highschool, gradeNum, sex, error } =
+          await fetchSchoolGradeSex();
+        if (!ok) console.error("학교/학년/성별 조회 실패:", error);
+        setHighschool(highschool || "");
+        setGradeNum(gradeNum ?? null);
+        setSex(sex || "");
+      } catch (err) {
+        console.error("학교/학년/성별 불러오기 실패:", err);
+      }
+    };
+
     loadProfile();
     loadToken();
+    loadSchool();
   }, []);
 
   return (
@@ -150,10 +178,13 @@ const Mypage = () => {
           <img src={`${process.env.PUBLIC_URL}/img/image 6.jpg`} alt="프로필" />
         </div>
         <div className="mypage-name">{profile.name} 님</div>
-        <div className="mypage-info">· 고등학교: 멋사고등학교</div>
-        <div className="mypage-info">· 학년: 3학년 {semester}</div>
+        {/* ← 연결: 고등학교 / 학년 */}
+        <div className="mypage-info">· 고등학교: {highschool || "미입력"}고등학교</div>
+        <div className="mypage-info">
+          · 학년: {gradeNum ?? "-"}학년 {semester}
+        </div>
         <div className="mypage-info">· Email: {profile.email}</div>
-        <div className="mypage-info">· 생일: 2001.01.30</div>
+        <div className="mypage-info">· 성별: {sexLabel(sex)}</div>
         <button className="mypage-edit-btn">개인정보 수정</button>
       </div>
     </div>

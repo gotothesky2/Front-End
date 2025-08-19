@@ -7,15 +7,14 @@ import Login from "./Login";
 import Header from "../../components/Header";
 import { useCookies } from "react-cookie";
 
-import config from "../../config"; // (쓰지 않아도 되지만 남겨둠)
+import config from "../../config"; // 사용하지 않으면 삭제해도 무방
 import EduProfileModal from "../../components/EduProfileModal";
 
-// ✅ axios 헬퍼로 /auth/me 호출 (Mypage가 쓰던 것과 동일한 경로)
-// 만약 경로가 다르면 "../../api/client"에서 fetchMe를 export 하도록 해주세요.
-import { fetchMe } from "../../api/client";
+import { fetchMe, requestLogout, updateUserProfile } from "../../api/client";
 
 const normalizeToken = (t) => (t ? t.replace(/^Bearer\s+/i, "").trim() : "");
-const cleanName = (raw) => (String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim() || "사용자");
+const cleanName = (raw) =>
+  (String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim() || "사용자");
 
 const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,8 +25,7 @@ const Home = () => {
   const handleLogin = async () => {
     try {
       const redirectUrl = "http://localhost:3000";
-      const oauthUrl =
-        `http://canfly.ap-northeast-2.elasticbeanstalk.com/oauth2/authorization/kakao?front_redirect=${redirectUrl}`;
+      const oauthUrl = `http://canfly.ap-northeast-2.elasticbeanstalk.com/oauth2/authorization/kakao?front_redirect=${redirectUrl}`;
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("로그인 실패:", error?.response || error?.message);
@@ -35,24 +33,32 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
-    removeCookie("accessToken", { path: "/" });
-    localStorage.removeItem("accessToken");
-    setIsLoggedIn(false);
-    setUserName("사용자");
+  // 서버 로그아웃 → 로컬 토큰 삭제 → 상태 초기화 → 홈으로 리다이렉트
+  const handleLogout = async () => {
+    try {
+      await requestLogout(); // DELETE /users/logout
+    } catch (e) {
+      console.warn("서버 로그아웃 실패(로컬만 정리):", e?.message || e);
+    } finally {
+      removeCookie("accessToken", { path: "/", sameSite: "lax" });
+      localStorage.removeItem("accessToken");
+      setIsLoggedIn(false);
+      setUserName("사용자");
+      window.location.href = "/"; // 새로고침 & URL 파라미터 제거
+    }
   };
 
-  // 🔑 토큰으로 즉시 /auth/me 호출 (axios 헬퍼 사용)
+  // /auth/me로 사용자명 조회
   const loadMe = useCallback(async () => {
     try {
-      const res = await fetchMe(); // { success, data: { name, ... } } 형태 가정
+      const res = await fetchMe(); // { data: { name, ... } } 가정
       const name = cleanName(
         res?.data?.name ??
-        res?.name ??
-        res?.username ??
-        res?.nickname ??
-        res?.nickName ??
-        res?.user?.name
+          res?.name ??
+          res?.username ??
+          res?.nickname ??
+          res?.nickName ??
+          res?.user?.name
       );
       setUserName(name);
       setIsLoggedIn(true);
@@ -61,7 +67,7 @@ const Home = () => {
     }
   }, []);
 
-  // 1) URL 쿼리 → 토큰 저장 + needsProfile 처리 + ✅ 저장 직후 loadMe() 실행
+  // 1) URL 쿼리에서 accessToken 수신 시 저장 → 즉시 /auth/me
   useEffect(() => {
     const parsed = new URL(window.location.href);
     const params = new URLSearchParams(parsed.search);
@@ -70,24 +76,22 @@ const Home = () => {
 
     if (tokenFromUrl) {
       const bare = normalizeToken(tokenFromUrl);
-      // 쿠키 & localStorage 저장
-      setCookie("accessToken", bare, { path: "/", maxAge: 60 * 60 * 24 * 7 });
+      setCookie("accessToken", bare, { path: "/", maxAge: 60 * 60 * 24 * 7, sameSite: "lax" });
       localStorage.setItem("accessToken", bare);
-      // axios 인터셉터가 localStorage의 토큰을 바로 읽을 수 있어야 함
-      loadMe(); // ✅ 토큰 저장 '직후' 곧바로 /auth/me
+      loadMe();
     } else if (cookies.accessToken) {
       const bare = normalizeToken(cookies.accessToken);
-      localStorage.setItem("accessToken", bare); // axios용 동기화
-      loadMe(); // ✅ 쿠키에 이미 있으면 바로 /auth/me
+      localStorage.setItem("accessToken", bare);
+      loadMe();
     }
 
     if (String(needsProfile).toLowerCase() === "true") {
       setShowEduModal(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 최초 1회
+  }, []); // 최초 1회만
 
-  // (선택/안전망) 토큰/로그인 상태 변화 시에도 한 번 더 시도
+  // 2) 안전망: 토큰이 있는데 로그인 false면 한 번 더 시도
   useEffect(() => {
     const bare = normalizeToken(
       cookies.accessToken || localStorage.getItem("accessToken")
@@ -97,9 +101,32 @@ const Home = () => {
     }
   }, [cookies.accessToken, isLoggedIn, loadMe]);
 
-  const handleSaveEdu = ({ school, grade, zipcode, address, addressDetail }) => {
-    console.log("저장된 학력/주소:", { school, grade, zipcode, address, addressDetail });
-    // TODO: 필요시 서버 저장 API 호출
+  // 학력/주소/성별 저장 → PUT /users/me/profile
+  const handleSaveEdu = async ({
+    highschool,
+    gradeNum,
+    zipcode,
+    address,
+    addressDetail,
+    sex,
+  }) => {
+    const { ok, error } = await updateUserProfile({
+      highschool,
+      gradeNum, // client.js에서 gradeNum으로 매핑됨
+      zipcode,
+      address,
+      addressDetail,
+      sex,
+    });
+
+    if (!ok) {
+      alert(`프로필 저장 실패: ${error}`);
+      return;
+    }
+    alert("프로필이 저장되었습니다.");
+    setShowEduModal(false);
+    // 필요 시 최신 사용자 정보 재조회
+    // await loadMe();
   };
 
   return (

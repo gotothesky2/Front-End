@@ -201,3 +201,9 @@
 
 /* 주소 행들 간의 세로 간격도 균일하게(별도 margin 제거) */
 /* 이전에 두었던 nth-of-type(5) margin-top 제거 */
+.edu-radio-group label {
+  font-size: 12px;   /* ✅ 글씨 작게 */
+  font-weight: 500;  /* 굵기 약간 줄임 (선택사항) */
+  color: #444;       /* 색상도 살짝 연하게 (선택사항) */
+  margin-right: 10px; /* 버튼 간격 */
+}
