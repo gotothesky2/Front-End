@@ -9,10 +9,10 @@ import axios from "axios";
 export const API_BASE = "http://43.200.79.118";
 export const COIN_BASE = "http://canfly.ap-northeast-2.elasticbeanstalk.com";
 
-/** 공통: 토큰 정규화 ("Bearer x"든 "x"든 순수 토큰만) */
+/** 공통: 토큰 정규화 */
 const normalizeToken = (t) => (t ? t.replace(/^Bearer\s+/i, "").trim() : "");
 
-/** Axios 인스턴스들 */
+/** Axios 인스턴스 */
 const client = axios.create({
   baseURL: API_BASE,
   timeout: 10000,
@@ -27,7 +27,7 @@ const coinClient = axios.create({
   withCredentials: false,
 });
 
-/** 요청 인터셉터: 매 요청에 Authorization 자동 첨부 */
+/** 매 요청 Authorization 자동 첨부 */
 const attachAuth = (cfg) => {
   const stored = localStorage.getItem("accessToken");
   const bare = normalizeToken(stored);
@@ -40,31 +40,25 @@ coinClient.interceptors.request.use(attachAuth);
 
 /* ===================== 헬퍼들 ===================== */
 
-/** 1) 사용자 정보 (/auth/me) */
+/** /auth/me */
 export const fetchMe = async () => {
   const res = await client.get("/auth/me");
   return res.data;
 };
 
-/** 2) 토큰 개수 조회 (/users/info → result.token)
- *    - 성공: { token: number, raw: any }
- *    - 실패(네트워크/권한/CORS 등): { token: 0, error: string }
- */
+/** /users/info → 토큰 */
 export const fetchTokenCount = async () => {
   try {
     const res = await coinClient.get("/users/info");
     const token = res?.data?.result?.token ?? 0;
     return { token, raw: res.data };
   } catch (err) {
-    const msg =
-      err?.response?.data?.message || err?.message || "토큰 조회 실패";
+    const msg = err?.response?.data?.message || err?.message || "토큰 조회 실패";
     return { token: 0, error: msg };
   }
 };
 
-/** 3) 서버 로그아웃 (DELETE /users/logout)
- *    - 스웨거 응답: { isSuccess, code, message, result }
- */
+/** 서버 로그아웃 */
 export const requestLogout = async () => {
   try {
     const res = await coinClient.delete("/users/logout");
@@ -78,13 +72,12 @@ export const requestLogout = async () => {
   }
 };
 
-/** 4) 프로필 수정 (PUT /users/me/profile)
- 
- *    - 성공: { ok:true, data }, 실패: { ok:false, error, status }
+/** 프로필 수정 (PUT /users/me/profile)
+ *  - 키 통일: gradeNum 사용
  */
 export const updateUserProfile = async ({
   highschool,
-  gradeNum, // 로컬 키명
+  gradeNum,
   sex,
   zipcode,
   address,
@@ -93,7 +86,7 @@ export const updateUserProfile = async ({
   try {
     const payload = {
       highschool,
-      gradeNum: gradeNum, // 서버 기대 키명
+      gradeNum,
       sex,
       zipcode,
       address,
@@ -106,33 +99,69 @@ export const updateUserProfile = async ({
       ok: false,
       status: err?.response?.status,
       error:
-        err?.response?.data?.message || err?.message || "프로필 수정 실패",
+        err?.response?.data?.message ||
+        err?.message ||
+        "프로필 수정 실패",
     };
   }
 };
 
-/** 5) 고등학교/학년/성별 조회 (GET /users/info)
- *    - 성공: { ok:true, highschool, gradeNum, sex, raw }
- *    - 실패: { ok:false, error }
- */
+// ✅ 주소 객체(result.address)를 안전하게 평탄화해서 문자열로 반환
 export const fetchSchoolGradeSex = async () => {
   try {
     const res = await coinClient.get("/users/info");
     const r = res?.data?.result || {};
+
+    // 서버가 address를 중첩 객체로 줄 수도 있음: { zipcode, address, addressDetail, empty }
+    const addrObj = (r && typeof r.address === "object" && r.address) || null;
+
+    const zipcode = addrObj
+      ? (addrObj.zipcode ?? "")
+      : (r.zipcode ?? "");
+
+    const baseAddress = addrObj
+      ? (addrObj.address ?? "")
+      : (r.address ?? "");
+
+    const addressDetail = addrObj
+      ? (addrObj.addressDetail ?? "")
+      : (r.addressDetail ?? "");
+
+    // 문자열로 강제 변환 (숫자/널/객체 대비)
+    const toStr = (v) =>
+      v == null
+        ? ""
+        : typeof v === "object"
+        ? ""
+        : String(v);
+
     return {
       ok: true,
-      highschool: r.highschool ?? "",
-      gradeNum: r.gradeNum ?? null,
-      sex: r.sex ?? "",
+      highschool: toStr(r.highschool),
+      gradeNum: r.gradeNum == null ? null : Number(r.gradeNum),
+      sex: toStr(r.sex),
+      zipcode: toStr(zipcode),
+      address: toStr(baseAddress),
+      addressDetail: toStr(addressDetail),
       raw: res.data,
     };
   } catch (err) {
     const msg =
       err?.response?.data?.message ||
       err?.message ||
-      "학교/학년/성별 조회 실패";
-    return { ok: false, highschool: "", gradeNum: null, sex: "", error: msg };
+      "학교/학년/성별/주소 조회 실패";
+    return {
+      ok: false,
+      highschool: "",
+      gradeNum: null,
+      sex: "",
+      zipcode: "",
+      address: "",
+      addressDetail: "",
+      error: msg,
+    };
   }
 };
+
 
 export default client;

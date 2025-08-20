@@ -12,7 +12,7 @@ const EduProfileModal = ({
   defaultZipcode = "",
   defaultAddress = "",
   defaultAddressDetail = "",
-  defaultSex = "", // MAN/WOMAN
+  defaultSex = "",
 }) => {
   const [highschool, setHighschool] = useState(defaultHighschool);
   const [gradeNum, setGradeNum] = useState(defaultGradeNum);
@@ -65,9 +65,16 @@ const EduProfileModal = ({
   };
 
   const handleSubmit = () => {
+    const g = normalize(gradeNum);
+    // ✅ 안전 검증: 1/2/3만 허용
+    if (!["1", "2", "3"].includes(g)) {
+      alert("학년은 1, 2, 3 중에서 선택해주세요.");
+      return;
+    }
+
     onSave?.({
       highschool: normalize(highschool),
-      gradeNum: normalize(gradeNum),
+      gradeNum: g, // 항상 "1" | "2" | "3"
       zipcode: normalize(zipcode),
       address: normalize(address),
       addressDetail: normalize(addressDetail),
@@ -112,15 +119,19 @@ const EduProfileModal = ({
             <label className="edu-label" htmlFor="edu-school">고등학교</label>
           </div>
 
-          {/* 학년 */}
+          {/* 학년 (1~3만) */}
           <div className="edu-field">
-            <input
+            <select
               id="edu-grade"
               className="edu-input"
-              type="text"
-              value={gradeNum}
+              value={gradeNum ?? ""}
               onChange={(e) => setGradeNum(e.target.value)}
-            />
+            >
+              <option value="">선택</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
             <label className="edu-label" htmlFor="edu-grade">학년</label>
           </div>
 
@@ -128,7 +139,7 @@ const EduProfileModal = ({
           <div className="edu-field">
             <span className="edu-label">성별</span>
             <div className="edu-radio-group">
-              <label>
+              <label className="edu-radio-label">
                 <input
                   type="radio"
                   name="sex"
@@ -136,9 +147,9 @@ const EduProfileModal = ({
                   checked={sex === "MAN"}
                   onChange={(e) => setSex(e.target.value)}
                 />
-                남자(MAN)
+                <span className="edu-radio-text">남자(MAN)</span>
               </label>
-              <label>
+              <label className="edu-radio-label">
                 <input
                   type="radio"
                   name="sex"
@@ -146,7 +157,7 @@ const EduProfileModal = ({
                   checked={sex === "WOMAN"}
                   onChange={(e) => setSex(e.target.value)}
                 />
-                여자(WOMAN)
+                <span className="edu-radio-text">여자(WOMAN)</span>
               </label>
             </div>
           </div>
