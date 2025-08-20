@@ -1,5 +1,5 @@
 // src/pages/GradeInput/StudentGrade.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../../styles/StudentGrade.css';
 
 import StudentGradeSidebar from '../../components/StudentGradeSidebar';
@@ -8,8 +8,8 @@ import StudentGradeHeader  from '../../components/StudentGradeHeader';
 import StudentGradeTable   from '../../components/StudentGradeTable';
 import StudentGradeTrend   from '../../components/StudentGradeTrend';
 
-// API 모듈
-import { registerReport, registerReportScores } from '../../api/report';
+// API
+import { registerReportScores } from '../../api/report';
 
 const defaultRow = () => ({
   id: Date.now(),
@@ -27,60 +27,26 @@ const defaultRow = () => ({
   achievement: ''
 });
 
-const STORAGE_KEY = 'hackathon_termData';
-
 export default function StudentGrade() {
-  const [isModalOpen, setIsModalOpen]     = useState(false);
-  const [selectedTerm, setSelectedTerm]   = useState('');
-  const [termData, setTermData]           = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-  const [modalRows, setModalRows]         = useState([defaultRow()]);
-  const [reportId, setReportId]           = useState(null); // 내신 보고서 ID
-  const [loading, setLoading]             = useState(false);
+  const [isModalOpen, setIsModalOpen]   = useState(false);
+  const [selectedTerm, setSelectedTerm] = useState('');
+  const [termData, setTermData]         = useState({});
+  const [modalRows, setModalRows]       = useState([defaultRow()]);
+  const [loading, setLoading]           = useState(false);
 
-  // termData가 바뀌면 로컬 스토리지에 저장
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(termData));
-  }, [termData]);
-
-  // 페이지 최초 진입 시 reportId 생성/조회
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!reportId) {
-          const res = await registerReport(); // 보고서 생성 (백엔드 구조에 맞게 변경)
-          setReportId(res.id); // Swagger 응답에 맞게 res.id 부분 확인
-        }
-      } catch (err) {
-        console.error(err);
-        alert('내신 보고서 생성에 실패했습니다.');
-      }
-    })();
-  }, [reportId]);
-
-  const handleOpenModal = term => {
+  const handleOpenModal = (term) => {
     setSelectedTerm(term);
     setModalRows(termData[term] ? [...termData[term]] : [defaultRow()]);
     setIsModalOpen(true);
   };
 
   const handleSave = async (rows) => {
-    if (!reportId) {
-      alert('보고서 ID를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
     try {
       setLoading(true);
-      // 1) 백엔드에 저장
-      await registerReportScores(reportId, selectedTerm, rows);
+      // 1) 백엔드 저장 (교과별로 여러 번 POST)
+      await registerReportScores(selectedTerm, rows);
 
-      // 2) 로컬 상태 반영
+      // 2) 화면 상태 갱신
       setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
       setIsModalOpen(false);
     } catch (err) {
@@ -112,7 +78,6 @@ export default function StudentGrade() {
       {/* 그레이 배경 + 사이드바 + 메인 */}
       <div className="grade-gray-section">
         <div className="grade-inner-container">
-
           <div className="grade-sidebar-container">
             <StudentGradeSidebar onOpenModal={handleOpenModal} />
           </div>
@@ -137,7 +102,7 @@ export default function StudentGrade() {
         rows={modalRows}
         setRows={setModalRows}
         onClose={handleCloseModal}
-        onSave={handleSave}
+        onSave={handleSave}   // ← 저장 = 내신 등록
       />
 
       {loading && (
@@ -149,6 +114,7 @@ export default function StudentGrade() {
     </>
   );
 }
+
 
 
 
