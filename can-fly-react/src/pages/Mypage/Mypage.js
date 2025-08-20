@@ -2,7 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Mypage.css";
-import { fetchMe, fetchTokenCount, fetchSchoolGradeSex } from "../../api/client"; // ← 고등학교/학년/성별 조회 추가
+import {
+  fetchMe,
+  fetchTokenCount,
+  fetchSchoolGradeSex,
+  updateUserProfile,
+} from "../../api/client";
+import EduProfileModal from "../../components/EduProfileModal";
 
 const LINKS = {
   aptitudeResult: "/TestResult",
@@ -15,13 +21,11 @@ const LINKS = {
 const cleanName = (raw) =>
   String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim();
 
-// ✅ 학기 계산: 3~7월은 1학기, 나머지는 2학기
 const getSemester = () => {
-  const month = new Date().getMonth() + 1; // 1~12
+  const month = new Date().getMonth() + 1;
   return month >= 3 && month <= 7 ? "1학기" : "2학기";
 };
 
-// ✅ 성별 표시 매핑: 서버값(MAN/WOMAN 등) → 남자/여자
 const sexLabel = (s) => {
   const v = String(s || "").toUpperCase();
   if (v === "MAN" || v === "M") return "남자";
@@ -30,17 +34,20 @@ const sexLabel = (s) => {
 };
 
 const Mypage = () => {
-  const [profile, setProfile] = useState({
-    name: "사용자",
-    email: "unknown@example.com",
-  });
+  const [profile, setProfile] = useState({ name: "사용자", email: "unknown@example.com" });
   const [token, setToken] = useState(0);
-  const [semester] = useState(getSemester()); // 페이지 로드 시점 기준으로 고정
+  const [semester] = useState(getSemester());
 
-  // ← 여기 추가: 고등학교/학년/성별 상태
+  // 고등학교/학년/성별/주소
   const [highschool, setHighschool] = useState("");
   const [gradeNum, setGradeNum] = useState(null);
   const [sex, setSex] = useState("");
+  const [zipcode, setZipcode] = useState("");
+  const [address, setAddress] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
+
+  const [openEdit, setOpenEdit] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -66,17 +73,19 @@ const Mypage = () => {
       }
     };
 
-    // ← 여기 추가: 고등학교/학년/성별 조회
     const loadSchool = async () => {
       try {
-        const { ok, highschool, gradeNum, sex, error } =
+        const { ok, highschool, gradeNum, sex, zipcode, address, addressDetail, error } =
           await fetchSchoolGradeSex();
-        if (!ok) console.error("학교/학년/성별 조회 실패:", error);
+        if (!ok) console.error("학교/학년/성별/주소 조회 실패:", error);
         setHighschool(highschool || "");
         setGradeNum(gradeNum ?? null);
         setSex(sex || "");
+        setZipcode(zipcode || "");
+        setAddress(address || "");
+        setAddressDetail(addressDetail || "");
       } catch (err) {
-        console.error("학교/학년/성별 불러오기 실패:", err);
+        console.error("학교/학년/성별/주소 불러오기 실패:", err);
       }
     };
 
@@ -84,6 +93,49 @@ const Mypage = () => {
     loadToken();
     loadSchool();
   }, []);
+
+  // 모달 저장 → 서버 업데이트
+  const handleSaveEdu = async ({
+    highschool,
+    gradeNum,
+    zipcode,
+    address,
+    addressDetail,
+    sex,
+  }) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const { ok, error } = await updateUserProfile({
+        highschool,
+        gradeNum,
+        zipcode,
+        address,
+        addressDetail,
+        sex,
+      });
+      if (!ok) {
+        alert(`프로필 저장 실패: ${error}`);
+        return;
+      }
+
+      // 화면 즉시 반영
+      setHighschool(highschool || "");
+      setGradeNum(gradeNum ? Number(gradeNum) : null);
+      setSex(sex || "");
+      setZipcode(zipcode || "");
+      setAddress(address || "");
+      setAddressDetail(addressDetail || "");
+
+      alert("프로필이 저장되었습니다.");
+      setOpenEdit(false);
+    } catch (e) {
+      console.error("프로필 저장 중 오류:", e);
+      alert("프로필 저장 중 오류가 발생했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="mypage-container">
@@ -178,15 +230,27 @@ const Mypage = () => {
           <img src={`${process.env.PUBLIC_URL}/img/image 6.jpg`} alt="프로필" />
         </div>
         <div className="mypage-name">{profile.name} 님</div>
-        {/* ← 연결: 고등학교 / 학년 */}
         <div className="mypage-info">· 고등학교: {highschool || "미입력"}고등학교</div>
-        <div className="mypage-info">
-          · 학년: {gradeNum ?? "-"}학년 {semester}
-        </div>
+        <div className="mypage-info">· 학년: {gradeNum ?? "-"}학년 {semester}</div>
         <div className="mypage-info">· Email: {profile.email}</div>
         <div className="mypage-info">· 성별: {sexLabel(sex)}</div>
-        <button className="mypage-edit-btn">개인정보 수정</button>
+        <button className="mypage-edit-btn" onClick={() => setOpenEdit(true)}>
+          개인정보 수정
+        </button>
       </div>
+
+      {/* 개인정보 수정 모달 */}
+      <EduProfileModal
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        onSave={handleSaveEdu}
+        defaultHighschool={highschool}
+        defaultGradeNum={gradeNum ?? ""}
+        defaultZipcode={zipcode}
+        defaultAddress={address}
+        defaultAddressDetail={addressDetail}
+        defaultSex={sex}
+      />
     </div>
   );
 };
