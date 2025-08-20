@@ -35,7 +35,7 @@ const ReportFilter = () => {
         />
       </label>
 
-      <button className="search-btn" onClick={() => alert('조회 클릭됨')}>
+      <button className="report-btn" onClick={() => alert('조회 클릭됨')}>
         조회 🔍
       </button>
     </div>
