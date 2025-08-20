@@ -1,86 +1,92 @@
+// AptitudeTest.js — v1 JSON 제출 대응(415 방지), qnos 정합성/복원 보강 + 결과 seq 안전 처리
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/AptitudeTest.css";
 
-const DRAFT_KEY = "aptitudeDraftV1"; // ✅ 로컬 임시저장 키
+const LS_KEY = "aptitude_v1_progress"; // 임시저장 키
 
 const AptitudeTest = () => {
   const QUESTIONS_PER_PAGE = 8;
-  const [allQuestions, setAllQuestions] = useState([]);
-  const [answers, setAnswers] = useState([]);
+  const [allQuestions, setAllQuestions] = useState([]); // 원문항
+  const [answers, setAnswers] = useState([]);           // 사용자 답(1~7)
+  const [qnos, setQnos] = useState([]);                 // 실제 문항번호(qitemNo)
+  const [qestrnSeq, setQestrnSeq] = useState("21");     // 설문 코드(질문과 일치)
   const [page, setPage] = useState(0);
   const questionRefs = useRef([]);
   const navigate = useNavigate();
 
-  // 질문 불러오기 + ✅ 임시저장 복원
+  // 질문 불러오기 + 임시저장 복원
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const res = await axios.get("http://localhost:4000/api/questions");
-        const questionData = res.data.RESULT || [];
+        const questionData = Array.isArray(res.data?.RESULT) ? res.data.RESULT : [];
 
-        // 기본 답안 배열
-        const baseAnswers = Array(questionData.length).fill(null);
-
-        // ✅ 로컬 임시저장 불러오기
-        const draftRaw = localStorage.getItem(DRAFT_KEY);
-        if (draftRaw) {
-          try {
-            const draft = JSON.parse(draftRaw);
-            if (Array.isArray(draft.answers)) {
-              // 길이가 달라도 안전하게 병합
-              const restored = baseAnswers.slice();
-              const len = Math.min(restored.length, draft.answers.length);
-              for (let i = 0; i < len; i++) {
-                restored[i] = draft.answers[i] ?? null;
-              }
-              setAnswers(restored);
-              if (
-                typeof draft.page === "number" &&
-                draft.page >= 0 &&
-                draft.page <= Math.ceil(questionData.length / QUESTIONS_PER_PAGE)
-              ) {
-                setPage(draft.page);
-              }
-              // 안내는 조용히 복원—원하면 아래 alert 주석 해제
-              // alert("임시 저장된 검사 진행사항을 불러왔습니다.");
-            } else {
-              setAnswers(baseAnswers);
-            }
-          } catch {
-            setAnswers(baseAnswers);
-          }
-        } else {
-          setAnswers(baseAnswers);
-        }
+        // 응답에 qestrnSeq가 있으면 우선 반영
+        const seqFromMeta =
+          res.data?.qestrnSeq ||
+          res.data?.result?.qestrnSeq ||
+          res.data?.meta?.qestrnSeq;
+        setQestrnSeq(String(seqFromMeta || "21"));
 
         setAllQuestions(questionData);
+
+        // 가능한 키 후보에서 문항번호 추출(없으면 1..N)
+        const ids = questionData.map((q, i) => {
+          const cand =
+            q.qitemNo ?? q.qItemNo ?? q.qno ?? q.no ?? q.itemNo ?? q.questNo;
+          return Number.isFinite(Number(cand)) ? Number(cand) : i + 1;
+        });
+        setQnos(ids);
+
+        // 임시저장 복원(문항 수와 번호배열 모두 일치할 때만)
+        const saved = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+        if (
+          Array.isArray(saved.answers) &&
+          Array.isArray(saved.qnos) &&
+          saved.qnos.length === ids.length &&
+          saved.qnos.every((n, idx) => n === ids[idx])
+        ) {
+          setAnswers(saved.answers);
+          setPage(Number(saved.page) || 0);
+        } else {
+          setAnswers(Array(questionData.length).fill(null));
+        }
       } catch (err) {
-        console.error("❌ API 연결 실패:", err);
+        console.error("❌ API 연결 실패:", {
+          message: err?.message,
+          status: err?.response?.status,
+          data: err?.response?.data,
+        });
       }
     };
     fetchQuestions();
   }, []);
 
   const handleSelect = (qIdx, value) => {
-    const newAnswers = [...answers];
-    newAnswers[qIdx] = value;
-    setAnswers(newAnswers);
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[qIdx] = value;
+      return next;
+    });
+  };
+
+  // 임시 저장
+  const handleTempSave = () => {
+    const toSave = { answers, qnos, page };
+    localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+    alert("임시 저장되었습니다. (이 브라우저에서 계속 이어서 응시할 수 있어요)");
   };
 
   const checkUnansweredAndScroll = () => {
     const startIdx = page * QUESTIONS_PER_PAGE;
     const endIdx = startIdx + QUESTIONS_PER_PAGE;
-    const unansweredIndex = answers
-      .slice(startIdx, endIdx)
-      .findIndex((ans) => ans === null);
+    const unansweredIndex = answers.slice(startIdx, endIdx).findIndex((ans) => ans == null);
 
     if (unansweredIndex !== -1) {
       const absoluteIndex = startIdx + unansweredIndex;
-      alert(
-        `${absoluteIndex + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`
-      );
+      alert(`${absoluteIndex + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`);
       questionRefs.current[absoluteIndex]?.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -91,80 +97,87 @@ const AptitudeTest = () => {
     }
   };
 
-  // ✅ 임시 저장 (answers + page 저장)
-  const handleSaveDraft = () => {
-    try {
-      localStorage.setItem(
-        DRAFT_KEY,
-        JSON.stringify({
-          answers,
-          page,
-          savedAt: new Date().toISOString(),
-        })
-      );
-      alert("임시 저장되었습니다. 다음에 다시 들어오면 이어서 시작됩니다.");
-    } catch (e) {
-      console.error("임시 저장 실패:", e);
-      alert("임시 저장에 실패했습니다.");
-    }
-  };
-
-  // 제출
   const handleSubmit = async () => {
     try {
-      // CareerNet API가 요구하는 응답 포맷
-      const payload = {
-        qestrnSeq: "21", // 적성검사 코드
-        trgetSe: "100209", // 중학생(예시)
-        name: "홍길동", // 사용자 이름
-        gender: "100323", // 남자
-        grade: "2",
-        startDtm: new Date().toISOString(),
-        answers: answers.map((ans, idx) => `${idx + 1}=${ans}`).join(" "),
-      };
-
-      const res = await axios.post(
-        "http://localhost:4000/api/aptitude/submit",
-        payload
-      );
-      console.log("✅ 제출 성공:", res.data);
-
-      const seq = res.data.RESULT?.url?.split("seq=")[1]; // CareerNet 리턴 URL에서 seq 추출
-      if (seq) {
-        try {
-          const reportRes = await axios.get(
-            `http://localhost:4000/api/aptitude/report/${seq}`
-          );
-          const pdfUrl =
-            reportRes.data.RESULT?.pdfLink ||
-            reportRes.data?.pdfLink ||
-            reportRes.data?.RESULT?.url;
-
-          // ✅ 제출 성공 시 임시저장 삭제
-          localStorage.removeItem(DRAFT_KEY);
-
-          // ✅ PDF 유무와 상관없이 TestComplete로 이동 (요청사항)
-          if (pdfUrl) {
-            navigate("/test-complete", { state: { pdfUrl } });
-          } else {
-            navigate("/test-complete");
-          }
-          return;
-        } catch (e) {
-          console.warn("결과 조회 실패(그래도 TestComplete 이동):", e);
-        }
-      } else {
-        console.warn("seq 없음(그래도 TestComplete 이동)");
+      // 0) 미응답 검사
+      const missing = answers.findIndex((v) => v == null);
+      if (missing !== -1) {
+        alert(`${missing + 1}번 문항을 답변하지 않았습니다.`);
+        questionRefs.current[missing]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
 
-      // ✅ seq 없거나 결과 조회 실패해도 TestComplete로 이동 (요청사항)
-      localStorage.removeItem(DRAFT_KEY);
-      navigate("/test-complete");
-    } catch (err) {
-      console.error("❌ 제출 실패:", err);
-      alert("제출에 실패했습니다.");
+      // 1) "순번(1..N)=답" 문자열 생성  ← ★핵심: qnos 대신 i+1 사용
+      const N = allQuestions.length;
+      const answersStr = Array.from({ length: N }, (_, i) => `${i + 1}=${answers[i]}`).join(" ");
+
+      // (안전) 포맷 검증
+      const tokens = answersStr.trim().split(/\s+/);
+      const valid = tokens.length === N && tokens.every(t => /^\d+=[1-7]$/.test(t));
+      if (!valid) {
+        console.error("❌ answersStr invalid", { count: tokens.length, expected: N, sample: tokens.slice(0, 20) });
+        alert("답안 포맷 오류가 발생했습니다. 다시 시도해 주세요.");
+        return;
+      }
+
+      // 2) CareerNet API 규격에 맞춘 payload 구성
+      const payload = {
+        qestrnSeq,          // 질문 세트와 반드시 동일
+        trgetSe: "100207",  // ★중학생 코드 (100206이 공란을 만들던 원인일 가능성 큼)
+        gender: "100323",   // 여: "100324"
+        school: "율도중학교",
+        grade: "2",
+        startDtm: Date.now(),
+        answers: answersStr,
+      };
+
+      // 3) 프록시 서버로 전송
+      const res = await axios.post("http://localhost:4000/api/aptitude/submit", payload);
+      console.log("제출 응답:", res.data);
+
+      const result = res?.data?.RESULT || res?.data?.result || {};
+      const urlFromApi = result?.url || "";
+      const inspctSeq = result?.inspctSeq;
+
+      // 4) URL 처리: seq 안전 추출
+      let encodedSeq = null;
+      try {
+        if (urlFromApi) {
+          const u = new URL(urlFromApi);
+          encodedSeq = u.searchParams.get("seq");
+        }
+      } catch (_) {}
+
+      if (!encodedSeq && inspctSeq != null) {
+        encodedSeq = btoa(String(inspctSeq)); // 예: 38918021 → "Mzg5MTgwMjE"
+      }
+
+      if (!encodedSeq) {
+        console.error("❌ 결과 seq 없음", { urlFromApi, inspctSeq, raw: res.data });
+        alert("결과 seq를 찾지 못했습니다. 콘솔 로그를 확인하세요.");
+        return;
+      }
+
+      // (선택) JSON 존재 여부 사전 확인 — 공란 디버깅에 매우 유용
+      // const jsonUrl = `https://www.career.go.kr/cloud/data/report${encodeURIComponent(encodedSeq)}.json`;
+      // await axios.get(jsonUrl, { headers: { Accept: "application/json" }, timeout: 10000 });
+      // console.log("✅ JSON exists:", jsonUrl);
+
+      const finalUrl = `https://www.career.go.kr/inspct/web/psycho/vocation/report?seq=${encodeURIComponent(encodedSeq)}`;
+      console.log("✅ 최종 결과 url:", finalUrl);
+
+      // 라우터 간섭 방지를 위해 새 탭으로 직접 오픈
+      window.open(finalUrl, "_blank", "noopener");
+    } catch (e) {
+      console.error("제출/결과 처리 오류", {
+        message: e?.message,
+        status: e?.response?.status,
+        data: e?.response?.data,
+      });
+      alert("제출 과정에서 오류가 발생했습니다.");
     }
   };
+
 
   const currentQuestions = allQuestions.slice(
     page * QUESTIONS_PER_PAGE,
@@ -200,7 +213,7 @@ const AptitudeTest = () => {
       <div className="questions-wrapper">
         <h3>
           문항 {page * QUESTIONS_PER_PAGE + 1} ~{" "}
-          {(page + 1) * QUESTIONS_PER_PAGE}
+          {Math.min((page + 1) * QUESTIONS_PER_PAGE, allQuestions.length)}
         </h3>
         <p className="small-guide">
           각 항목을 잘 읽고 자신에게 해당하는 정도를 선택해주세요.
@@ -208,6 +221,7 @@ const AptitudeTest = () => {
         <hr />
         {currentQuestions.map((q, idx) => {
           const absoluteIndex = page * QUESTIONS_PER_PAGE + idx;
+          const qText = q.question ?? q.qstnCn ?? q.title ?? q.qItemNm ?? "";
           return (
             <div
               key={absoluteIndex}
@@ -215,7 +229,7 @@ const AptitudeTest = () => {
               ref={(el) => (questionRefs.current[absoluteIndex] = el)}
             >
               <div className="question-text">
-                {absoluteIndex + 1}. {q.question}
+                {absoluteIndex + 1}. {qText}
               </div>
               <div className="circle-options">
                 {[1, 2, 3, 4, 5, 6, 7].map((value, i) => (
@@ -225,7 +239,7 @@ const AptitudeTest = () => {
                         answers[absoluteIndex] === value ? "selected" : ""
                       }`}
                       onClick={() => handleSelect(absoluteIndex, value)}
-                    ></div>
+                    />
                     {i === 0 && (
                       <div className="circle-label">〈 전혀 그렇지 않다</div>
                     )}
@@ -240,17 +254,14 @@ const AptitudeTest = () => {
         })}
 
         <div className="button-group">
-          {/* ✅ 임시 저장 버튼 동작 추가 */}
-          <button className="save-button" onClick={handleSaveDraft}>
+          <button className="save-button" onClick={handleTempSave}>
             임시 저장
           </button>
-
-          {page < Math.ceil(allQuestions.length / QUESTIONS_PER_PAGE) - 1 && (
+          {page < Math.ceil(allQuestions.length / QUESTIONS_PER_PAGE) - 1 ? (
             <button className="next-button" onClick={checkUnansweredAndScroll}>
               다음 페이지 &gt;
             </button>
-          )}
-          {page === Math.ceil(allQuestions.length / QUESTIONS_PER_PAGE) - 1 && (
+          ) : (
             <button className="next-button" onClick={handleSubmit}>
               제출하기
             </button>
