@@ -1,5 +1,5 @@
 // src/pages/GradeInput/StudentGrade.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/StudentGrade.css';
 
 import StudentGradeSidebar from '../../components/StudentGradeSidebar';
@@ -10,6 +10,7 @@ import StudentGradeTrend   from '../../components/StudentGradeTrend';
 
 // API
 import { registerReportScores } from '../../api/report';
+import { fetchMe, fetchUserSummary } from '../../api/client'; // ✅ 사용자명 API
 
 const defaultRow = () => ({
   id: Date.now(),
@@ -27,12 +28,47 @@ const defaultRow = () => ({
   achievement: ''
 });
 
+// {kakao}홍길동 → 홍길동
+const cleanProviderPrefix = (username = '') =>
+  String(username).replace(/^\{[a-zA-Z0-9_]+\}/, '').trim();
+
 export default function StudentGrade() {
   const [isModalOpen, setIsModalOpen]   = useState(false);
   const [selectedTerm, setSelectedTerm] = useState('');
   const [termData, setTermData]         = useState({});
   const [modalRows, setModalRows]       = useState([defaultRow()]);
   const [loading, setLoading]           = useState(false);
+
+  // ✅ 사용자명 상태
+  const [userName, setUserName] = useState('사용자');
+
+  // 사용자명 로드: /auth/me → 실패/누락 시 /users/info
+  useEffect(() => {
+    const loadUserName = async () => {
+      try {
+        const me = await fetchMe(); // { ok, data }
+        let rawName =
+          me?.data?.name ??
+          me?.data?.username ??
+          me?.data?.nickname ??
+          me?.name ??
+          me?.username ??
+          me?.nickname ??
+          '';
+
+        if (!rawName) {
+          const info = await fetchUserSummary(); // { ok, name, ... }
+          if (info?.ok && info?.name) rawName = info.name;
+        }
+
+        setUserName(cleanProviderPrefix(rawName) || '사용자');
+      } catch (e) {
+        console.error('사용자 정보 조회 실패:', e);
+        setUserName('사용자');
+      }
+    };
+    loadUserName();
+  }, []);
 
   const handleOpenModal = (term) => {
     setSelectedTerm(term);
@@ -51,7 +87,7 @@ export default function StudentGrade() {
       setIsModalOpen(false);
     } catch (err) {
       console.error(err);
-      alert('저장에 실패했습니다: ' + (err.response?.data?.message || '알 수 없는 오류'));
+      alert('저장에 실패했습니다: ' + (err?.response?.data?.message || '알 수 없는 오류'));
     } finally {
       setLoading(false);
     }
@@ -83,7 +119,8 @@ export default function StudentGrade() {
           </div>
 
           <div className="grade-main-content">
-            <StudentGradeHeader userName="전성환" />
+            {/* ✅ 사용자명 적용 */}
+            <StudentGradeHeader userName={userName} />
 
             <div className="grade-table-header">
               <span className="grade-table-tab">주요교과 분석</span>
@@ -114,12 +151,3 @@ export default function StudentGrade() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-

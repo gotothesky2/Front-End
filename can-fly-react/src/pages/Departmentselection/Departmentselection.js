@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+// ✅ 전체 코드: 나의 대학목록에 북마크된 전공-대학쌍 표시
+
+import React, { useState, useEffect } from 'react';
 import "../../styles/Departmentselection.css";
 import "../../styles/AddDepartmentModal.css";
 import HeartToggle from "../Departmentselection/HeartToggle";
@@ -7,117 +9,124 @@ import AddDepartmentModal from "../Departmentselection/AddDepartmentModal";
 import MajorDepartmentModal from "../Departmentselection/MajorDepartmentModal";
 import DepartmentUniversityModal from "../Departmentselection/DepartmentUniversityModal";
 import AddUniversityModal from "../Departmentselection/AddUniversityModal";
-
-const initialRecommended = {
-  계열: [],
-  학과: [],
-};
+import {
+  fetchLikedMajors,
+  toggleMajorBookmark,
+  fetchLikedDepartments,
+  toggleDepartmentBookmark,
+  fetchAllDepartments,
+  fetchBookmarkedMajorUniversities,
+  toggleMajorUniversityBookmark, // ✅ 추가
+} from "../../api/departmentApi";
 
 const Departmentselection = () => {
-  const [myDepartments, setMyDepartments] = useState({
-    계열: [],
-    학과: [],
-  });
+  const [myDepartments, setMyDepartments] = useState({ 계열: [], 학과: [] });
+  const [departmentNameToIdMap, setDepartmentNameToIdMap] = useState({});
+  const [myMajorUnivs, setMyMajorUnivs] = useState([]);
 
-  const [recommended, setRecommended] = useState(initialRecommended);
   const [showMajorModal, setShowMajorModal] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [showUniversityModal, setShowUniversityModal] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState("");
   const [popupAddedDepartments, setPopupAddedDepartments] = useState([]);
-  const [popupAddedMajors, setPopupAddedMajors] = useState([]);
-  const [popupAddedUniversities, setPopupAddedUniversities] = useState({
-    상향: [],
-    적정: [],
-    하향: [],
-  });
+  const [popupAddedUniversities, setPopupAddedUniversities] = useState([]);
   const [selectedMajorForDepartments, setSelectedMajorForDepartments] = useState(null);
   const [selectedDepartmentForUniversities, setSelectedDepartmentForUniversities] = useState(null);
 
-  const allMajors = [
-    "인문 계열", "사회 계열", "교육 계열",
-    "공학 계열", "자연 계열", "의학 계열"
-  ];
-
-  const allDepartments = [
-    "xx 학과", "□□ 학과", "□□ 학과",
-    "□□ 학과", "□□ 학과", "□□ 학과",
-    "□□ 학과", "oo 학과",
-  ];
-
-  const filteredDepartmentsByMajor = {
-    "인문 계열": ["국어국문학과", "영어영문학과", "사학과", "철학과", "문예창작과", "중어중문학과", "불어불문학과"],
-    "사회 계열": ["경영학과", "경제학과", "정치외교학과", "사회학과", "심리학과", "미디어커뮤니케이션학과"],
-    "교육 계열": ["교육학과", "유아교육과", "특수교육과", "체육교육과"],
-    "공학 계열": ["기계공학과", "전기전자공학과", "컴퓨터공학과", "건축공학과", "화학공학과", "산업공학과"],
-    "자연 계열": ["수학과", "물리학과", "화학과", "생물학과", "통계학과"],
-    "의학 계열": ["의학과", "치의학과", "한의학과", "간호학과", "약학과", "물리치료학과"]
+  const nameToIdMap = {
+    "인문 계열": 1,
+    "사회 계열": 2,
+    "교육 계열": 3,
+    "공학 계열": 4,
+    "자연 계열": 5,
+    "의학 계열": 6,
   };
 
-  const handleToggle = (type, item) => {
-    const isInMyList = myDepartments[type].includes(item);
-    const isPopupAdded = type === "계열"
-      ? popupAddedMajors.includes(item)
-      : popupAddedDepartments.includes(item);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [likedMajors, likedDepartments, allDepartments, majorUnivs] = await Promise.all([
+          fetchLikedMajors(),
+          fetchLikedDepartments(),
+          fetchAllDepartments(),
+          fetchBookmarkedMajorUniversities(),
+        ]);
 
-    if (isInMyList) {
-      setMyDepartments(prev => ({
-        ...prev,
-        [type]: prev[type].filter(i => i !== item),
-      }));
+        const nameToId = {};
+        allDepartments.forEach((d) => {
+          nameToId[d.name] = d.id;
+        });
 
-      if (!isPopupAdded) {
-        setRecommended(prev => ({
+        setDepartmentNameToIdMap(nameToId);
+        setMyDepartments({
+          계열: likedMajors.map((m) => m.name),
+          학과: likedDepartments.map((d) => d.name),
+        });
+        setMyMajorUnivs(majorUnivs);
+      } catch (e) {
+        console.error("초기 데이터 불러오기 실패:", e);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleToggle = async (type, item) => {
+    if (type === "계열") {
+      const id = nameToIdMap[item];
+      if (!id) return;
+      try {
+        await toggleMajorBookmark(id);
+        const isIn = myDepartments.계열.includes(item);
+        setMyDepartments((prev) => ({
           ...prev,
-          [type]: [...prev[type], item],
+          계열: isIn ? prev.계열.filter(i => i !== item) : [...prev.계열, item],
         }));
+      } catch (e) {
+        console.error("계열 토글 실패:", e);
       }
-
-      if (type === "계열") {
-        setPopupAddedMajors(prev => prev.filter(i => i !== item));
-      } else {
-        setPopupAddedDepartments(prev => prev.filter(i => i !== item));
+    } else if (type === "학과") {
+      const id = departmentNameToIdMap[item];
+      if (!id) return;
+      try {
+        await toggleDepartmentBookmark(id);
+        const isIn = myDepartments.학과.includes(item);
+        setMyDepartments((prev) => ({
+          ...prev,
+          학과: isIn ? prev.학과.filter(i => i !== item) : [...prev.학과, item],
+        }));
+      } catch (e) {
+        console.error("학과 토글 실패:", e);
       }
-    } else {
-      setMyDepartments(prev => ({
-        ...prev,
-        [type]: [...prev[type], item],
-      }));
-      setRecommended(prev => ({
-        ...prev,
-        [type]: prev[type].filter(i => i !== item),
-      }));
-    }
-  };
-
-  const handleMajorToggleFromPopup = (item) => {
-    const isAlreadyInMine = myDepartments.계열.includes(item);
-    if (isAlreadyInMine) {
-      setMyDepartments(prev => ({ ...prev, 계열: prev.계열.filter(i => i !== item) }));
-      setPopupAddedMajors(prev => prev.filter(i => i !== item));
-    } else {
-      setMyDepartments(prev => ({ ...prev, 계열: [...prev.계열, item] }));
-      setPopupAddedMajors(prev => [...prev, item]);
     }
   };
 
   const handleDepartmentToggleFromPopup = (item) => {
-    const isAlreadyInMine = myDepartments.학과.includes(item);
-    if (isAlreadyInMine) {
-      setMyDepartments(prev => ({ ...prev, 학과: prev.학과.filter(i => i !== item) }));
-      setPopupAddedDepartments(prev => prev.filter(i => i !== item));
-    } else {
-      setMyDepartments(prev => ({ ...prev, 학과: [...prev.학과, item] }));
-      setPopupAddedDepartments(prev => [...prev, item]);
-    }
+    const isIn = myDepartments.학과.includes(item);
+    setMyDepartments((prev) => ({
+      ...prev,
+      학과: isIn ? prev.학과.filter(i => i !== item) : [...prev.학과, item],
+    }));
+    setPopupAddedDepartments((prev) =>
+      isIn ? prev.filter(i => i !== item) : [...prev, item]
+    );
   };
 
-  const handleUniversityToggleFromPopup = (category, item) => {
-    setPopupAddedUniversities(prev => {
-      const isExist = prev[category].includes(item);
-      const updated = isExist ? prev[category].filter(i => i !== item) : [...prev[category], item];
-      return { ...prev, [category]: updated };
-    });
+  const handleUniversityToggleFromPopup = (item) => {
+    const isExist = popupAddedUniversities.includes(item);
+    setPopupAddedUniversities((prev) =>
+      isExist ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handleUniversityBookmarkToggle = async (majorId, univId) => {
+    try {
+      await toggleMajorUniversityBookmark(majorId, univId);
+      setMyMajorUnivs((prev) =>
+        prev.filter((item) => !(item.majorId === majorId && item.univId === univId))
+      );
+    } catch (e) {
+      console.error("전공-대학 북마크 토글 실패:", e);
+    }
   };
 
   const handleOpenUniversityPopup = (department) => {
@@ -127,60 +136,32 @@ const Departmentselection = () => {
   return (
     <div className="Departmentselection-container">
       <div className="Departmentselection-steps">
-        {/* 계열 */}
+
+        {/* 계열 목록 */}
         <div className="Departmentselection-step">
-          <div className="Departmentselection-step-title">계열 목록</div>
+          <div className="Departmentselection-step-title">나의 계열 목록</div>
           <div className="Departmentselection-section">
-            <div className="Departmentselection-subtitle">• 추천 계열</div>
-            {recommended.계열.map((item, idx) => (
-              <div className="Departmentselection-item" key={idx}>
-                <HeartToggle selected={false} onToggle={() => handleToggle("계열", item)} />
-                {item}  
-                <span style={{ cursor: "pointer" }} onClick={() => setSelectedMajorForDepartments(item)}>›</span>
-              </div>
-            ))}
-          </div>
-          <div className="Departmentselection-section">
-            <div className="Departmentselection-subtitle">• 나의 계열목록</div>
             {myDepartments.계열.map((item, idx) => (
-              <div className="Departmentselection-item" key={idx}>
-                <HeartToggle selected={true} onToggle={() => handleToggle("계열", item)} />
-                {item}
-                <span style={{ cursor: "pointer" }} onClick={() => setSelectedMajorForDepartments(item)}>›</span>
+              <div className="Departmentselection-item" key={idx} onClick={() => setSelectedMajorForDepartments(item)}>
+                <HeartToggle
+                  selected={true}
+                  onToggle={(e) => {
+                    e.stopPropagation();
+                    handleToggle("계열", item);
+                  }}
+                />
+                <span className="department-name">{item}</span>
+                <span className="arrow">›</span>
               </div>
             ))}
             <div className="Departmentselection-add" onClick={() => setShowMajorModal(true)}>+</div>
           </div>
         </div>
 
-        {/* 학과 */}
+        {/* 학과 목록 */}
         <div className="Departmentselection-step">
-          <div className="Departmentselection-step-title">학과 목록</div>
+          <div className="Departmentselection-step-title">나의 학과 목록</div>
           <div className="Departmentselection-section">
-            <div className="Departmentselection-subtitle">• 추천 학과</div>
-            {recommended.학과.length === 0 ? (
-              <div className="Departmentselection-locked">
-                🔒<br />
-                <span>1-2 성적부터 입력 후 추천 가능</span>
-              </div>
-            ) : (
-              recommended.학과.map((item, idx) => (
-                <div className="Departmentselection-item" key={idx} onClick={() => handleOpenUniversityPopup(item)}>
-                  <HeartToggle
-                    selected={false}
-                    onToggle={(e) => {
-                      e.stopPropagation();
-                      handleToggle("학과", item);
-                    }}
-                  />
-                  {item}
-                  <span>›</span>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="Departmentselection-section">
-            <div className="Departmentselection-subtitle">• 나의 학과목록</div>
             {myDepartments.학과.map((item, idx) => (
               <div className="Departmentselection-item" key={idx} onClick={() => handleOpenUniversityPopup(item)}>
                 <HeartToggle
@@ -190,75 +171,64 @@ const Departmentselection = () => {
                     handleToggle("학과", item);
                   }}
                 />
-                {item}
-                <span>›</span>
+                {item}<span>›</span>
               </div>
             ))}
             <div className="Departmentselection-add" onClick={() => setShowDepartmentModal(true)}>+</div>
           </div>
         </div>
 
-        {/* 대학 */}
+        {/* 대학 목록 */}
         <div className="Departmentselection-step">
-          <div className="Departmentselection-step-title">대학 목록</div>
+          <div className="Departmentselection-step-title">나의 대학 목록</div>
           <div className="Departmentselection-section">
-            {popupAddedUniversities.상향.length + popupAddedUniversities.적정.length + popupAddedUniversities.하향.length === 0 ? (
-              <div className="Departmentselection-locked full">
-                🔒<br />
-                <span>2-2 성적부터 입력 후 추천 가능</span>
+            {myMajorUnivs.map((item, idx) => (
+              <div className="Departmentselection-item" key={idx}>
+                <HeartToggle
+                  selected={true}
+                  onToggle={() => handleUniversityBookmarkToggle(item.majorId, item.univId)}
+                />
+                {item.name}
+                <span>›</span>
               </div>
-            ) : (
-              ["상향", "적정", "하향"].map(category => (
-                popupAddedUniversities[category].length > 0 && (
-                  <div key={category}>
-                    <div className="Departmentselection-subtitle">• {category}</div>
-                    {popupAddedUniversities[category].map((item, idx) => (
-                      <div className="Departmentselection-item" key={idx}>
-                        <HeartToggle
-                          selected={true}
-                          onToggle={() => handleUniversityToggleFromPopup(category, item)}
-                        />
-                        {item}
-                        <span>›</span>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ))
-            )}
-            <div className="Departmentselection-add-top" onClick={() => setShowUniversityModal(true)}>+</div>
+            ))}
+            <div className="Departmentselection-add-top" >+</div>
           </div>
         </div>
       </div>
 
+      {/* 모달들 */}
       <AddMajorModal
         show={showMajorModal}
-        onClose={() => setShowMajorModal(false)}
-        allMajors={allMajors}
-        myMajors={myDepartments.계열}
-        onToggle={handleMajorToggleFromPopup}
-        onOpenMajorDepartments={(major) => {
+        onClose={() => {
           setShowMajorModal(false);
-          setSelectedMajorForDepartments(major);
+          window.location.reload();
         }}
+        myMajors={myDepartments.계열}
+        onOpenMajorDepartments={(major) => setSelectedMajorForDepartments(major)}
       />
 
       <AddDepartmentModal
         show={showDepartmentModal}
-        onClose={() => setShowDepartmentModal(false)}
-        departments={allDepartments}
+        onClose={() => {
+          setShowDepartmentModal(false);
+          window.location.reload();
+        }}
         selected={myDepartments.학과}
-        onToggle={handleDepartmentToggleFromPopup}
         search={departmentSearch}
         onSearch={setDepartmentSearch}
+        onToggle={handleDepartmentToggleFromPopup}
         onOpenUniversityPopup={handleOpenUniversityPopup}
       />
 
       <MajorDepartmentModal
         show={!!selectedMajorForDepartments}
-        onClose={() => setSelectedMajorForDepartments(null)}
+        onClose={() => {
+          setSelectedMajorForDepartments(null);
+          if (!showMajorModal) window.location.reload();
+        }}
         title={selectedMajorForDepartments}
-        departments={filteredDepartmentsByMajor[selectedMajorForDepartments] || []}
+        fieldId={nameToIdMap[selectedMajorForDepartments]}
         selected={myDepartments.학과}
         onToggle={handleDepartmentToggleFromPopup}
       />
@@ -267,6 +237,7 @@ const Departmentselection = () => {
         show={!!selectedDepartmentForUniversities}
         onClose={() => setSelectedDepartmentForUniversities(null)}
         departmentName={selectedDepartmentForUniversities}
+        departmentId={departmentNameToIdMap[selectedDepartmentForUniversities]}
       />
 
       <AddUniversityModal

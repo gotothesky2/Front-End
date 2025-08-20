@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Mypage.css";
 import {
-  fetchMe,
-  fetchTokenCount,
-  fetchSchoolGradeSex,
-  updateUserProfile,
+  fetchUserSummary,   // ← /users/info 요약 (name, email, token 등)
+  fetchTokenCount,    // ← 토큰 개수
+  fetchSchoolGradeSex, // ← 학교/학년/성별/주소 (평탄화)
+  updateUserProfile,   // ← 개인정보 수정
 } from "../../api/client";
 import EduProfileModal from "../../components/EduProfileModal";
 
@@ -18,8 +18,13 @@ const LINKS = {
   tokenCharge: "/TokenCharge",
 };
 
-const cleanName = (raw) =>
-  String(raw || "사용자").replace(/^\{[^}]+\}/, "").trim();
+// 이름 접두사/태그 제거: "{kakao}", "(kakao)", "[kakao]", "kakao: " 등
+const cleanName = (raw) => {
+  const s = String(raw || "사용자").trim();
+  return s
+    .replace(/^\s*[\{\[\(]?\s*(kakao|naver|google)\s*[\}\]\)]?\s*[:\-]?\s*/i, "")
+    .trim();
+};
 
 const getSemester = () => {
   const month = new Date().getMonth() + 1;
@@ -50,13 +55,18 @@ const Mypage = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const loadProfile = async () => {
       try {
-        const res = await fetchMe();
-        const data = res?.data || {};
+        const sum = await fetchUserSummary();
+        if (!mounted) return;
+        if (!sum.ok) {
+          console.error("프로필 불러오기 실패:", sum.error);
+        }
         setProfile({
-          name: cleanName(data.name),
-          email: data.email || "unknown@example.com",
+          name: cleanName(sum.name || "사용자"),
+          email: sum.email || "unknown@example.com",
         });
       } catch (err) {
         console.error("프로필 불러오기 실패:", err);
@@ -66,8 +76,9 @@ const Mypage = () => {
     const loadToken = async () => {
       try {
         const { token, error } = await fetchTokenCount();
+        if (!mounted) return;
         if (error) console.error("토큰 조회 실패:", error);
-        setToken(token);
+        setToken(Number(token ?? 0));
       } catch (err) {
         console.error("토큰 불러오기 실패:", err);
       }
@@ -75,8 +86,17 @@ const Mypage = () => {
 
     const loadSchool = async () => {
       try {
-        const { ok, highschool, gradeNum, sex, zipcode, address, addressDetail, error } =
-          await fetchSchoolGradeSex();
+        const {
+          ok,
+          highschool,
+          gradeNum,
+          sex,
+          zipcode,
+          address,
+          addressDetail,
+          error,
+        } = await fetchSchoolGradeSex();
+        if (!mounted) return;
         if (!ok) console.error("학교/학년/성별/주소 조회 실패:", error);
         setHighschool(highschool || "");
         setGradeNum(gradeNum ?? null);
@@ -92,6 +112,10 @@ const Mypage = () => {
     loadProfile();
     loadToken();
     loadSchool();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // 모달 저장 → 서버 업데이트
@@ -136,6 +160,13 @@ const Mypage = () => {
       setSaving(false);
     }
   };
+
+  // "○○고등학교" 중복 방지
+  const displayHighschool = (() => {
+    const n = (highschool || "").trim();
+    if (!n) return "미입력";
+    return /고등학교$/.test(n) ? n : `${n}고등학교`;
+  })();
 
   return (
     <div className="mypage-container">
@@ -198,7 +229,7 @@ const Mypage = () => {
               충전하기 &gt;
             </Link>
           </div>
-          <div className="mypage-token-value">{token}개</div>
+          <div className="mypage-token-value">{Number.isFinite(token) ? token : 0}개</div>
         </div>
 
         <div className="mypage-card report">
@@ -230,7 +261,7 @@ const Mypage = () => {
           <img src={`${process.env.PUBLIC_URL}/img/image 6.jpg`} alt="프로필" />
         </div>
         <div className="mypage-name">{profile.name} 님</div>
-        <div className="mypage-info">· 고등학교: {highschool || "미입력"}고등학교</div>
+        <div className="mypage-info">· 고등학교: {displayHighschool}</div>
         <div className="mypage-info">· 학년: {gradeNum ?? "-"}학년 {semester}</div>
         <div className="mypage-info">· Email: {profile.email}</div>
         <div className="mypage-info">· 성별: {sexLabel(sex)}</div>
@@ -256,3 +287,4 @@ const Mypage = () => {
 };
 
 export default Mypage;
+  
