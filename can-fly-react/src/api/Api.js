@@ -100,4 +100,21 @@ export const del = async (endpoint, options = {}) => {
   }
 };
 
+// PATCH
+export const patch = async (endpoint, data = {}, options = {}) => {
+  try {
+    const response = await api.patch(endpoint, data, options);
+
+    const contentType = response.headers["content-type"] || "";
+    if (!contentType.includes("application/json")) {
+      throw new Error("서버 응답이 올바르지 않습니다.");
+    }
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export default api;
