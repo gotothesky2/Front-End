@@ -2,22 +2,24 @@ import React, { useState } from "react";
 import "../../styles/AddUniversityModal.css";
 import HeartToggle from "./HeartToggle";
 
-const AddUniversityModal = ({ show, onClose, onToggle, selected }) => {
+const AddUniversityModal = ({ show, onClose, onToggle, selected = [] }) => {
   const [search, setSearch] = useState("");
 
   if (!show) return null;
 
-  // 예시 데이터
-  const universityData = {
-    상향: ["xx 대-소프트웨어", "□□ 대-기계"],
-    적정: ["xx대 천체우주", "□□대 물리"],
-    하향: ["xx 대-컴퓨터", "□□ 대-정보"]
-  };
+  // 예시 데이터 (단일 배열)
+  const universityData = [
+    "xx대-소프트웨어",
+    "□□대-기계",
+    "yy대-전기전자",
+    "zz대-컴퓨터공학",
+    "aa대-물리학",
+  ];
 
-  const filterList = (list) => {
-    if (!search.trim()) return list;
-    return list.filter((item) => item.includes(search));
-  };
+  // 검색 필터 적용
+  const filtered = universityData.filter((item) =>
+    item.includes(search.trim())
+  );
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -42,36 +44,32 @@ const AddUniversityModal = ({ show, onClose, onToggle, selected }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="search-btn"><img 
-          src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
-          className="search-icon"/></button>
+          <button className="search-btn">
+            <img
+              src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
+              className="search-icon"
+              alt="검색"
+            />
+          </button>
         </div>
 
         {/* 본문 */}
         <div className="modal-body">
-          <div className="modal-subtitle">추천 대학-학과</div>
-          {["상향", "적정", "하향"].map((category) => {
-            const filtered = filterList(universityData[category]);
-            return (
-              <div key={category}>
-                <div className="modal-subtitle-small">• {category}</div>
-                {filtered.length > 0 ? (
-                  filtered.map((item, idx) => (
-                    <div className="modal-item" key={idx}>
-                      <HeartToggle
-                        selected={selected?.[category]?.includes(item)}
-                        onToggle={() => onToggle(category, item)}
-                      />
-                      {item}
-                      <span>›</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-data">검색 결과가 없습니다</div>
-                )}
+          <div className="modal-subtitle">대학-학과 목록</div>
+          {filtered.length > 0 ? (
+            filtered.map((item, idx) => (
+              <div className="modal-item" key={idx}>
+                <HeartToggle
+                  selected={selected.includes(item)}
+                  onToggle={() => onToggle(item)}
+                />
+                {item}
+                <span>›</span>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <div className="no-data">검색 결과가 없습니다</div>
+          )}
         </div>
       </div>
     </div>
