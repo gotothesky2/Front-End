@@ -1,15 +1,36 @@
-import React from "react";
+// src/pages/Login.jsx
+import React, { useEffect, useState } from "react";
 import "../../styles/Login.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { fetchTokenCount, fetchSchoolGradeSex } from "../../api/client"; // ← 추가
 
-const Login = ({ onLogin, isLoggedIn }) => {
-  const userName = "사용자"; // 더미 사용자 이름, API로 대체 가능
-  const currentDate = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
+const Login = ({ onLogin, isLoggedIn, userName }) => {
+  const [token, setToken] = useState(0);
+  const [semester, setSemester] = useState("1학기");
+  const [school, setSchool] = useState({ highschool: "", gradeNum: null }); // ← 고등학교/학년
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      (async () => {
+        // 토큰
+        const { token, error } = await fetchTokenCount();
+        if (error) console.error("토큰 조회 실패:", error);
+        setToken(token);
+
+        // 고등학교/학년
+        const { ok, highschool, gradeNum, error: sErr } =
+          await fetchSchoolGradeSex();
+        if (!ok && sErr) console.error("학교/학년 조회 실패:", sErr);
+        setSchool({ highschool: highschool || "", gradeNum: gradeNum ?? null });
+      })();
+    }
+
+    // 학기 계산 (3~7월: 1학기, 나머지: 2학기) — 기존 로직 유지
+    const month = new Date().getMonth() + 1;
+    if (month >= 3 && month <= 7) setSemester("1학기");
+    else setSemester("2학기");
+  }, [isLoggedIn]);
+
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
@@ -43,6 +64,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
     );
   }
 
+  // 로그인 상태
   return (
     <div className="profile-card-container">
       <div className="profile-card">
@@ -54,7 +76,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
             />
           </div>
           <div className="profile-details">
-            <div className="profile-name">전성환 님</div>
+            <div className="profile-name">{userName} 님</div>
             <div className="profile-row-wrapper">
               <div className="profile-row">
                 <img
@@ -62,7 +84,7 @@ const Login = ({ onLogin, isLoggedIn }) => {
                   alt="학교"
                   className="icon"
                 />
-                <span>멋사고등학교</span>
+                <span>{school.highschool || "고등학교 미입력"}고등학교</span>
               </div>
               <div className="profile-row">
                 <img
@@ -70,7 +92,9 @@ const Login = ({ onLogin, isLoggedIn }) => {
                   alt="학년"
                   className="icon"
                 />
-                <span>3학년 2학기</span>
+                <span>
+                  {school.gradeNum ?? "-"}학년 {semester}
+                </span>
               </div>
               <div className="profile-row">
                 <img
@@ -78,14 +102,16 @@ const Login = ({ onLogin, isLoggedIn }) => {
                   alt="코인"
                   className="icon"
                 />
-                <span>100 코인</span>
+                <span>{token} 토큰</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="profile-bottom">
-          <button className="profile-btn left">충전하기</button>
+          <Link to="/TokenCharge" className="profile-btn left">
+            충전하기
+          </Link>
           <Link to="/Mypage" className="profile-btn right">
             마이페이지
           </Link>

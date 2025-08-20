@@ -1,6 +1,6 @@
 import { Cookies } from "react-cookie";
 import axios from "axios";
-import config from "./config";
+import config from "../config";
 
 const api = axios.create({
   baseURL: config.API_URL,
@@ -13,7 +13,7 @@ api.interceptors.request.use(
   (config) => {
     const token = cookies.get("accessToken");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `${token}`;
     }
     return config;
   },
@@ -99,5 +99,22 @@ export const del = async (endpoint, options = {}) => {
     throw error;
   }
 };
+
+// PATCH
+export const patch = async (endpoint, data = {}, options = {}) => {
+  try {
+    const response = await api.patch(endpoint, data, options);
+
+    const contentType = response.headers["content-type"] || "";
+    if (!contentType.includes("application/json")) {
+      throw new Error("서버 응답이 올바르지 않습니다.");
+    }
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 export default api;

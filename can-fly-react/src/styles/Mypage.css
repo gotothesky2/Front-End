@@ -1,3 +1,18 @@
+
+@font-face {
+  font-family: 'Kakaobold';
+  src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoExtra';
+  src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'KakaoRegular';
+  src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
 /* 전체 컨테이너 */
 .mypage-container {
   display: flex;
@@ -36,6 +51,13 @@
   box-sizing: border-box;
   overflow: hidden;
 }
+.mypage-card-title-link { text-decoration: none; color: inherit; cursor: pointer; }
+
+
+.mypage-card-link,
+.mypage-token-recharge { text-decoration: none; color: inherit; }
+
+
 
 /* 카드 내부 이미지 */
 .mypage-step {
@@ -172,3 +194,7 @@
   font-size: 1rem;
   cursor: pointer;
 }
+
+
+
+

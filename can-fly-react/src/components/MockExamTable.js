@@ -14,24 +14,26 @@ const mapSubjectToKey = {
   탐구2:   'explore2',
 };
 
-// 한 과목의 백분위
+// 한 과목의 백분위  ✅ 수정
 function getPercentile(termData, grade, sem, subjName) {
   const termKey = `${grade} ${sem}`;
   const rowKey  = mapSubjectToKey[subjName];
-  return termData[termKey]?.[rowKey]?.percentile ?? 0;
+  const v = termData?.[termKey]?.[rowKey]?.percentile;  // '', '77', 77, undefined 등
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;                     // '', undefined -> 0
 }
 
 // — 새로 추가 —
 // 한 과목의 평균(6월+9월)
 function getSubjectAvg(data, grade, subjName) {
-  const p6 = Number(getPercentile(data, grade, '6월', subjName));
-  const p9 = Number(getPercentile(data, grade, '9월', subjName));
+  const p6 = getPercentile(data, grade, '6월', subjName);
+  const p9 = getPercentile(data, grade, '9월', subjName);
   return ((p6 + p9) / 2).toFixed(1);
 }
 
 // 학기별 평균
 function computeSemesterAvg(termData, grade, sem) {
-  const vals = subjects.map(s => Number(getPercentile(termData, grade, sem, s)));
+  const vals = subjects.map(s => getPercentile(termData, grade, sem, s));
   return (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1);
 }
 

@@ -1,4 +1,3 @@
-// src/components/MockExamModal.js
 import React, { useState, useEffect } from 'react';
 import '../styles/MockExamModal.css';
 
@@ -38,12 +37,26 @@ export default function MockExamModal({
   const change = (key, field, val) => {
     setRows(r => ({ ...r, [key]: { ...r[key], [field]: val }}));
   };
+
   const submit = () => onSave(rows);
   if (!isOpen) return null;
 
-  // disabled 조건
+  // 표준점수/등급 비활성 규칙 (이전 로직 유지)
   const stdDisabled   = key => ['koreanHistory','english'].includes(key);
   const gradeDisabled = key => !['koreanHistory','english'].includes(key);
+
+  // ✅ 백분위는 전부 비활성 + 빈 값으로 표시
+  const renderPercentileBlank = () => (
+    <input
+      type="number"
+      className="percentile-disabled"
+      disabled
+      value=""
+      placeholder=""
+      readOnly
+      aria-label="백분위(비활성)"
+    />
+  );
 
   return (
     <div className="modal-backdrop">
@@ -92,13 +105,7 @@ export default function MockExamModal({
                   onChange={e=>change('koreanHistory','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.koreanHistory.percentile}
-                  onChange={e=>change('koreanHistory','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
 
             {/* 국어 */}
@@ -121,13 +128,7 @@ export default function MockExamModal({
                   onChange={e=>change('korean','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.korean.percentile}
-                  onChange={e=>change('korean','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
 
             {/* 수학 */}
@@ -158,13 +159,7 @@ export default function MockExamModal({
                   onChange={e=>change('math','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.math.percentile}
-                  onChange={e=>change('math','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
 
             {/* 영어 */}
@@ -195,13 +190,7 @@ export default function MockExamModal({
                   onChange={e=>change('english','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.english.percentile}
-                  onChange={e=>change('english','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
 
             {/* 탐구 (rowSpan=2) */}
@@ -232,13 +221,7 @@ export default function MockExamModal({
                   onChange={e=>change('explore1','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.explore1.percentile}
-                  onChange={e=>change('explore1','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
             <tr>
               <td>
@@ -266,13 +249,7 @@ export default function MockExamModal({
                   onChange={e=>change('explore2','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.explore2.percentile}
-                  onChange={e=>change('explore2','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
 
             {/* 제2외국어/한문 */}
@@ -303,13 +280,7 @@ export default function MockExamModal({
                   onChange={e=>change('secondLang','grade',e.target.value)}
                 />
               </td>
-              <td>
-                <input
-                  type="number"
-                  value={rows.secondLang.percentile}
-                  onChange={e=>change('secondLang','percentile',e.target.value)}
-                />
-              </td>
+              <td>{renderPercentileBlank()}</td>
             </tr>
           </tbody>
         </table>
@@ -323,6 +294,7 @@ export default function MockExamModal({
     </div>
   );
 }
+
 
 
 

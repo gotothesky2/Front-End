@@ -95,3 +95,8 @@
   cursor: pointer;
   transition: background-color 0.3s;
 }
+.Main-step-action-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block; /* 필요 시 block으로 확장 */
+}

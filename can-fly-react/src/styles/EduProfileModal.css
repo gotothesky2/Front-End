@@ -1,0 +1,209 @@
+/* ===== EduProfileModal only ===== */
+
+/* 폰트 (필요 없으면 지워도 됨) */
+@font-face {
+  font-family: 'Kakaobold';
+  src: url("../../public/font/KakaoBigSans-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: 'KakaoExtra';
+  src: url("../../public/font/KakaoBigSans-ExtraBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: 'KakaoRegular';
+  src: url("../../public/font/KakaoBigSans-Regular.ttf") format("truetype");
+}
+
+/* 배경 오버레이 */
+.edu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  font-family: 'KakaoRegular';
+}
+
+/* 모달 박스 */
+.edu-modal {
+  width: 360px;
+  max-width: calc(100% - 32px);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+
+  /* === 간격 변수(원하면 여기만 조절) === */
+  --edu-label-w: 80px;     /* 라벨 고정 폭 */
+  --edu-row-gap: 12px;     /* 각 행(세로) 간격 */
+  --edu-addr-hgap: 14px;   /* 3~5행(주소 영역) 라벨-인풋/인풋-버튼 가로 간격 */
+}
+
+/* 헤더 */
+.edu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e9e9ee;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+.edu-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* 닫기 버튼 (hover 제거) */
+.edu-close {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #0339A6;
+}
+.edu-close:hover,
+.edu-close:focus {
+  background: transparent !important;
+  color: #0339A6 !important;
+}
+
+/* 본문 */
+.edu-body {
+  padding: 10px 16px 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--edu-row-gap);      /* ⬅︎ 행 간(세로) 간격을 변수로 통일 */
+}
+
+/* 한 줄: [라벨][입력][(선택)버튼] */
+.edu-field {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;                     /* 기본 가로 간격(행별 오버라이드로 변경) */
+  width: 100%;
+}
+
+/* 라벨 공통 */
+.edu-label {
+  font-weight: 700;
+  color: #2d2d35;
+  font-size: 14px;
+  text-align: right;            /* 기본은 오른쪽 정렬 */
+  white-space: nowrap;          /* 줄바꿈 방지 (예: '기본주소'가 두 줄로 내려가지 않도록) */
+  word-break: keep-all;         /* 한글 단어 분리 방지 */
+  flex: 0 0 var(--edu-label-w); /* 라벨 폭 고정(수축 방지) */
+}
+
+/* 작은 입력칸(고등학교/학년/우편번호) */
+.edu-input {
+  width: 90px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #dcdce3;
+  outline: none;
+  padding: 0 6px;
+  text-align: center;
+  background: #fff;
+}
+
+/* 긴 입력칸(기본주소/상세주소) */
+.edu-input-long {
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #dcdce3;
+  outline: none;
+  padding: 0 8px;
+  width: 100%;
+  min-width: 0;
+  background: #fff;
+}
+
+/* 주거지역 섹션 타이틀 */
+.edu-section-title {
+  margin: 12px 0 10px;
+  padding-top: 8px;
+  border-top: 1px dashed #ececf3;
+  font-weight: 700;
+  font-size: 15px;
+  color: #2d2d35;
+  text-align: center;
+}
+
+/* 우편번호 찾기 버튼 */
+.edu-mini-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #cfd6ff;
+  background: #f2f5ff;
+  color: #0339A6;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 푸터 / 완료 버튼 */
+.edu-footer {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+.edu-submit {
+  min-width: 80px;
+  height: 30px;
+  border-radius: 6px;
+  background: #0339A6;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  border: 0;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+/* =========================
+   행별 미세 조정
+   ========================= */
+
+/* 1~2행(고등학교/학년)
+   - 라벨-박스 간격 '극도로' 축소
+   - 라벨을 왼쪽 정렬로 바꿔 '고'와 '학' 시작선을 동일화
+   - 행은 중앙에 배치 */
+.edu-body .edu-field:nth-of-type(1),
+.edu-body .edu-field:nth-of-type(2) {
+  justify-content: center;          /* 라벨+인풋 묶음 중앙 정렬 */
+  gap: 0px !important;              /* 아주 타이트 */
+  column-gap: 10px !important;
+}
+.edu-body .edu-field:nth-of-type(1) .edu-label,
+.edu-body .edu-field:nth-of-type(2) .edu-label {
+  text-align: left !important;      /* 시작선 통일(왼쪽 기준) */
+  flex: 0 0 var(--edu-label-w) !important;
+}
+.edu-body .edu-field:nth-of-type(1) .edu-input,
+.edu-body .edu-field:nth-of-type(2) .edu-input {
+  width: 120px !important;          /* 두 행 동일 폭 */
+}
+
+/* === 주소 영역(3~5행) 가로 간격을 '완전히 동일'하게 통일 === */
+.edu-body .edu-field:nth-of-type(3),
+.edu-body .edu-field:nth-of-type(4),
+.edu-body .edu-field:nth-of-type(5) {
+  gap: var(--edu-addr-hgap) !important;
+  column-gap: var(--edu-addr-hgap) !important;
+}
+
+/* 주소 행들 간의 세로 간격도 균일하게(별도 margin 제거) */
+/* 이전에 두었던 nth-of-type(5) margin-top 제거 */
+.edu-radio-group label {
+  font-size: 12px;   /* ✅ 글씨 작게 */
+  font-weight: 500;  /* 굵기 약간 줄임 (선택사항) */
+  color: #444;       /* 색상도 살짝 연하게 (선택사항) */
+  margin-right: 10px; /* 버튼 간격 */
+}
