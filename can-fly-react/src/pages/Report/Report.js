@@ -6,7 +6,8 @@ import RiaSecCards from "./RiaSecCards";
 import ReportScatter from "./ReportScatter";
 import "../../styles/Report.css";
 import AptitudeText from "./AptitudeText";
-import ScoreTrend from "./ScoreTrend";
+import ReportGradeTrendContainer from "../../components/ReportGradeTrendContainer";
+import MockExamTrend from "../../components/MockExamTrend";
 import ScoreTrendText from "./ScoreTrendText";
 import InterestChart from "./InterestChart";
 import ComprehensiveAnalysis from "./ComprehensiveAnalysis";
@@ -140,7 +141,8 @@ const Report = () => {
               </div>
 
               
-              <ScoreTrend />
+              <ReportGradeTrendContainer />
+              <MockExamTrend />
               <ScoreTrendText />
 
                             {/* 관심 학과·학교 분석 */}

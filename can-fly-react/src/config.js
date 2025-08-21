@@ -19,7 +19,7 @@ const config = {
 
     MOCK: {
         ALL_DETAIL: `${BASE_URL}/users/grades/mock`,
-        REGISTER: `${BASE_URL}/users/grades/mock`,
+        REGISTER: `${BASE_URL}/users/grades/mock/excel`,
         SPECIFIC_DETAIL: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         SCORE_REGISTER: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         DELETE_MOCK: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
