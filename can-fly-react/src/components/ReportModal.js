@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import '../styles/ReportModal.css';
 import {
   fetchTokenCount,
-  useTokens as apiUseTokens, // 일반 함수 (Hook 아님)
+  useTokens as apiUseTokens, // PATCH /users/token  (amount: -cost)
 } from '../api/client';
+import { createAiReport } from '../api/aireport';
 
 const ReportModal = ({ isOpen, onClose }) => {
   const [grade, setGrade] = useState('3학년');
@@ -12,6 +13,7 @@ const ReportModal = ({ isOpen, onClose }) => {
   const [hasInput, setHasInput] = useState(true);
 
   const [tokens, setTokens] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,6 +24,9 @@ const ReportModal = ({ isOpen, onClose }) => {
     '3학년': 70,
   };
   const cost = costByGrade[grade] ?? 0;
+
+  const toGradeNum = (g) => Number(String(g).match(/[1-3]/)?.[0] || 0);  // '3학년' -> 3
+  const toTermNum  = (t) => Number(String(t).match(/[1-2]/)?.[0] || 0);  // '1학기' -> 1
 
   // 모달 열릴 때 보유 토큰 조회
   useEffect(() => {
@@ -46,25 +51,56 @@ const ReportModal = ({ isOpen, onClose }) => {
     })();
   }, [isOpen]);
 
-  // 확인 → 학년별 토큰 차감 후 홈으로 전체 새로고침
+  // ✅ '예' 클릭 → (1) 토큰 확인 → (2) AiReport 생성 → (3) 토큰 차감 → (4) 저장 후 이동
   const handleConfirm = async () => {
+    setError('');
     if (tokens < cost) {
       setError('토큰 부족으로 레포트 생성에 실패하였습니다');
       return;
     }
+
+    const reportGradeNum = toGradeNum(grade);
+    const reportTermNum  = toTermNum(term);
+    if (!reportGradeNum || !reportTermNum) {
+      setError('학년/학기 선택을 확인해주세요.');
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      const res = await apiUseTokens(cost); // PATCH /users/token { amount: -cost }
-      if (!res.ok) {
-        setError(res.message || '토큰 차감 실패');
+      // (2) AiReport 생성
+      const makeRes = await createAiReport({ reportGradeNum, reportTermNum });
+      if (!makeRes?.success) {
+        setError(makeRes?.message || '레포트 생성 실패');
+        setSubmitting(false);
         return;
       }
-      // ✅ 차감 성공 시: 홈으로 이동 + 전체 새로고침
-      window.location.href = '/';         // 이동과 동시에 새로고침됨 (SPA 무시하고 풀 리로드)
-      // 또는 window.location.replace('/') 사용 가능
-      // 또는 setTimeout(() => window.location.reload(), 0) 도 가능
+
+      const created = makeRes.data; // 서버가 내려준 생성된 보고서
+      // (3) 토큰 차감
+      const tokenRes = await apiUseTokens(cost);
+      if (!tokenRes.ok) {
+        setError(tokenRes.message || '토큰 차감 실패');
+        setSubmitting(false);
+        return;
+      }
+
+      // (4) 생성 결과를 로컬스토리지에 저장 (페이지에서 사용)
+      try {
+        localStorage.setItem('last_ai_report', JSON.stringify(created));
+        // hasInput 여부도 보관하고 싶다면:
+        localStorage.setItem('last_ai_report_hasInput', JSON.stringify(hasInput));
+      } catch (e) {
+        console.warn('localStorage 저장 중 경고:', e);
+      }
+
+      // 이동(선호하는 경로로 변경 가능)
+      // 레포트 페이지에서 읽어가도록 보고서 페이지로 이동 권장
+      window.location.href = '/report'; // 또는 '/mypage/report' 등 실제 경로
     } catch (err) {
-      console.error('토큰 차감 에러:', err);
-      setError('토큰 차감 중 오류가 발생했습니다.');
+      console.error('레포트 생성 에러:', err);
+      setError('레포트 생성 중 오류가 발생했습니다.');
+      setSubmitting(false);
     }
   };
 
@@ -85,7 +121,7 @@ const ReportModal = ({ isOpen, onClose }) => {
             <div className="selects">
               <label className="inline-label">
                 <span className="inline-label-text">학년</span>
-                <select value={grade} onChange={e => setGrade(e.target.value)}>
+                <select value={grade} onChange={e => setGrade(e.target.value)} disabled={submitting}>
                   <option>1학년</option>
                   <option>2학년</option>
                   <option>3학년</option>
@@ -93,7 +129,7 @@ const ReportModal = ({ isOpen, onClose }) => {
               </label>
               <label className="inline-label">
                 <span className="inline-label-text">학기</span>
-                <select value={term} onChange={e => setTerm(e.target.value)}>
+                <select value={term} onChange={e => setTerm(e.target.value)} disabled={submitting}>
                   <option>1학기</option>
                   <option>2학기</option>
                 </select>
@@ -106,18 +142,10 @@ const ReportModal = ({ isOpen, onClose }) => {
             <h3>2. 관심 계열 및 학과 입력 여부</h3>
             <div className="radios">
               <label>
-                <input
-                  type="radio"
-                  checked={hasInput}
-                  onChange={() => setHasInput(true)}
-                /> 입력함
+                <input type="radio" checked={hasInput} onChange={() => setHasInput(true)} disabled={submitting} /> 입력함
               </label>
               <label>
-                <input
-                  type="radio"
-                  checked={!hasInput}
-                  onChange={() => setHasInput(false)}
-                /> 입력하지 않음
+                <input type="radio" checked={!hasInput} onChange={() => setHasInput(false)} disabled={submitting} /> 입력하지 않음
               </label>
             </div>
           </div>
@@ -146,8 +174,14 @@ const ReportModal = ({ isOpen, onClose }) => {
 
           {/* 버튼 */}
           <div className="buttons">
-            <button className="btn confirm" onClick={handleConfirm}>예</button>
-            <button className="btn cancel" onClick={onClose}>아니오</button>
+            <button
+              className="btn confirm"
+              onClick={handleConfirm}
+              disabled={submitting}
+            >
+              {submitting ? '생성 중…' : '예'}
+            </button>
+            <button className="btn cancel" onClick={onClose} disabled={submitting}>아니오</button>
           </div>
 
           {/* 에러 메시지 */}
@@ -159,3 +193,4 @@ const ReportModal = ({ isOpen, onClose }) => {
 };
 
 export default ReportModal;
+

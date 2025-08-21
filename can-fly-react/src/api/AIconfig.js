@@ -24,6 +24,13 @@ const AIconfig = {
         DELETE_CST: (cst_id) => `${BASE_URL}/cst/${cst_id}`,
     },
 
+    AIREPORT:{
+        ALL_REPORT: `${BASE_URL}/aireport/me`,
+        CONTENT_GET: (report_id) => `${BASE_URL}/aireport/${report_id}`,
+        DELETE_REPORT: (report_id) => `${BASE_URL}/aireport/${report_id}`,
+        MAKE_REPORT: `${BASE_URL}/aireport`,
+    }
+
 };
 
 export default AIconfig;

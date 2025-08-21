@@ -1,7 +1,7 @@
-import React from 'react';
+// src/pages/Report/AptitudeText.js
+import React, { useMemo } from 'react';
 import '../../styles/AptitudeText.css';
 
-// 백엔드에서 받아올 “종합 텍스트” 더미
 const DUMMY_TEXT = [
   '동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라 만세 …',
   '남산 위에 저 소나무 철갑을 두른 듯 바람 서리 불변함은 우리 기상일세 …',
@@ -9,12 +9,36 @@ const DUMMY_TEXT = [
   '이 기상과 이 맘으로 충성을 다하여 괴로우나 즐거우나 나라 사랑하세 …',
 ];
 
-export default function AptitudeText({ lines = DUMMY_TEXT }) {
+const splitToLines = (text) =>
+  String(text || '')
+    .split(/\r?\n\r?\n|\n/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+export default function AptitudeText({ lines }) {
+  const fromStorage = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('last_ai_report');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.testReport?.content || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const finalLines = useMemo(() => {
+    if (lines?.length) return lines;
+    if (fromStorage) return splitToLines(fromStorage);
+    return DUMMY_TEXT;
+  }, [lines, fromStorage]);
+
   return (
     <ul className="aptitude-text">
-      {lines.map((line, idx) => (
+      {finalLines.map((line, idx) => (
         <li key={idx}>{line}</li>
       ))}
     </ul>
   );
 }
+
