@@ -1,5 +1,5 @@
 // src/pages/ExamGrade/ExamGrade.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MockExamSidebar from '../../components/MockExamSidebar';
 import MockExamModal   from '../../components/MockExamModal';
 import StudentGradeHeader from '../../components/StudentGradeHeader';
@@ -8,12 +8,19 @@ import MockExamScoreTable from '../../components/MockExamScoreTable';
 import MockExamTrend from '../../components/MockExamTrend';
 import '../../styles/StudentGrade.css';
 
+// ★ API 불러오기
+import { getAllMockExams /*, postMockExam*/ } from '../../api/mockExam';
+
 const STORAGE_KEY = 'hackathon_mockData';
 
 export default function ExamGrade() {
   // 선택된 학기(term) + 모달 열림여부
   const [selectedTerm, setSelectedTerm] = useState('');
   const [isModalOpen,  setIsModalOpen]  = useState(false);
+
+  // 로딩/에러 (조회 상태 표시용)
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
 
   // ① lazy initializer 로 로컬스토리지에서 한 번만 불러옵니다.
   const [mockData, setMockData] = useState(() => {
@@ -24,6 +31,62 @@ export default function ExamGrade() {
       return {};
     }
   });
+
+// (중략) 기존 코드 유지
+
+const normalizeApiResult = (list = []) => {
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const out = {};
+
+  // 원본형: [{ examGrade, examMonth, scoreList:[{category, standardScore}...] }, ...]
+  for (const item of list) {
+    const { examGrade, examMonth, scoreList = [] } = item;
+    const termKey = `${examGrade}학년 ${examMonth}월`;
+
+    // category 매핑: 1=국어, 2=수학, 5=탐구1, 6=탐구2  (이 네 개만 사용)
+    const byCat = (cat) => scoreList.find((s) => s.category === cat);
+
+    out[termKey] = {
+      koreanStd:   num(byCat(1)?.standardScore),
+      mathStd:     num(byCat(2)?.standardScore),
+      explore1Std: num(byCat(5)?.standardScore),
+      explore2Std: num(byCat(6)?.standardScore),
+      // 메타(필요시)
+      examGrade,
+      examMonth,
+    };
+  }
+
+  return out;
+};
+
+// B) 재조회: API → 정규화 → 기존 mockData와 병합(서버값 우선)
+const reload = React.useCallback(async () => {
+  try {
+    setLoading(true);
+    setErr('');
+    const list = await getAllMockExams(); // 반드시 res.data.result가 오도록 api 함수 맞춰두기
+    const apiMapped = normalizeApiResult(list);
+
+    setMockData((prev) => {
+      const next = { ...prev, ...apiMapped };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  } catch (e) {
+    console.error(e);
+    setErr(e?.response?.data?.message || e.message || '모의고사 조회 실패');
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
+
+  // 초기 마운트 시 API 조회
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 사이드바에서 term 클릭 시
   const handleOpenModal = (term) => {
@@ -36,18 +99,38 @@ export default function ExamGrade() {
     setIsModalOpen(false);
   };
 
-  // ② functional update + 즉시 localStorage 저장
-  const handleSave = (rows) => {
-    setMockData(prev => {
-      const newData = { ...prev, [selectedTerm]: rows };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
-      return newData;
-    });
-    setIsModalOpen(false);
-  };
+ const handleSave = (rows) => {
+   // rows 예시 대응: { koreanStd: '123', math: {standardScore: 130}, explore1: '50', ... }
+   const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+   const pickStd = (v) => {
+     if (v && typeof v === 'object') {
+       return num(v.standardScore ?? v.std ?? v.value ?? v.val);
+     }
+     return num(v);
+   };
+
+  const stdObj = {
+     koreanStd:   pickStd(rows.koreanStd ?? rows.korean),
+     mathStd:     pickStd(rows.mathStd   ?? rows.math),
+     explore1Std: pickStd(rows.explore1Std ?? rows.explore1 ?? rows.science1),
+     explore2Std: pickStd(rows.explore2Std ?? rows.explore2 ?? rows.science2),
+   };
+
+   setMockData((prev) => {
+     const prevTerm = prev[selectedTerm] || {};
+     const nextTerm = { ...prevTerm, ...stdObj }; // 표준점수만 덮어쓰기
+     const next = { ...prev, [selectedTerm]: nextTerm };
+     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+     return next;
+   });
+   setIsModalOpen(false);
+ };
 
   // 모달에 넘길 초기 데이터 (없으면 빈 객체)
   const initialData = mockData[selectedTerm] || {};
+
+  console.log('percentileData keys:', Object.keys(mockData || {}));
+  console.log('term 3학년 6월:', mockData?.['3학년 6월']);
 
   return (
     <>
@@ -80,17 +163,22 @@ export default function ExamGrade() {
           <div className="grade-main-content">
             <StudentGradeHeader userName="전성환" />
 
+            {/* 조회 상태 표시 */}
+            {loading && <div style={{ margin: '8px 0' }}>모의고사 데이터 불러오는 중…</div>}
+            {err && <div style={{ color: 'crimson', margin: '8px 0' }}>{err}</div>}
+
             <div className="grade-table-header">
               <span className="grade-table-tab">모의고사 분석</span>
               <div className="grade-table-underline" />
             </div>
-            {/* 백분위 테이블 */}
+
+            {/* 백분위 테이블: 기존처럼 term->과목키 구조 사용 */}
             <MockExamTable percentileData={mockData} />
 
-            {/* 표준점수 테이블 */}
+            {/* 표준점수 테이블: 위에서 *_Std 키도 같이 주입했음 */}
             <MockExamScoreTable rawData={mockData} />
 
-            {/* 추가: 모의고사 추이(백분위) 차트 */}
+            {/* 모의고사 추이(백분위) 차트 */}
             <MockExamTrend percentileData={mockData} />
           </div>
         </div>
@@ -107,5 +195,6 @@ export default function ExamGrade() {
     </>
   );
 }
+
 
 

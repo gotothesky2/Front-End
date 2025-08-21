@@ -1,53 +1,60 @@
 // src/components/MockExamScoreTable.js
+// 이거 표준점수임
 import React from 'react';
 
-const grades    = ['1학년','2학년','3학년'];
-const semesters = ['6월','9월','평균'];
-const subjects  = ['국어','수학','영어','탐구1','탐구2'];
+const grades    = ['1학년', '2학년', '3학년'];
+const semesters = ['6월', '9월', '평균'];
+const subjects  = ['국어', '수학', '탐구1', '탐구2'];
 
-// map 과목명 → modal rows key
-const mapSubjectToKey = {
-  국어:    'korean',
-  수학:    'math',
-  영어:    'english',
-  탐구1:   'explore1',
-  탐구2:   'explore2',
+// 과목 → mockData 내부 표준점수 키
+const mapSubjectToStdKey = {
+  국어:  'koreanStd',
+  수학:  'mathStd',
+  탐구1: 'explore1Std',
+  탐구2: 'explore2Std',
 };
 
-// 한 과목의 표준점수 (단일 학기)
- function getRawScore(data, grade, sem, subjName) {
-   const termKey = `${grade} ${sem}`;
-   const rowKey  = mapSubjectToKey[subjName];
-   // 실제 저장된 값
-   const stored = data[termKey]?.[rowKey]?.raw;
-   // null, undefined, '' 전부 0으로 대체
-   if (stored === null || stored === undefined || stored === '') {
-     return 0;
-   }
-   return stored;
- }
-
-// 한 과목 평균 (6월+9월)
-function getSubjectAvg(data, grade, subjName) {
-  const v6 = Number(getRawScore(data, grade, '6월', subjName));
-  const v9 = Number(getRawScore(data, grade, '9월', subjName));
-  return ((v6 + v9) / 2).toFixed(1);
+// 숫자/문자/객체(예: {standardScore: 123}) 모두 안전 변환
+function toStdNumber(cell) {
+  if (cell && typeof cell === 'object') {
+    const cand = cell.standardScore ?? cell.std ?? cell.value ?? cell.val;
+    const n = Number(cand);
+    return Number.isFinite(n) ? n : 0;
+  }
+  const n = Number(cell);
+  return Number.isFinite(n) ? n : 0;
 }
 
-// 한 학기 전체 평균
-function computeSemesterAvg(data, grade, sem) {
-  const vals = subjects.map(s => Number(getRawScore(data, grade, sem, s)));
-  return (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1);
+// 한 과목의 표준점수 (mockData["3학년 9월"].koreanStd 같은 형태 가정)
+function getStd(rawData, grade, sem, subjName) {
+  const termKey = `${grade} ${sem}`;
+  const key     = mapSubjectToStdKey[subjName];
+  const cell    = rawData?.[termKey]?.[key];
+  return toStdNumber(cell);
 }
 
-// 학년 전체 평균
-function computeGradeAvg(data, grade) {
-  const avg6 = Number(computeSemesterAvg(data, grade, '6월'));
-  const avg9 = Number(computeSemesterAvg(data, grade, '9월'));
-  return ((avg6 + avg9)/2).toFixed(1);
+// 과목 평균(6월+9월)
+function getSubjectAvg(rawData, grade, subjName) {
+  const s6 = getStd(rawData, grade, '6월', subjName);
+  const s9 = getStd(rawData, grade, '9월', subjName);
+  return ((s6 + s9) / 2).toFixed(1);
 }
 
-export default function MockExamScoreTable({ rawData }) {
+// 학기 평균(해당 학기의 4과목 평균)
+function computeSemesterAvg(rawData, grade, sem) {
+  const vals = subjects.map(s => getStd(rawData, grade, sem, s));
+  const avg = vals.reduce((a, b) => a + b, 0) / (vals.length || 1);
+  return avg.toFixed(1);
+}
+
+// 학년 전체 평균(6월/9월 평균의 평균)
+function computeGradeAvg(rawData, grade) {
+  const avg6 = Number(computeSemesterAvg(rawData, grade, '6월'));
+  const avg9 = Number(computeSemesterAvg(rawData, grade, '9월'));
+  return ((avg6 + avg9) / 2).toFixed(1);
+}
+
+export default function MockExamScoreTable({ rawData = {} }) {
   return (
     <div className="grade-table-container">
       <table className="grade-table">
@@ -62,7 +69,7 @@ export default function MockExamScoreTable({ rawData }) {
           {grades.map(grade =>
             semesters.map((sem, i) => (
               <tr key={`${grade}-${sem}`}>
-                {i===0 && (
+                {i === 0 && (
                   <td rowSpan={semesters.length} className="grade-table__grade">
                     {grade}
                   </td>
@@ -73,7 +80,7 @@ export default function MockExamScoreTable({ rawData }) {
                   <td key={subjName}>
                     {sem === '평균'
                       ? getSubjectAvg(rawData, grade, subjName)
-                      : getRawScore(rawData, grade, sem, subjName)}
+                      : getStd(rawData, grade, sem, subjName)}
                   </td>
                 ))}
 
@@ -90,3 +97,5 @@ export default function MockExamScoreTable({ rawData }) {
     </div>
   );
 }
+
+

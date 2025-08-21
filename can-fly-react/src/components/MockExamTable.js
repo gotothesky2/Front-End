@@ -1,4 +1,5 @@
 // src/components/MockExamTable.js
+// 이건 백분위임
 import React from 'react';
 
 const grades    = ['1학년','2학년','3학년'];

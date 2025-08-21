@@ -1,5 +1,5 @@
 // src/pages/GradeInput/StudentGrade.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../styles/StudentGrade.css';
 
 import StudentGradeSidebar from '../../components/StudentGradeSidebar';
@@ -9,7 +9,7 @@ import StudentGradeTable   from '../../components/StudentGradeTable';
 import StudentGradeTrend   from '../../components/StudentGradeTrend';
 
 // API
-import { registerReportScores } from '../../api/report';
+import { registerReportScores, fetchAllDetailReportAsTermData } from '../../api/report';
 
 const defaultRow = () => ({
   id: Date.now(),
@@ -34,6 +34,25 @@ export default function StudentGrade() {
   const [modalRows, setModalRows]       = useState([defaultRow()]);
   const [loading, setLoading]           = useState(false);
 
+   // 서버에서 termData 동기화
+ const refreshFromServer = async () => {
+   try {
+     setLoading(true);
+     const serverTermData = await fetchAllDetailReportAsTermData();
+     setTermData(serverTermData);
+   } catch (e) {
+     console.error('전체 내신 조회 실패:', e);
+   } finally {
+     setLoading(false);
+   }
+ };
+
+ // 페이지 첫 진입 시 한 번 로드
+ useEffect(() => {
+   refreshFromServer();
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
+
   const handleOpenModal = (term) => {
     setSelectedTerm(term);
     setModalRows(termData[term] ? [...termData[term]] : [defaultRow()]);
@@ -47,14 +66,22 @@ export default function StudentGrade() {
       await registerReportScores(selectedTerm, rows);
 
       // 2) 화면 상태 갱신
-      setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
+      await refreshFromServer();
       setIsModalOpen(false);
     } catch (err) {
-      console.error(err);
-      alert('저장에 실패했습니다: ' + (err.response?.data?.message || '알 수 없는 오류'));
-    } finally {
-      setLoading(false);
-    }
+        const status = err.response?.status;
+        const data   = err.response?.data;
+        const serverMsg = data?.message || data?.title || data?.detail || JSON.stringify(data);
+        console.error('REGISTER_REPORT error >>>', {
+          status,
+          headers: err.response?.headers,
+          data,
+          requestPayload: err.config?.data,  // 실제 전송 바디
+          url: err.config?.url,
+          method: err.config?.method,
+  });
+  alert(`저장 실패 [${status ?? 'NO_STATUS'}]: ${serverMsg ?? err.message}`);
+}
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
