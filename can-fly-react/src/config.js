@@ -14,6 +14,7 @@ const config = {
         USE_RECHARGE: `${BASE_URL}/users/token`, // 토큰 사용 및 충전
         DELETE_ME: `${BASE_URL}/users/me`, // 회원탈퇴
         LOGOUT: `${BASE_URL}/users/logout`, // 로그아웃
+        User_info: `${BASE_URL}/users/info`, // 유저 전체 정보
     },
 
     MOCK: {

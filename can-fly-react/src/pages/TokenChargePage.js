@@ -2,8 +2,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import '../styles/TokenChargePage.css';
 import TokenModal from './TokenModal';
-import { get, patch } from '../api/Api';
+import { get } from '../api/Api'; // (있으면 사용) 내역 조회용
 import config from '../config';
+import { fetchTokenCount, chargeTokens } from '../api/client'; // ✅ chargeTokens 사용
 
 const TokenChargePage = () => {
   const [tab, setTab] = useState('charge');
@@ -68,14 +69,14 @@ const TokenChargePage = () => {
   };
 
   // ─────────────────────────────────────────
-  // 보유 토큰 조회: GET /users/me (config.USERS.DELETE_ME 경로를 GET으로)
+  // 보유 토큰 조회
   // ─────────────────────────────────────────
   const fetchBalance = async () => {
     setLoadingBalance(true);
     try {
-      const me = await get(config.USERS.DELETE_ME); // 서버가 GET 허용한다고 가정
-      const current = me?.result?.currentCoin ?? me?.result?.coin ?? 0;
-      setBalance(Number(current));
+      const { token, error } = await fetchTokenCount();
+      if (error) console.warn('[balance] 조회 실패:', error);
+      setBalance(Number(token || 0));
     } catch (e) {
       console.warn('[balance] 조회 실패', e);
     } finally {
@@ -84,26 +85,22 @@ const TokenChargePage = () => {
   };
 
   // ─────────────────────────────────────────
-  // 충전 내역 조회: 여러 후보를 순차 시도 (실 서버 경로 확정되면 하나로 바꿔도 됨)
+  // 충전 내역 조회 (백엔드가 엔드포인트 제공 시)
   // ─────────────────────────────────────────
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      // 1) 명시적 history 엔드포인트 후보들
       const base = config.API_URL;
       const candidates = [
         `${base}/users/token/history`,
         `${base}/users/token/logs`,
         `${base}/users/token/transactions`,
-        // 4) 혹시 GET /users/token 이 배열 내역을 주는 서버일 수도…
-        config.USERS.USE_RECHARGE,
       ];
 
       let list = null;
       for (const url of candidates) {
         try {
           const res = await get(url);
-          // 응답이 {result: [...] } or [...] or {data: [...] } 등일 수 있음
           const arr =
             Array.isArray(res) ? res :
             (Array.isArray(res?.result) ? res.result :
@@ -112,8 +109,8 @@ const TokenChargePage = () => {
             list = arr;
             break;
           }
-        } catch (e) {
-          // 계속 다음 후보로
+        } catch {
+          // 다음 후보 시도
         }
       }
       setHistory(normalizeHistory(list || []));
@@ -142,28 +139,37 @@ const TokenChargePage = () => {
     setModalInfo({ amount, price });
   };
 
-  // 모달에서 "결제/확인" 클릭 시만 PATCH 호출
+  // 모달에서 "결제하기" 클릭 시 충전 API 호출
   const confirmCharge = async () => {
     if (!modalInfo) return;
+
+    const amt = Number(modalInfo.amount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      alert('충전 수량이 올바르지 않습니다.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await patch(config.USERS.USE_RECHARGE, { amount: modalInfo.amount });
-      const newBalance = res?.result?.currentCoin;
-      if (typeof newBalance !== 'undefined') {
-        setBalance(Number(newBalance));
+      // ✅ 서버가 계산해서 내려주는 currentCoin만 사용
+      const { ok, currentCoin, message, error } = await chargeTokens(amt);
+      if (!ok) throw new Error(error || message || '충전에 실패했습니다.');
+
+      setBalance(Number(currentCoin) || 0); // ← 로컬 덧셈 없이 서버값만 반영
+      alert(message || '충전이 완료되었습니다.');
+      setModalInfo(null); // 모달 닫기
+
+      if (tab === 'history') {
+        await fetchHistory();
       }
-      alert('충전이 완료되었습니다.');
-      setModalInfo(null);
-      if (tab === 'history') fetchHistory();
     } catch (e) {
       console.error('[charge] 실패', e);
-      alert('충전에 실패했습니다.');
+      alert(e.message || '충전에 실패했습니다.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // prettier 표시용
   const balanceText = useMemo(
     () => (loadingBalance ? '…' : `${balance}개`),
     [loadingBalance, balance]
@@ -177,7 +183,7 @@ const TokenChargePage = () => {
           amount={modalInfo.amount}
           price={modalInfo.price}
           onClose={() => setModalInfo(null)}
-          onConfirm={confirmCharge}   // ← 모달의 확인 버튼에서 이 콜백 호출해야 함
+          onConfirm={confirmCharge}
           loading={submitting}
         />
       )}

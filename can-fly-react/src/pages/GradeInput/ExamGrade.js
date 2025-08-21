@@ -1,4 +1,5 @@
 // src/pages/ExamGrade/ExamGrade.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import MockExamSidebar from '../../components/MockExamSidebar';
 import MockExamModal   from '../../components/MockExamModal';
@@ -6,12 +7,17 @@ import StudentGradeHeader from '../../components/StudentGradeHeader';
 import MockExamTable from '../../components/MockExamTable';
 import MockExamScoreTable from '../../components/MockExamScoreTable';
 import MockExamTrend from '../../components/MockExamTrend';
+import { fetchMe, fetchUserSummary } from '../../api/client'; // ✅ /auth/me → /users/info 폴백
 import '../../styles/StudentGrade.css';
 
 // ★ API 불러오기
 import { getAllMockExams /*, postMockExam*/ } from '../../api/mockExam';
 
 const STORAGE_KEY = 'hackathon_mockData';
+
+// {kakao}홍길동 → 홍길동 (서버/클라 어디서 와도 방어)
+const cleanProviderPrefix = (username = '') =>
+  String(username).replace(/^\{[a-zA-Z0-9_]+\}/, '').trim();
 
 export default function ExamGrade() {
   // 선택된 학기(term) + 모달 열림여부
@@ -21,6 +27,9 @@ export default function ExamGrade() {
   // 로딩/에러 (조회 상태 표시용)
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+  // 사용자명
+  const [userName, setUserName] = useState('사용자');
+
 
   // ① lazy initializer 로 로컬스토리지에서 한 번만 불러옵니다.
   const [mockData, setMockData] = useState(() => {
@@ -31,6 +40,7 @@ export default function ExamGrade() {
       return {};
     }
   });
+
 
 // (중략) 기존 코드 유지
 
@@ -86,6 +96,36 @@ const reload = React.useCallback(async () => {
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  // 사용자 정보 불러오기: /auth/me → (없으면) /users/info
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        // 1) /auth/me 시도
+        const me = await fetchMe(); // { ok, data }
+        let rawName =
+          me?.data?.name ??
+          me?.data?.username ??
+          me?.data?.nickname ??
+          me?.name ??
+          me?.username ??
+          me?.nickname ??
+          '';
+
+        // 2) name이 비었거나 /auth/me 실패 느낌이면 /users/info 폴백
+        if (!rawName) {
+          const info = await fetchUserSummary(); // { ok, name, ... }
+          if (info?.ok && info?.name) rawName = info.name;
+        }
+
+        const cleaned = cleanProviderPrefix(rawName) || '사용자';
+        setUserName(cleaned);
+      } catch (e) {
+        console.error('사용자 정보 조회 실패:', e);
+        setUserName('사용자');
+      }
+    };
+    loadUser();
+
   }, []);
 
   // 사이드바에서 term 클릭 시
@@ -161,7 +201,8 @@ const reload = React.useCallback(async () => {
 
           {/* 2) 메인 콘텐츠 (헤더 + 테이블) */}
           <div className="grade-main-content">
-            <StudentGradeHeader userName="전성환" />
+            {/* ✅ 서버에서 가져온 사용자명 표시 */}
+            <StudentGradeHeader userName={userName} />
 
             {/* 조회 상태 표시 */}
             {loading && <div style={{ margin: '8px 0' }}>모의고사 데이터 불러오는 중…</div>}
@@ -195,6 +236,4 @@ const reload = React.useCallback(async () => {
     </>
   );
 }
-
-
 
