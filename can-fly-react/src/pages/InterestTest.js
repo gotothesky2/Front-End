@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const PAGE_SIZE = 20;
-const API_BASE = 'http://localhost:4000'; // 배포 시 .env 사용 권장
+const API_BASE = 'http://localhost:4000'; // 배포 시 .env 권장
 
 // 디버그용 안전 stringify
 const safeJson = (obj, len = 1000) => {
@@ -17,7 +17,7 @@ const safeJson = (obj, len = 1000) => {
   }
 };
 
-// 응답 어디에 있든 문항 배열 찾아오기
+// 응답 어디에 있든 문항 배열 찾아오기(방어)
 const findQuestionArrays = (root, maxDepth = 6) => {
   const results = [];
   const seen = new Set();
@@ -50,7 +50,6 @@ const normalizeV2Item = (q) => {
     .filter(c => c && (c.val !== undefined || c.text !== undefined))
     .map(c => ({ label: String(c.text ?? c.val ?? ''), score: String(c.val ?? '') }))
     .filter(o => o.score !== '');
-  // v2인데 choices가 없을 수도 있으니 1~5 기본 생성
   if (options.length === 0) {
     options = Array.from({ length: 5 }, (_, i) => ({ label: String(i + 1), score: String(i + 1) }));
   }
@@ -61,7 +60,7 @@ const normalizeV2Item = (q) => {
   };
 };
 
-// v1 정규화 (답항이 전부 null이면 1~5 기본 생성)
+// v1 정규화 (방어용 — 실제 v2만 사용하겠지만 혹시 모를 포맷 대응)
 const normalizeV1Item = (it) => {
   const qitemNo = Number(it.qitemNo ?? it.qitemno ?? it.qItemNo ?? it.no ?? 0);
   const question = String(it.question ?? it.qstnCn ?? it.title ?? '').trim();
@@ -70,26 +69,17 @@ const normalizeV1Item = (it) => {
   for (let i = 1; i <= 10; i++) {
     const pad = String(i).padStart(2, '0');
     const label =
-      it[`answer${pad}`] ??
-      it[`answr${pad}`] ??
-      it[`answer_${pad}`] ??
-      it[`answr_${pad}`];
+      it[`answer${pad}`] ?? it[`answr${pad}`] ?? it[`answer_${pad}`] ?? it[`answr_${pad}`];
     const scoreRaw =
-      it[`answerScore${pad}`] ??
-      it[`answrScore${pad}`] ??
-      it[`score${pad}`];
-
-    // label/score가 부분적으로라도 있으면 그대로 사용
+      it[`answerScore${pad}`] ?? it[`answrScore${pad}`] ?? it[`score${pad}`];
     if (label !== undefined && label !== null && String(label).trim() !== '') {
       const score =
         (scoreRaw !== undefined && scoreRaw !== null && String(scoreRaw) !== '')
           ? String(scoreRaw)
-          : String(i); // 점수 없으면 순번 대체
+          : String(i);
       options.push({ label: String(label), score });
     }
   }
-
-  // 여기! 답항이 전부 null인 케이스 → 1~5 기본 생성
   const finalOptions = options.length === 0
     ? Array.from({ length: 5 }, (_, i) => ({ label: String(i + 1), score: String(i + 1) }))
     : options;
@@ -108,7 +98,8 @@ const InterestTest = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const url = `${API_BASE}/api/interest/questions?q=34`;
+        // ★ 1~120만 서버에서 필터해서 받기
+        const url = `${API_BASE}/api/interest/questions?q=34&min=1&max=120`;
         const res = await axios.get(url);
 
         console.log('[interest raw keys]', Object.keys(res.data || {}));
@@ -119,7 +110,6 @@ const InterestTest = () => {
         if (Array.isArray(res.data?.result?.questions)) primaryCandidates.push({ path: '$.result.questions', arr: res.data.result.questions });
         if (Array.isArray(res.data?.RESULT)) primaryCandidates.push({ path: '$.RESULT', arr: res.data.RESULT });
 
-        // 후보다 없으면 깊이 탐색
         const discovered = findQuestionArrays(res.data);
         const candidates = [...primaryCandidates, ...discovered];
 
@@ -129,22 +119,16 @@ const InterestTest = () => {
           return;
         }
 
-        // 가장 긴 배열 사용
         candidates.sort((a, b) => (b.arr?.length || 0) - (a.arr?.length || 0));
         const picked = candidates[0];
         console.log('[interest] picked path:', picked.path, 'count:', picked.arr.length);
 
-        // 포맷 감지 후 정규화
         const first = picked.arr[0] || {};
         const isV2 = 'no' in first || 'choices' in first;
         const normalized = (isV2 ? picked.arr.map(normalizeV2Item) : picked.arr.map(normalizeV1Item))
           .filter(q => q.qitemNo && q.question && q.options.length > 0);
 
         console.log('[interest normalized count]', normalized.length);
-        if (normalized.length === 0) {
-          alert('문항 파싱 결과가 0개입니다. 콘솔의 [interest raw preview]를 확인하세요.');
-        }
-
         setAllQuestions(normalized);
       } catch (err) {
         console.log('fetch error:', err?.response?.status, err?.response?.data || err.message);
@@ -165,7 +149,7 @@ const InterestTest = () => {
     setAnswers(Array(pageQuestions.length).fill(null));
     questionRefs.current = [];
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [page, allQuestions.length]);
+  }, [page, allQuestions.length]); // eslint-disable-line
 
   if (allQuestions.length === 0) {
     return (
@@ -180,13 +164,14 @@ const InterestTest = () => {
     newAnswers[qIdx] = optIdx;
     setAnswers(newAnswers);
 
+    // 선택한 값 로컬스토리지 누적 저장 (→ 7페이지에서 합쳐 제출)
     const q = pageQuestions[qIdx];
     const picked = q.options[optIdx];
     if (!picked) return;
 
     const mapKey = 'interestAnswersV2';
     const prev = JSON.parse(localStorage.getItem(mapKey) || '{}');
-    prev[q.qitemNo] = picked.score; // { "1": "1".."5" }
+    prev[q.qitemNo] = picked.score; // {"1":"1".."5"}
     localStorage.setItem(mapKey, JSON.stringify(prev));
   };
 
@@ -200,7 +185,10 @@ const InterestTest = () => {
     if (page < Math.ceil(allQuestions.length / PAGE_SIZE) - 1) {
       setPage(p => p + 1);
     } else {
+      // 1~120 끝 → 7페이지로
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       navigate('/interesttestpage7');
+
     }
   };
 

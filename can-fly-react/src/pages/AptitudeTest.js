@@ -123,7 +123,7 @@ const AptitudeTest = () => {
       // 2) CareerNet API 규격에 맞춘 payload 구성
       const payload = {
         qestrnSeq,          // 질문 세트와 반드시 동일
-        trgetSe: "100207",  // ★중학생 코드 (100206이 공란을 만들던 원인일 가능성 큼)
+        trgetSe: "100207",  // 고등학생
         gender: "100323",   // 여: "100324"
         school: "율도중학교",
         grade: "2",
@@ -158,16 +158,28 @@ const AptitudeTest = () => {
         return;
       }
 
-      // (선택) JSON 존재 여부 사전 확인 — 공란 디버깅에 매우 유용
-      // const jsonUrl = `https://www.career.go.kr/cloud/data/report${encodeURIComponent(encodedSeq)}.json`;
-      // await axios.get(jsonUrl, { headers: { Accept: "application/json" }, timeout: 10000 });
-      // console.log("✅ JSON exists:", jsonUrl);
-
       const finalUrl = `https://www.career.go.kr/inspct/web/psycho/vocation/report?seq=${encodeURIComponent(encodedSeq)}`;
       console.log("✅ 최종 결과 url:", finalUrl);
 
-      // 라우터 간섭 방지를 위해 새 탭으로 직접 오픈
-      window.open(finalUrl, "_blank", "noopener");
+      // 5) 결과지는 새 탭으로, 현재 탭은 /testcomplete 이동
+      let w = window.open(finalUrl, "_blank", "noopener,noreferrer");
+      if (!w) {
+        // 팝업 차단 대비: 앵커 트릭 한 번 더
+        const a = document.createElement("a");
+        a.href = finalUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      // 임시저장 제거(선택)
+      localStorage.removeItem(LS_KEY);
+
+      // 현재 탭은 완료 화면으로 이동
+      navigate("/testcomplete");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       console.error("제출/결과 처리 오류", {
         message: e?.message,
@@ -177,7 +189,6 @@ const AptitudeTest = () => {
       alert("제출 과정에서 오류가 발생했습니다.");
     }
   };
-
 
   const currentQuestions = allQuestions.slice(
     page * QUESTIONS_PER_PAGE,
