@@ -1,80 +1,108 @@
-import React, { useState } from "react";
-import "../../styles/MajorDepartmentModal.css"; // 새 스타일 파일
+// src/components/Departmentselection/MajorDepartmentModal.jsx
+import React, { useState, useEffect } from "react";
+import "../../styles/MajorDepartmentModal.css";
 import HeartToggle from "./HeartToggle";
+import { fetchDepartmentsByField, toggleDepartmentBookmark } from "../../api/departmentApi";
 
 const MajorDepartmentModal = ({
   show,
   onClose,
   title,
-  departments,
+  fieldId,
   selected,
-  onToggle
+  onToggleGlobal,
 }) => {
   const [search, setSearch] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [liked, setLiked] = useState([]); // 로컬 좋아요 상태
+
+  useEffect(() => {
+    const loadDepartments = async () => {
+      if (show && fieldId) {
+        setLoading(true);
+        try {
+          const result = await fetchDepartmentsByField(fieldId); // [{ id, name }]
+          setDepartments(result);
+          setLiked(selected);
+        } catch (error) {
+          console.error("계열별 학과 조회 실패:", error);
+          setDepartments([]);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loadDepartments();
+  }, [show, fieldId, selected]);
+
+  const filtered = departments.filter((d) =>
+    d.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleToggle = async (dept) => {
+    const { id, name } = dept;
+    try {
+      await toggleDepartmentBookmark(id); // ✅ 서버 반영
+
+      const isLiked = liked.includes(name);
+      const newLiked = isLiked
+        ? liked.filter((item) => item !== name)
+        : [...liked, name];
+      setLiked(newLiked);
+
+      if (onToggleGlobal) onToggleGlobal(name); // ✅ 상위 컴포넌트에 알림
+    } catch (e) {
+      console.error("학과 즐겨찾기 토글 실패:", e);
+    }
+  };
 
   if (!show) return null;
 
-  const filtered = departments.filter(d => d.includes(search));
-
-  // 앞 3개는 추천 학과, 나머지는 일반 학과
-  const recommendedDepartments = filtered.slice(0, 3);
-  const otherDepartments = filtered.slice(3);
-
   return (
     <div className="modal-overlay">
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        
-        {/* 헤더 */}
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span>{title}</span>
-          <button onClick={onClose} className="close-btn"><img
+          <button onClick={onClose} className="close-btn">
+            <img
               src={`${process.env.PUBLIC_URL}/icon/exit_icon.svg`}
               alt="닫기"
               className="close-icon"
-            /></button>
+            />
+          </button>
         </div>
 
-        {/* 검색창 */}
         <div className="modal-search">
           <input
             placeholder="학과명을 입력해주세요"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="search-btn"><img 
-          src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
-          className="search-icon"/></button>
+          <button className="search-btn">
+            <img
+              src={`${process.env.PUBLIC_URL}/icon/search_icon.svg`}
+              className="search-icon"
+              alt="검색"
+            />
+          </button>
         </div>
 
-        {/* 스크롤 가능한 본문 */}
         <div className="modal-body">
-          <div className="modal-subtitle">추천 학과</div>
-          {recommendedDepartments.length === 0 ? (
-            <div className="no-data">추천 학과가 없습니다.</div>
-          ) : (
-            recommendedDepartments.map((dept, idx) => (
-              <div className="modal-item" key={idx}>
-                <HeartToggle
-                  selected={selected.includes(dept)}
-                  onToggle={() => onToggle(dept)}
-                />
-                {dept}
-                <span>›</span>
-              </div>
-            ))
-          )}
-
           <div className="modal-subtitle">학과 목록</div>
-          {otherDepartments.length === 0 ? (
+
+          {loading ? (
+            <div className="no-data">불러오는 중...</div>
+          ) : filtered.length === 0 ? (
             <div className="no-data">학과가 없습니다.</div>
           ) : (
-            otherDepartments.map((dept, idx) => (
-              <div className="modal-item" key={idx}>
+            filtered.map((dept) => (
+              <div className="modal-item" key={dept.id}>
                 <HeartToggle
-                  selected={selected.includes(dept)}
-                  onToggle={() => onToggle(dept)}
+                  selected={liked.includes(dept.name)}
+                  onToggle={() => handleToggle(dept)}
                 />
-                {dept}
+                {dept.name}
                 <span>›</span>
               </div>
             ))

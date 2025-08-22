@@ -2,35 +2,73 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/Login.css";
 import { Link } from "react-router-dom";
-import { fetchTokenCount, fetchSchoolGradeSex } from "../../api/client"; // ← 추가
+import {
+  fetchTokenCount,
+  fetchSchoolGradeSex,
+  fetchUserSummary,
+} from "../../api/client";
 
 const Login = ({ onLogin, isLoggedIn, userName }) => {
   const [token, setToken] = useState(0);
   const [semester, setSemester] = useState("1학기");
-  const [school, setSchool] = useState({ highschool: "", gradeNum: null }); // ← 고등학교/학년
+  const [school, setSchool] = useState({ highschool: "", gradeNum: null });
+  const [name, setName] = useState("");
+
+  // ✅ 이름 접두사 정리:
+  //   - "{kakao}홍길동", "[kakao] 홍길동", "(kakao) 홍길동", "kakao: 홍길동", "kakao 홍길동" 등 제거
+  //   - "google", "naver"도 동일 처리 (대소문자 무시)
+  const cleanName = (raw) => {
+    if (!raw) return "";
+    const s = String(raw).trim();
+    return s
+      .replace(/^\s*[\{\[\(]?\s*(kakao|naver|google)\s*[\}\]\)]?\s*[:\-]?\s*/i, "")
+      .trim();
+  };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      (async () => {
-        // 토큰
-        const { token, error } = await fetchTokenCount();
-        if (error) console.error("토큰 조회 실패:", error);
-        setToken(token);
+    let isMounted = true;
 
-        // 고등학교/학년
-        const { ok, highschool, gradeNum, error: sErr } =
-          await fetchSchoolGradeSex();
-        if (!ok && sErr) console.error("학교/학년 조회 실패:", sErr);
-        setSchool({ highschool: highschool || "", gradeNum: gradeNum ?? null });
-      })();
-    }
+    const load = async () => {
+      if (!isLoggedIn) return;
 
-    // 학기 계산 (3~7월: 1학기, 나머지: 2학기) — 기존 로직 유지
+      // 1) 이름/요약
+      const sum = await fetchUserSummary();
+      if (isMounted) {
+        if (!sum.ok) console.error("이름 조회 실패:", sum.error);
+        setName(cleanName(sum.name || ""));
+      }
+
+      // 2) 토큰
+      const { token: tokenCount, error: tokenErr } = await fetchTokenCount();
+      if (isMounted) {
+        if (tokenErr) console.error("토큰 조회 실패:", tokenErr);
+        setToken(Number(tokenCount ?? 0));
+      }
+
+      // 3) 학교/학년
+      const { ok, highschool, gradeNum, error: schoolErr } =
+        await fetchSchoolGradeSex();
+      if (isMounted) {
+        if (!ok && schoolErr) console.error("학교/학년 조회 실패:", schoolErr);
+        setSchool({
+          highschool: highschool || "",
+          gradeNum: gradeNum ?? null,
+        });
+      }
+    };
+
+    load();
+
+    // 학기 계산 (3~7월: 1학기, 나머지: 2학기)
     const month = new Date().getMonth() + 1;
-    if (month >= 3 && month <= 7) setSemester("1학기");
-    else setSemester("2학기");
+    setSemester(month >= 3 && month <= 7 ? "1학기" : "2학기");
+
+    return () => {
+      isMounted = false;
+    };
   }, [isLoggedIn]);
 
+  // 로그인 전
   if (!isLoggedIn) {
     return (
       <div className="Login-container">
@@ -64,7 +102,22 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
     );
   }
 
-  // 로그인 상태
+  // 학교명 중복 "고등학교" 방지
+  const displayHighschool = (() => {
+    const n = (school.highschool || "").trim();
+    if (!n) return "고등학교 미입력";
+    return /고등학교$/.test(n) ? n : `${n}고등학교`;
+  })();
+
+  // ✅ DB 이름 최우선, prop도 클린 후 fallback
+  const displayName = (() => {
+    const apiName = cleanName(name).trim();
+    const propName = cleanName(userName).trim();
+    if (apiName) return apiName;
+    if (propName && propName !== "사용자") return propName;
+    return "사용자";
+  })();
+
   return (
     <div className="profile-card-container">
       <div className="profile-card">
@@ -76,7 +129,8 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
             />
           </div>
           <div className="profile-details">
-            <div className="profile-name">{userName} 님</div>
+            <div className="profile-name">{displayName} 님</div>
+
             <div className="profile-row-wrapper">
               <div className="profile-row">
                 <img
@@ -84,8 +138,9 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
                   alt="학교"
                   className="icon"
                 />
-                <span>{school.highschool || "고등학교 미입력"}고등학교</span>
+                <span>{displayHighschool}</span>
               </div>
+
               <div className="profile-row">
                 <img
                   src={`${process.env.PUBLIC_URL}/icon/vector.svg`}
@@ -96,13 +151,14 @@ const Login = ({ onLogin, isLoggedIn, userName }) => {
                   {school.gradeNum ?? "-"}학년 {semester}
                 </span>
               </div>
+
               <div className="profile-row">
                 <img
                   src={`${process.env.PUBLIC_URL}/icon/coin.svg`}
                   alt="코인"
                   className="icon"
                 />
-                <span>{token} 토큰</span>
+                <span>{Number.isFinite(token) ? token : 0} 토큰</span>
               </div>
             </div>
           </div>

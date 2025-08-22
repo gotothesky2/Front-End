@@ -1,5 +1,6 @@
 // src/pages/GradeInput/StudentGrade.js
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import '../../styles/StudentGrade.css';
 
 import StudentGradeSidebar from '../../components/StudentGradeSidebar';
@@ -9,7 +10,11 @@ import StudentGradeTable   from '../../components/StudentGradeTable';
 import StudentGradeTrend   from '../../components/StudentGradeTrend';
 
 // API
+
+import { registerReportScores, fetchAllDetailReportAsTermData } from '../../api/report';
 import { registerReportScores } from '../../api/report';
+import { fetchMe, fetchUserSummary } from '../../api/client'; // ✅ 사용자명 API
+
 
 const defaultRow = () => ({
   id: Date.now(),
@@ -27,12 +32,67 @@ const defaultRow = () => ({
   achievement: ''
 });
 
+// {kakao}홍길동 → 홍길동
+const cleanProviderPrefix = (username = '') =>
+  String(username).replace(/^\{[a-zA-Z0-9_]+\}/, '').trim();
+
 export default function StudentGrade() {
   const [isModalOpen, setIsModalOpen]   = useState(false);
   const [selectedTerm, setSelectedTerm] = useState('');
   const [termData, setTermData]         = useState({});
   const [modalRows, setModalRows]       = useState([defaultRow()]);
   const [loading, setLoading]           = useState(false);
+
+
+   // 서버에서 termData 동기화
+ const refreshFromServer = async () => {
+   try {
+     setLoading(true);
+     const serverTermData = await fetchAllDetailReportAsTermData();
+     setTermData(serverTermData);
+   } catch (e) {
+     console.error('전체 내신 조회 실패:', e);
+   } finally {
+     setLoading(false);
+   }
+ };
+
+ // 페이지 첫 진입 시 한 번 로드
+ useEffect(() => {
+   refreshFromServer();
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
+  // ✅ 사용자명 상태
+  const [userName, setUserName] = useState('사용자');
+
+  // 사용자명 로드: /auth/me → 실패/누락 시 /users/info
+  useEffect(() => {
+    const loadUserName = async () => {
+      try {
+        const me = await fetchMe(); // { ok, data }
+        let rawName =
+          me?.data?.name ??
+          me?.data?.username ??
+          me?.data?.nickname ??
+          me?.name ??
+          me?.username ??
+          me?.nickname ??
+          '';
+
+        if (!rawName) {
+          const info = await fetchUserSummary(); // { ok, name, ... }
+          if (info?.ok && info?.name) rawName = info.name;
+        }
+
+        setUserName(cleanProviderPrefix(rawName) || '사용자');
+      } catch (e) {
+        console.error('사용자 정보 조회 실패:', e);
+        setUserName('사용자');
+      }
+    };
+    loadUserName();
+  }, []);
+
 
   const handleOpenModal = (term) => {
     setSelectedTerm(term);
@@ -47,14 +107,30 @@ export default function StudentGrade() {
       await registerReportScores(selectedTerm, rows);
 
       // 2) 화면 상태 갱신
-      setTermData(prev => ({ ...prev, [selectedTerm]: rows }));
+      await refreshFromServer();
       setIsModalOpen(false);
     } catch (err) {
+
+        const status = err.response?.status;
+        const data   = err.response?.data;
+        const serverMsg = data?.message || data?.title || data?.detail || JSON.stringify(data);
+        console.error('REGISTER_REPORT error >>>', {
+          status,
+          headers: err.response?.headers,
+          data,
+          requestPayload: err.config?.data,  // 실제 전송 바디
+          url: err.config?.url,
+          method: err.config?.method,
+  });
+  alert(`저장 실패 [${status ?? 'NO_STATUS'}]: ${serverMsg ?? err.message}`);
+}
+
       console.error(err);
-      alert('저장에 실패했습니다: ' + (err.response?.data?.message || '알 수 없는 오류'));
+      alert('저장에 실패했습니다: ' + (err?.response?.data?.message || '알 수 없는 오류'));
     } finally {
       setLoading(false);
     }
+
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
@@ -83,7 +159,8 @@ export default function StudentGrade() {
           </div>
 
           <div className="grade-main-content">
-            <StudentGradeHeader userName="전성환" />
+            {/* ✅ 사용자명 적용 */}
+            <StudentGradeHeader userName={userName} />
 
             <div className="grade-table-header">
               <span className="grade-table-tab">주요교과 분석</span>
@@ -114,12 +191,3 @@ export default function StudentGrade() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
