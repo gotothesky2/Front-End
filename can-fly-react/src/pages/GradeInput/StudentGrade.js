@@ -12,7 +12,6 @@ import StudentGradeTrend   from '../../components/StudentGradeTrend';
 // API
 
 import { registerReportScores, fetchAllDetailReportAsTermData } from '../../api/report';
-import { registerReportScores } from '../../api/report';
 import { fetchMe, fetchUserSummary } from '../../api/client'; // ✅ 사용자명 API
 
 
@@ -100,38 +99,34 @@ export default function StudentGrade() {
     setIsModalOpen(true);
   };
 
-  const handleSave = async (rows) => {
-    try {
-      setLoading(true);
-      // 1) 백엔드 저장 (교과별로 여러 번 POST)
-      await registerReportScores(selectedTerm, rows);
+const handleSave = async (rows) => {
+  try {
+    setLoading(true);
+    // 1) 백엔드 저장 (교과별로 여러 번 POST)
+    await registerReportScores(selectedTerm, rows);
 
-      // 2) 화면 상태 갱신
-      await refreshFromServer();
-      setIsModalOpen(false);
-    } catch (err) {
+    // 2) 화면 상태 갱신
+    await refreshFromServer();
+    setIsModalOpen(false);
+  } catch (err) {
+    const status = err.response?.status;
+    const data   = err.response?.data;
+    const serverMsg = data?.message || data?.title || data?.detail || JSON.stringify(data);
 
-        const status = err.response?.status;
-        const data   = err.response?.data;
-        const serverMsg = data?.message || data?.title || data?.detail || JSON.stringify(data);
-        console.error('REGISTER_REPORT error >>>', {
-          status,
-          headers: err.response?.headers,
-          data,
-          requestPayload: err.config?.data,  // 실제 전송 바디
-          url: err.config?.url,
-          method: err.config?.method,
-  });
-  alert(`저장 실패 [${status ?? 'NO_STATUS'}]: ${serverMsg ?? err.message}`);
-}
+    console.error('REGISTER_REPORT error >>>', {
+      status,
+      headers: err.response?.headers,
+      data,
+      requestPayload: err.config?.data,  // 실제 전송 바디
+      url: err.config?.url,
+      method: err.config?.method,
+    });
 
-      console.error(err);
-      alert('저장에 실패했습니다: ' + (err?.response?.data?.message || '알 수 없는 오류'));
-    } finally {
-      setLoading(false);
-    }
-
-  };
+    alert(`저장 실패 [${status ?? 'NO_STATUS'}]: ${serverMsg ?? err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCloseModal = () => setIsModalOpen(false);
 

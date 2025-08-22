@@ -1,4 +1,4 @@
-// src/pages/ExamGrade/ExamGrade.js
+// src/pages/GradeInput/ExamGrade.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import MockExamSidebar from '../../components/MockExamSidebar';
@@ -96,6 +96,7 @@ const reload = React.useCallback(async () => {
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
   // 사용자 정보 불러오기: /auth/me → (없으면) /users/info
   useEffect(() => {
     const loadUser = async () => {
@@ -236,4 +237,3 @@ const reload = React.useCallback(async () => {
     </>
   );
 }
-
