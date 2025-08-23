@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/TestCompletePage.css";
 
 import { aiPdfPost } from "../api/aiApi";
 import AIconfig from "../api/AIconfig";
+
+// ✅ 추가: 자동 리다이렉트를 위한 훅
+import { useLocation } from "react-router-dom";
 
 const TestCompletePage = () => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [examType, setExamType] = useState("interest"); // 'interest' | 'aptitude'
   const [loading, setLoading] = useState(false);
+
+  // ✅ 추가: AptitudeTest에서 전달되는 결과 URL
+  const { state } = useLocation();
+  const resultUrl = state?.resultUrl;
+
+  // ✅ 추가: 결과 URL이 있으면 자동 이동 (기존 기능에 영향 없음)
+  useEffect(() => {
+    if (resultUrl) {
+      window.location.replace(resultUrl);
+    }
+  }, [resultUrl]);
 
   // 흥미검사 생성 api
   const handleProfileUpload = async (file) => {
@@ -92,6 +106,8 @@ const TestCompletePage = () => {
           검사가 <span className="blue">완료</span>되었습니다.
         </h1>
         <p className="complete-desc">
+          {/* resultUrl이 있을 땐 실제로 즉시 리다이렉트 되지만,
+              눈에 보이는 문구는 그대로 유지 */}
           커리어넷에서 검사 결과를 PDF로 다운로드 하신 뒤 아래에 업로드 해주세요
           <br />
           분석을 통해 맞춤형 전공·진로를 추천해드립니다.
@@ -151,4 +167,3 @@ const TestCompletePage = () => {
 };
 
 export default TestCompletePage;
-
