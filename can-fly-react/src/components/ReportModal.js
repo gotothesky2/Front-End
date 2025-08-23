@@ -1,10 +1,7 @@
 // src/components/ReportModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../styles/ReportModal.css';
-import {
-  fetchTokenCount,
-  useTokens as apiUseTokens, // 일반 함수 (Hook 아님)
-} from '../api/client';
+import { fetchTokenCount } from '../api/client'; // ✅ 차감 함수(import) 제거
 
 const ReportModal = ({ isOpen, onClose }) => {
   const [grade, setGrade] = useState('3학년');
@@ -15,7 +12,7 @@ const ReportModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 학년별 차감량
+  // 학년별 차감량 (표시용)
   const costByGrade = {
     '1학년': 30,
     '2학년': 50,
@@ -23,7 +20,7 @@ const ReportModal = ({ isOpen, onClose }) => {
   };
   const cost = costByGrade[grade] ?? 0;
 
-  // 모달 열릴 때 보유 토큰 조회
+  // 모달 열릴 때 보유 토큰 조회 (표시만)
   useEffect(() => {
     if (!isOpen) return;
     setError('');
@@ -46,26 +43,12 @@ const ReportModal = ({ isOpen, onClose }) => {
     })();
   }, [isOpen]);
 
-  // 확인 → 학년별 토큰 차감 후 홈으로 전체 새로고침
-  const handleConfirm = async () => {
-    if (tokens < cost) {
-      setError('토큰 부족으로 레포트 생성에 실패하였습니다');
-      return;
-    }
-    try {
-      const res = await apiUseTokens(cost); // PATCH /users/token { amount: -cost }
-      if (!res.ok) {
-        setError(res.message || '토큰 차감 실패');
-        return;
-      }
-      // ✅ 차감 성공 시: 홈으로 이동 + 전체 새로고침
-      window.location.href = '/';         // 이동과 동시에 새로고침됨 (SPA 무시하고 풀 리로드)
-      // 또는 window.location.replace('/') 사용 가능
-      // 또는 setTimeout(() => window.location.reload(), 0) 도 가능
-    } catch (err) {
-      console.error('토큰 차감 에러:', err);
-      setError('토큰 차감 중 오류가 발생했습니다.');
-    }
+  // ✅ 확인 → 실제 차감 없이 홈으로 이동(풀 리로드만)
+  const handleConfirm = () => {
+    // 차감/검증 로직 전부 제거
+    window.location.href = '/';
+    // 또는 window.location.replace('/') 사용 가능
+    // 또는 setTimeout(() => window.location.reload(), 0)
   };
 
   if (!isOpen) return null;
@@ -122,7 +105,7 @@ const ReportModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* 3. 토큰 사용 */}
+          {/* 3. 토큰 사용 (표시용) */}
           <div className="section">
             <h3>3. 토큰 사용</h3>
             <div className="tokens">
@@ -150,7 +133,7 @@ const ReportModal = ({ isOpen, onClose }) => {
             <button className="btn cancel" onClick={onClose}>아니오</button>
           </div>
 
-          {/* 에러 메시지 */}
+          {/* 에러 메시지 (현재는 표시될 일 없음) */}
           {error && <p className="error-text">{error}</p>}
         </div>
       </div>
