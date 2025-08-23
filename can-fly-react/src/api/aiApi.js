@@ -1,38 +1,49 @@
 // src/api/aiApi.js
 import axios from "axios";
 import { Cookies } from "react-cookie";
+import AIconfig from "./AIconfig";
 
 const ai = axios.create({
-  baseURL: "http://43.200.79.118", // 예: 'http://43.200.79.118'  (docs 주소 아님!)
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: false,
+  baseURL: AIconfig.API_URL, // 'http://43.200.79.118'
+  headers: { "Content-Type": "application/json" },
+  withCredentials: false, // 쿠키 세션 쓸 거면 true + 서버 CORS 설정 필요
 });
 
 const cookies = new Cookies();
 
-// 요청 인터셉터: accessToken 있으면 붙이기
+// ---- 요청 인터셉터 (토큰 부착) ----
 ai.interceptors.request.use((cfg) => {
-  const token = cookies.get("accessToken");
-  console.log("???", token);
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  const cookieToken = cookies.get("accessToken");
+  const lsToken = localStorage.getItem("accessToken");
+  const token = cookieToken || lsToken;
+
+  // 디버그
+  console.log("[AI token]", token ? "present" : "missing");
+
+  if (token) {
+    cfg.headers.Authorization = token.startsWith("Bearer ")
+      ? token
+      : `Bearer ${token}`;
+  }
   return cfg;
 });
 
-// 응답 인터셉터: 401 처리(필요 시 재로그인)
+// ---- 응답 인터셉터 ----
 ai.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err?.response?.status;
+    console.error("[AI ERROR]", status, err?.response?.data || err.message);
+    if (status === 401) {
       cookies.remove("accessToken", { path: "/" });
-      window.location.href = "/login";
+      // 필요 시 리다이렉트
+      // window.location.href = "/login";
     }
     return Promise.reject(err);
   }
 );
 
-// 공통 파서(파일/204 대비)
+// ---- 공통 파서 ----
 const parse = (res) => {
   const ct = (res.headers["content-type"] || "").toLowerCase();
   if (ct.includes("application/json")) return res.data;
@@ -40,30 +51,32 @@ const parse = (res) => {
   return res.data;
 };
 
-//GET
+// ---- 공개 메서드 ----
 export const aiGet = async (endpoint, params = {}, options = {}) => {
   const res = await ai.get(endpoint, { params, ...options });
   return parse(res);
 };
 
-//PDF 업로드
-export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
-  try {
-    const formData = new FormData();
-    formData.append("file", pdfFile);
-
-    const response = await ai.post(endpoint, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      ...options,
-    });
-
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+export const aiPost = async (endpoint, body = {}, options = {}) => {
+  const res = await ai.post(endpoint, body, options);
+  return parse(res);
 };
 
+export const aiDelete = async (endpoint, options = {}) => {
+  const res = await ai.delete(endpoint, options);
+  return parse(res);
+};
+
+// PDF 업로드(멀티파트)
+export const aiPdfPost = async (endpoint, pdfFile, options = {}) => {
+  const formData = new FormData();
+  formData.append("file", pdfFile);
+
+  const res = await ai.post(endpoint, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    ...options,
+  });
+  return parse(res);
+};
 
 export default ai;

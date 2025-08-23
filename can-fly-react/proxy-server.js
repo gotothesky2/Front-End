@@ -486,3 +486,25 @@ app.post("/api/interest/submit", async (req, res) => {
     });
   }
 });
+
+
+
+// ---- 서버 시작 (파일 맨 아래에 추가) ----
+const server = app.listen(PORT, () => {
+  console.log(`✅ Proxy server running at http://localhost:${PORT}`);
+  if (!API_KEY) {
+    console.warn("⚠️  API_KEY가 .env에서 로드되지 않았습니다. 인증이 필요한 요청은 실패할 수 있어요.");
+  }
+});
+
+server.on("error", (err) => {
+  console.error("❌ server error:", err.code || err.message, err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ UnhandledRejection:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("❌ UncaughtException:", err);
+});
