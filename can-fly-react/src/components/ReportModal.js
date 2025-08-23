@@ -1,24 +1,54 @@
+// src/components/ReportModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../styles/ReportModal.css';
+import { fetchTokenCount } from '../api/client'; // ✅ 차감 함수(import) 제거
 
-const ReportModal = ({ isOpen, onClose, initialTokens = 200, cost = 100 }) => {
+const ReportModal = ({ isOpen, onClose }) => {
   const [grade, setGrade] = useState('3학년');
   const [term, setTerm] = useState('1학기');
   const [hasInput, setHasInput] = useState(true);
-  const [tokens, setTokens] = useState(initialTokens);
+
+  const [tokens, setTokens] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 학년별 차감량 (표시용)
+  const costByGrade = {
+    '1학년': 30,
+    '2학년': 50,
+    '3학년': 70,
+  };
+  const cost = costByGrade[grade] ?? 0;
+
+  // 모달 열릴 때 보유 토큰 조회 (표시만)
   useEffect(() => {
-    if (isOpen) setError('');
+    if (!isOpen) return;
+    setError('');
+    (async () => {
+      setLoading(true);
+      try {
+        const { ok, token, error } = await fetchTokenCount();
+        if (!ok) {
+          console.warn('토큰 조회 실패:', error);
+          setTokens(0);
+        } else {
+          setTokens(Number(token || 0));
+        }
+      } catch (e) {
+        console.error('토큰 조회 중 오류:', e);
+        setTokens(0);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [isOpen]);
 
+  // ✅ 확인 → 실제 차감 없이 홈으로 이동(풀 리로드만)
   const handleConfirm = () => {
-    if (tokens < cost) {
-      setError('토큰 부족으로 레포트 생성에 실패하였습니다');
-      return;
-    }
-    // TODO: 실제 생성 API 호출
-    onClose();
+    // 차감/검증 로직 전부 제거
+    window.location.href = '/';
+    // 또는 window.location.replace('/') 사용 가능
+    // 또는 setTimeout(() => window.location.reload(), 0)
   };
 
   if (!isOpen) return null;
@@ -30,8 +60,9 @@ const ReportModal = ({ isOpen, onClose, initialTokens = 200, cost = 100 }) => {
           <h2>레포트 생성하기</h2>
           <button className="report-modal-close" onClick={onClose}>×</button>
         </div>
+
         <div className="report-modal-body">
-         {/* 1. 학년·학기 선택 */}
+          {/* 1. 학년·학기 선택 */}
           <div className="section">
             <h3>1. 학년 및 학기를 선택</h3>
             <div className="selects">
@@ -74,13 +105,15 @@ const ReportModal = ({ isOpen, onClose, initialTokens = 200, cost = 100 }) => {
             </div>
           </div>
 
-          {/* 3. 토큰 사용 */}
+          {/* 3. 토큰 사용 (표시용) */}
           <div className="section">
             <h3>3. 토큰 사용</h3>
             <div className="tokens">
               <div className="token-item">
                 <div className="token-label">보유 토큰</div>
-                <div className="token-value">{tokens}개</div>
+                <div className="token-value">
+                  {loading ? '조회 중…' : `${tokens}개`}
+                </div>
               </div>
               <div className="token-item">
                 <div className="token-label">생성 시 차감 토큰</div>
@@ -100,7 +133,7 @@ const ReportModal = ({ isOpen, onClose, initialTokens = 200, cost = 100 }) => {
             <button className="btn cancel" onClick={onClose}>아니오</button>
           </div>
 
-          {/* 에러 메시지 */}
+          {/* 에러 메시지 (현재는 표시될 일 없음) */}
           {error && <p className="error-text">{error}</p>}
         </div>
       </div>
@@ -109,4 +142,3 @@ const ReportModal = ({ isOpen, onClose, initialTokens = 200, cost = 100 }) => {
 };
 
 export default ReportModal;
-

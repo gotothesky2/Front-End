@@ -19,7 +19,7 @@ const cleanName = (raw) =>
 const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("사용자");
-  const [cookies, setCookie, removeCookie] = useCookies(["accessToken"]);
+   const [cookies, setCookie, removeCookie] = useCookies(["accessToken", "isShowEduModal"]);
   const [showEduModal, setShowEduModal] = useState(false);
 
   const handleLogin = async () => {
@@ -124,6 +124,8 @@ const Home = () => {
       return;
     }
     alert("프로필이 저장되었습니다.");
+      setCookie("isShowEduModal", true, { path: "/", maxAge: 60 * 60 * 24 * 7, sameSite: "lax" });
+
     setShowEduModal(false);
     // 필요 시 최신 사용자 정보 재조회
     // await loadMe();
@@ -139,7 +141,7 @@ const Home = () => {
       </div>
 
       <EduProfileModal
-        open={showEduModal}
+        open={!cookies.isShowEduModal && showEduModal}
         onClose={() => setShowEduModal(false)}
         onSave={handleSaveEdu}
       />

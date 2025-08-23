@@ -14,11 +14,12 @@ const config = {
         USE_RECHARGE: `${BASE_URL}/users/token`, // 토큰 사용 및 충전
         DELETE_ME: `${BASE_URL}/users/me`, // 회원탈퇴
         LOGOUT: `${BASE_URL}/users/logout`, // 로그아웃
+        User_info: `${BASE_URL}/users/info`, // 유저 전체 정보
     },
 
     MOCK: {
         ALL_DETAIL: `${BASE_URL}/users/grades/mock`,
-        REGISTER: `${BASE_URL}/users/grades/mock`,
+        REGISTER: `${BASE_URL}/users/grades/mock/excel`,
         SPECIFIC_DETAIL: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         SCORE_REGISTER: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,
         DELETE_MOCK: (mockId) => `${BASE_URL}/users/grades/mock/${mockId}`,

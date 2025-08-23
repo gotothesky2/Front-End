@@ -1,8 +1,7 @@
 // src/pages/ReportOverview.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import '../styles/ReportOverview.css';
-import { get } from '../api/Api';
-import config from '../config';
+import { fetchAllAiReports } from '../api/aireport';
 
 // 표준 학년/학기 키
 const GRADES = [1, 2, 3];
@@ -21,11 +20,7 @@ function normalizeItem(raw) {
 
   // 타입(적성/흥미) 추론
   let type =
-    raw?.type ||
-    raw?.category ||
-    raw?.kind ||
-    raw?.examType ||
-    '';
+    raw?.type || raw?.category || raw?.kind || raw?.examType || raw?.reportType || '';
 
   if (!type) {
     const hint = `${raw?.title ?? ''} ${raw?.name ?? ''} ${raw?.slug ?? ''}`.toLowerCase();
@@ -34,32 +29,19 @@ function normalizeItem(raw) {
   }
 
   // 학년/학기
-  let grade =
-    raw?.grade ??
-    raw?.gradeYear ??
-    raw?.schoolGrade ??
-    null;
+  let grade = raw?.grade ?? raw?.userGrade ?? raw?.gradeYear ?? raw?.schoolGrade ?? null;
+  let term  = raw?.term  ?? raw?.semester  ?? raw?.schoolTerm  ?? raw?.userTerm   ?? null;
 
-  let term =
-    raw?.term ??
-    raw?.semester ??
-    raw?.schoolTerm ??
-    null;
-
-  // 잘못된 값 방지(기본값)
+  // 기본값 보정
   grade = Number(grade);
   if (!GRADES.includes(grade)) grade = 1;
-
   term = Number(term);
   if (!TERMS.includes(term)) term = 1;
 
   // 링크
   const url =
-    raw?.url ||
-    raw?.link ||
-    raw?.fileUrl ||
-    raw?.pdfUrl ||
-    null;
+    raw?.url || raw?.link || raw?.fileUrl || raw?.pdfUrl ||
+    raw?.reportUrl || raw?.downloadUrl || null;
 
   // 날짜 표기
   const dateText = dateStr
@@ -70,12 +52,9 @@ function normalizeItem(raw) {
     : '-';
 
   return {
-    id: raw?.id ?? raw?._id ?? `${Math.random()}`,
-    type: type === 'interest' ? 'interest' : 'aptitude', // 기본 'aptitude'
-    grade,         // 1|2|3
-    term,          // 1|2
-    dateText,
-    url,
+    id: raw?.id ?? raw?._id ?? raw?.reportId ?? `${Math.random()}`,
+    type: type === 'interest' ? 'interest' : 'aptitude',
+    grade, term, dateText, url,
   };
 }
 
@@ -92,15 +71,13 @@ const ReportOverview = () => {
   const [errMsg, setErrMsg] = useState('');
 
   const fetchReports = async () => {
+    console.log("[RO] fetchReports called");
     setLoading(true);
     setErrMsg('');
     try {
-      // 전체 리스트 불러오기
-      const res = await get(config.REPORT.ALL_DETAIL_REPORT);
-      const list =
-        Array.isArray(res) ? res :
-        (Array.isArray(res?.result) ? res.result :
-        (Array.isArray(res?.data) ? res.data : []));
+      console.log("[RO] before fetchAllAiReports");
+      const list = await fetchAllAiReports();
+      console.log("[RO] after fetchAllAiReports:", Array.isArray(list) ? list.length : list);
 
       const normalized = list.map(normalizeItem);
 
@@ -109,7 +86,6 @@ const ReportOverview = () => {
         bucket[g] = { grade: g, terms: { 1: [], 2: [] } };
       });
 
-      // 학년/학기별로 넣기 (같은 학기 내에서 적성/흥미를 함께 보여주고, 태그로 구분)
       for (const it of normalized) {
         const g = GRADES.includes(it.grade) ? it.grade : 1;
         const t = TERMS.includes(it.term) ? it.term : 1;
@@ -121,7 +97,7 @@ const ReportOverview = () => {
         });
       }
 
-      // 최신순 정렬(옵션)
+      // 최신순 정렬
       GRADES.forEach(g => {
         TERMS.forEach(t => {
           bucket[g].terms[t].sort((a, b) => (a.dateText < b.dateText ? 1 : -1));
@@ -130,9 +106,8 @@ const ReportOverview = () => {
 
       setByGrade(bucket);
     } catch (e) {
-      console.error(e);
+      console.error("[RO] fetchReports error:", e?.response?.status, e?.response?.data || e.message);
       setErrMsg('결과를 불러오지 못했습니다.');
-      // 실패 시 비워둠
       const empty = {};
       GRADES.forEach(g => {
         empty[g] = { grade: g, terms: { 1: [], 2: [] } };
@@ -144,6 +119,7 @@ const ReportOverview = () => {
   };
 
   useEffect(() => {
+    console.log("[RO] mounted");
     fetchReports();
   }, []);
 
@@ -160,16 +136,13 @@ const ReportOverview = () => {
 
   return (
     <div className="test-results">
-      {/* 상단 제목 변경 */}
       <h2 className="main-title">레포트 모아보기</h2>
-
       {statusBox}
 
       {GRADES.map((g) => {
         const sem = byGrade[g]?.terms ?? { 1: [], 2: [] };
         return (
           <div key={g} className="semester-container">
-            {/* 큰 박스 제목을 1학년/2학년/3학년으로 */}
             <h3 className="semester-title">{g}학년</h3>
 
             <div className="big-box">
@@ -191,15 +164,10 @@ const ReportOverview = () => {
                         onClick={() => openPdf(item.url)}
                         title={item.url ? '열기' : undefined}
                       >
-                        {/* 타입 태그 표시 */}
                         <span className="pdf-date">
                           [{item.type === 'interest' ? '흥미' : '적성'}] {item.dateText}
                         </span>
-                        <img
-                          src="/icon/right_arrow.jpg"
-                          alt="arrow"
-                          className="arrow-icon rotated"
-                        />
+                        <img src="/icon/right_arrow.jpg" alt="arrow" className="arrow-icon rotated" />
                       </div>
                     ))}
                   </div>
@@ -227,11 +195,7 @@ const ReportOverview = () => {
                         <span className="pdf-date">
                           [{item.type === 'interest' ? '흥미' : '적성'}] {item.dateText}
                         </span>
-                        <img
-                          src="/icon/right_arrow.jpg"
-                          alt="arrow"
-                          className="arrow-icon rotated"
-                        />
+                        <img src="/icon/right_arrow.jpg" alt="arrow" className="arrow-icon rotated" />
                       </div>
                     ))}
                   </div>
