@@ -8,7 +8,7 @@ import {
 import { createAiReport } from '../api/aireport';
 
 const ReportModal = ({ isOpen, onClose }) => {
-  const [grade, setGrade] = useState('3학년');
+  const [grade, setGrade] = useState('1학년');
   const [term, setTerm] = useState('1학기');
   const [hasInput, setHasInput] = useState(true);
 
@@ -69,6 +69,7 @@ const ReportModal = ({ isOpen, onClose }) => {
     setSubmitting(true);
     try {
       // (2) AiReport 생성
+      //makeRes에 HmtID, CstID 있을테니 값 뽑아내서 radar, scatter, riaseccard에 넣기
       const makeRes = await createAiReport({ reportGradeNum, reportTermNum });
       if (!makeRes?.success) {
         setError(makeRes?.message || '레포트 생성 실패');

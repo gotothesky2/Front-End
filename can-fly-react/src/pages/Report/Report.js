@@ -54,7 +54,7 @@ const Report = () => {
       { school: "연세대학교", dept: "의예과", rate: 1 },
     ]);
   }, []);
-
+  //fecthMyHmt, fetchMyCst 함수 버리기
   const fetchMyHmt = async () => {
     try {
       const res = await aiGet(AIconfig.INTEREST.MY_HMT);
