@@ -1,9 +1,14 @@
 // src/components/ReportModal.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // navigate 추가
 import '../styles/ReportModal.css';
-import { fetchTokenCount } from '../api/client'; // ✅ 차감 함수(import) 제거
+import { fetchTokenCount } from '../api/client';
+import { aiPost } from '../api/aiApi'; // AI API 추가
+import AIconfig from '../api/AIconfig'; // AI 설정 추가
 
 const ReportModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate(); // navigate 훅 추가
+  
   const [grade, setGrade] = useState('3학년');
   const [term, setTerm] = useState('1학기');
   const [hasInput, setHasInput] = useState(true);
@@ -43,12 +48,85 @@ const ReportModal = ({ isOpen, onClose }) => {
     })();
   }, [isOpen]);
 
-  // ✅ 확인 → 실제 차감 없이 홈으로 이동(풀 리로드만)
-  const handleConfirm = () => {
-    // 차감/검증 로직 전부 제거
-    window.location.href = '/';
-    // 또는 window.location.replace('/') 사용 가능
-    // 또는 setTimeout(() => window.location.reload(), 0)
+  // ✅ 확인 → 실제 레포트 생성 처리
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      // 학년과 학기를 숫자로 변환
+      const gradeNum = parseInt(grade.replace('학년', ''));
+      const termNum = parseInt(term.replace('학기', ''));
+      
+      // 사용자 입력 정보 수집
+      const reportData = {
+        reportGradeNum: gradeNum,
+        reportTermNum: termNum
+      };
+      
+      console.log('AI 레포트 생성 요청 데이터:', reportData);
+      
+      // AI 레포트 생성 API 호출
+      const result = await aiPost(AIconfig.AIREPORT.CREATE, reportData);
+      console.log('AI 레포트 생성 API 응답:', result);
+      
+      // aiPost는 res.data만 반환하므로 result 자체가 응답 데이터
+      const responseData = result;
+      
+      if (responseData.success && responseData.data) {
+        const reportData = responseData.data;
+        console.log('생성된 레포트 데이터:', reportData);
+        
+        // 성공 시 생성된 레포트 페이지로 이동 (state 포함)
+        navigate('/report', { 
+          state: { 
+            selectedReport: {
+              id: reportData.id,
+              type: 'aireport',
+              dateText: new Date(reportData.created_at).toLocaleString('ko-KR'),
+              // API 응답에서 실제 데이터 추출
+              testReport: reportData.testReport,
+              scoreReport: reportData.scoreReport,
+              totalReport: reportData.totalReport,
+              HmtID: reportData.HmtID,
+              CstID: reportData.CstID,
+              // 원본 데이터
+              raw: reportData
+            },
+            fromOverview: false // 새로 생성된 레포트
+          } 
+        });
+      } else if (responseData.success === false && responseData.error) {
+        // 에러 응답 처리
+        const errorMessage = responseData.error.error_message || '레포트 생성에 실패했습니다.';
+        console.error('레포트 생성 에러:', responseData.error);
+        setError(errorMessage);
+      } else {
+        console.error('예상치 못한 응답 구조:', responseData);
+        throw new Error('레포트 생성에 실패했습니다.');
+      }
+      
+    } catch (e) {
+      console.error('레포트 생성 실패:', e);
+      
+      // API 응답에서 에러 메시지 추출 시도
+      let errorMessage = '레포트 생성에 실패했습니다.';
+      
+      if (e.response?.data?.error?.error_message) {
+        // API 에러 응답에서 메시지 추출
+        errorMessage = e.response.data.error.error_message;
+      } else if (e.response?.data?.message) {
+        // 일반적인 API 에러 메시지
+        errorMessage = e.response.data.message;
+      } else if (e.message) {
+        // JavaScript 에러 메시지
+        errorMessage = e.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -129,7 +207,13 @@ const ReportModal = ({ isOpen, onClose }) => {
 
           {/* 버튼 */}
           <div className="buttons">
-            <button className="btn confirm" onClick={handleConfirm}>예</button>
+            <button 
+              className="btn confirm" 
+              onClick={handleConfirm}
+              disabled={loading}
+            >
+              {loading ? '생성 중...' : '예'}
+            </button>
             <button className="btn cancel" onClick={onClose}>아니오</button>
           </div>
 

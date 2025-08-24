@@ -20,7 +20,7 @@ import { Link } from "react-router-dom";
 const Report = () => {
   const location = useLocation();
   const selectedReport = location.state?.selectedReport;
-  const fromOverview = location.state?.fromOverview;
+  const fromOverview = location.state?.fromOverview || (selectedReport ? true : false); // selectedReport가 있으면 true로 설정
 
   // ▼ 각 섹션을 가리킬 ref
   const aptitudeRef = useRef(null);
@@ -57,7 +57,7 @@ const Report = () => {
     console.log("[Report] selectedReport:", selectedReport);
     console.log("[Report] fromOverview:", fromOverview);
     
-    if (selectedReport && fromOverview) {
+    if (selectedReport) {
       console.log("[Report] Loading selected report:", selectedReport);
       setCurrentReport(selectedReport);
       setReportData(selectedReport);
@@ -309,9 +309,9 @@ const Report = () => {
           <div className="report-contents">
             {/* ReportFilter를 여기로 이동 */}
             <ReportFilter 
-              currentGrade={reportData?.reportGradeNum || currentReport?.raw?.reportGradeNum}
-              currentTerm={reportData?.reportTermNum || currentReport?.raw?.reportTermNum}
-              currentDate={currentReport?.dateText}
+              currentGrade={selectedReport?.raw?.reportGradeNum || reportData?.raw?.reportGradeNum}
+              currentTerm={selectedReport?.raw?.reportTermNum || reportData?.raw?.reportTermNum}
+              currentDate={selectedReport?.dateText || currentReport?.dateText}
               fromOverview={fromOverview}
             />
             
