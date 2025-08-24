@@ -11,15 +11,15 @@ const AptitudeTest = () => {
 
   // ── 질문/답/진행 상태
   const [allQuestions, setAllQuestions] = useState([]); // 원문항
-  const [answers, setAnswers] = useState([]);           // 사용자 답(1~7)
-  const [qnos, setQnos] = useState([]);                 // 실제 문항번호(qitemNo)
-  const [qestrnSeq, setQestrnSeq] = useState("21");     // 설문 코드(질문과 일치)
+  const [answers, setAnswers] = useState([]); // 사용자 답(1~7)
+  const [qnos, setQnos] = useState([]); // 실제 문항번호(qitemNo)
+  const [qestrnSeq, setQestrnSeq] = useState("21"); // 설문 코드(질문과 일치)
   const [page, setPage] = useState(0);
 
   // ── 제출에 필요한 메타(간단히 기본값만 세팅; UI는 추후 추가)
-  const [selectedGender] = useState("male");            // "male" | "female"
-  const [selectedGrade] = useState("2");                // "1" | "2" | "3"
-  const [schoolName] = useState("테스트고등학교");        // 임시 기본값
+  const [selectedGender] = useState("male"); // "male" | "female"
+  const [selectedGrade] = useState("2"); // "1" | "2" | "3"
+  const [schoolName] = useState("테스트고등학교"); // 임시 기본값
 
   const questionRefs = useRef([]);
   const navigate = useNavigate();
@@ -27,13 +27,18 @@ const AptitudeTest = () => {
   // 질문 불러오기 + 임시저장 복원
   useEffect(() => {
     console.log("REACT_APP_API_BASE =", process.env.REACT_APP_API_BASE);
-    console.log("axios.defaults.baseURL =", require("axios").default?.defaults?.baseURL);
+    console.log(
+      "axios.defaults.baseURL =",
+      require("axios").default?.defaults?.baseURL
+    );
     console.log("window.location.origin =", window.location.origin);
 
     const fetchQuestions = async () => {
       try {
         const res = await axios.get("/api/questions?q=21");
-        const questionData = Array.isArray(res.data?.RESULT) ? res.data.RESULT : [];
+        const questionData = Array.isArray(res.data?.RESULT)
+          ? res.data.RESULT
+          : [];
 
         // 응답에 qestrnSeq가 있으면 우선 반영
         const seqFromMeta =
@@ -88,17 +93,23 @@ const AptitudeTest = () => {
   const handleTempSave = () => {
     const toSave = { answers, qnos, page };
     localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-    alert("임시 저장되었습니다. (이 브라우저에서 계속 이어서 응시할 수 있어요)");
+    alert(
+      "임시 저장되었습니다. (이 브라우저에서 계속 이어서 응시할 수 있어요)"
+    );
   };
 
   const checkUnansweredAndScroll = () => {
     const startIdx = page * QUESTIONS_PER_PAGE;
     const endIdx = startIdx + QUESTIONS_PER_PAGE;
-    const unansweredIndex = answers.slice(startIdx, endIdx).findIndex((ans) => ans == null);
+    const unansweredIndex = answers
+      .slice(startIdx, endIdx)
+      .findIndex((ans) => ans == null);
 
     if (unansweredIndex !== -1) {
       const absoluteIndex = startIdx + unansweredIndex;
-      alert(`${absoluteIndex + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`);
+      alert(
+        `${absoluteIndex + 1}번 문항을 답변하지 않았습니다.\n답변해주세요.`
+      );
       questionRefs.current[absoluteIndex]?.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -115,26 +126,41 @@ const AptitudeTest = () => {
       const missing = answers.findIndex((v) => v == null);
       if (missing !== -1) {
         alert(`${missing + 1}번 문항을 답변하지 않았습니다.`);
-        questionRefs.current[missing]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        questionRefs.current[missing]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
         return;
       }
 
       // 1) "순번(1..N)=답" 문자열 생성  ← ★핵심: qnos 대신 i+1 사용
       const N = allQuestions.length;
-      const answersStr = Array.from({ length: N }, (_, i) => `${i + 1}=${answers[i]}`).join(" ");
+      const answersStr = Array.from(
+        { length: N },
+        (_, i) => `${i + 1}=${answers[i]}`
+      ).join(" ");
 
       // (안전) 포맷 검증
       const tokens = answersStr.trim().split(/\s+/);
-      const valid = tokens.length === N && tokens.every((t) => /^\d+=[1-7]$/.test(t));
+      const valid =
+        tokens.length === N && tokens.every((t) => /^\d+=[1-7]$/.test(t));
       if (!valid) {
-        console.error("❌ answersStr invalid", { count: tokens.length, expected: N, sample: tokens.slice(0, 20) });
+        console.error("❌ answersStr invalid", {
+          count: tokens.length,
+          expected: N,
+          sample: tokens.slice(0, 20),
+        });
         alert("답안 포맷 오류가 발생했습니다. 다시 시도해 주세요.");
         return;
       }
 
       // answers: 숫자 배열 (index 0 → 문항 1)
       const toAptitudeAnswers = (arr) =>
-        arr.map((v, i) => `${i + 1}=${v}`).join(" ").replace(/\s+/g, " ").trim();
+        arr
+          .map((v, i) => `${i + 1}=${v}`)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
 
       const payload = {
         qestrnSeq: qestrnSeq || "21",
@@ -170,7 +196,11 @@ const AptitudeTest = () => {
       }
 
       if (!encodedSeq) {
-        console.error("❌ 결과 seq 없음", { urlFromApi, inspctSeq, raw: res.data });
+        console.error("❌ 결과 seq 없음", {
+          urlFromApi,
+          inspctSeq,
+          raw: res.data,
+        });
         alert("결과 seq를 찾지 못했습니다. 콘솔 로그를 확인하세요.");
         return;
       }
