@@ -9,7 +9,7 @@ const ReportFilter = ({ currentGrade, currentTerm, currentDate, fromOverview }) 
 
   // props로 전달받은 현재 레포트 정보로 초기값 설정
   useEffect(() => {
-    if (fromOverview && currentGrade && currentTerm) {
+    if (currentGrade && currentTerm) {
       setGrade(`${currentGrade}학년`);
       setSemester(`${currentTerm}학기`);
     }
@@ -23,7 +23,7 @@ const ReportFilter = ({ currentGrade, currentTerm, currentDate, fromOverview }) 
         setReportDate(`${year}-${month}-${day}`);
       }
     }
-  }, [currentGrade, currentTerm, currentDate, fromOverview]);
+  }, [currentGrade, currentTerm, currentDate]);
 
   return (
     <div className="filter-box" style={{ justifyContent: 'flex-start', gap: '24px' }}>
