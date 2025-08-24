@@ -8,19 +8,31 @@ const LS_KEY = "aptitude_v1_progress"; // 임시저장 키
 
 const AptitudeTest = () => {
   const QUESTIONS_PER_PAGE = 8;
+
+  // ── 질문/답/진행 상태
   const [allQuestions, setAllQuestions] = useState([]); // 원문항
   const [answers, setAnswers] = useState([]);           // 사용자 답(1~7)
   const [qnos, setQnos] = useState([]);                 // 실제 문항번호(qitemNo)
   const [qestrnSeq, setQestrnSeq] = useState("21");     // 설문 코드(질문과 일치)
   const [page, setPage] = useState(0);
+
+  // ── 제출에 필요한 메타(간단히 기본값만 세팅; UI는 추후 추가)
+  const [selectedGender] = useState("male");            // "male" | "female"
+  const [selectedGrade] = useState("2");                // "1" | "2" | "3"
+  const [schoolName] = useState("테스트고등학교");        // 임시 기본값
+
   const questionRefs = useRef([]);
   const navigate = useNavigate();
 
   // 질문 불러오기 + 임시저장 복원
   useEffect(() => {
+    console.log("REACT_APP_API_BASE =", process.env.REACT_APP_API_BASE);
+    console.log("axios.defaults.baseURL =", require("axios").default?.defaults?.baseURL);
+    console.log("window.location.origin =", window.location.origin);
+
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/questions");
+        const res = await axios.get("/api/questions?q=21");
         const questionData = Array.isArray(res.data?.RESULT) ? res.data.RESULT : [];
 
         // 응답에 qestrnSeq가 있으면 우선 반영
@@ -113,26 +125,31 @@ const AptitudeTest = () => {
 
       // (안전) 포맷 검증
       const tokens = answersStr.trim().split(/\s+/);
-      const valid = tokens.length === N && tokens.every(t => /^\d+=[1-7]$/.test(t));
+      const valid = tokens.length === N && tokens.every((t) => /^\d+=[1-7]$/.test(t));
       if (!valid) {
         console.error("❌ answersStr invalid", { count: tokens.length, expected: N, sample: tokens.slice(0, 20) });
         alert("답안 포맷 오류가 발생했습니다. 다시 시도해 주세요.");
         return;
       }
 
-      // 2) CareerNet API 규격에 맞춘 payload 구성
+      // answers: 숫자 배열 (index 0 → 문항 1)
+      const toAptitudeAnswers = (arr) =>
+        arr.map((v, i) => `${i + 1}=${v}`).join(" ").replace(/\s+/g, " ").trim();
+
       const payload = {
-        qestrnSeq,          // 질문 세트와 반드시 동일
-        trgetSe: "100207",  // 고등학생
-        gender: "100323",   // 여: "100324"
-        school: "율도중학교",
-        grade: "2",
+        qestrnSeq: qestrnSeq || "21",
+        trgetSe: "100207",
+        gender: selectedGender === "female" ? "100324" : "100323",
+        grade: String(selectedGrade || "2"),
         startDtm: Date.now(),
-        answers: answersStr,
+        school: schoolName || "",
+        answers: toAptitudeAnswers(answers), // ← 여기만 확실히!
       };
 
-      // 3) 프록시 서버로 전송
-      const res = await axios.post("http://localhost:4000/api/aptitude/submit", payload);
+      const res = await axios.post("/api/aptitude/submit", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
       console.log("제출 응답:", res.data);
 
       const result = res?.data?.RESULT || res?.data?.result || {};
@@ -158,7 +175,9 @@ const AptitudeTest = () => {
         return;
       }
 
-      const finalUrl = `https://www.career.go.kr/inspct/web/psycho/vocation/report?seq=${encodeURIComponent(encodedSeq)}`;
+      const finalUrl = `https://www.career.go.kr/inspct/web/psycho/vocation/report?seq=${encodeURIComponent(
+        encodedSeq
+      )}`;
       console.log("✅ 최종 결과 url:", finalUrl);
 
       // 5) 결과지는 새 탭으로, 현재 탭은 /testcomplete 이동

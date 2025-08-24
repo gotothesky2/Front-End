@@ -4,8 +4,7 @@ import '../styles/InterestTestPage7.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000';
-
+const API_BASE = "";
 // ───────────────────────────────
 // 커리어넷 문항 번호 매핑 (121 ~ 145)
 // ───────────────────────────────
@@ -34,8 +33,19 @@ const JOB_LABELS = [
   '출판편집자','캐스팅디렉터','컴퓨터그래픽디자이너','크라우드펀딩전문가','판사','항공교통관제사','항공기선박조립검사원',
   '항공기정비원','환경컨설턴트','회계사','기타( )','아직 결정 못함'
 ];
-
 const MAJOR_FIELDS = ['인문','사회','교육','공학','자연','의약','예체능'];
+
+// ✅ 전공 계열 → 코드 맵 (v2는 코드 전송 필요)
+const MAJOR_FIELD_CODES = Object.freeze({
+  '인문': '1',
+  '사회': '2',
+  '교육': '3',
+  '공학': '4',
+  '자연': '5',
+  '의약': '6',
+  '예체능': '7',
+});
+
 const SUBJECT_CHOICES = [
   '국어','사회','도덕','수학','과학','기술·가정','정보','체육','음악','미술',
   '연극','영어','제2외국어','한문','교양','창의적 체험활동','기타'
@@ -89,11 +99,15 @@ const InterestTestPage7 = () => {
     const fetchPage7Questions = async () => {
       try {
         // 121~128
-        const r1 = await axios.get(`${API_BASE}/api/interest/questions?q=34&min=121&max=128`);
-        const arr1 = Array.isArray(r1.data?.result?.questions) ? r1.data.result.questions
-                   : Array.isArray(r1.data?.RESULT) ? r1.data.RESULT : [];
+        const r1 = await axios.get('/api/interest/questions?q=34&min=121&max=128');
+        const arr1 = Array.isArray(r1.data?.result?.questions)
+          ? r1.data.result.questions
+          : Array.isArray(r1.data?.RESULT)
+          ? r1.data.RESULT
+          : [];
         const map1 = [...arr1]
           .map(q => ({ no: Number(q.no ?? q.qno ?? q.id ?? 0), text: String(q.text ?? q.title ?? '').trim() }))
+          // ✅ 혹시 서버가 필터 안해줘도 안전
           .filter(q => q.no >= 121 && q.no <= 128)
           .sort((a,b)=>a.no-b.no)
           .map(q => q.text || '질문 내용');
@@ -105,13 +119,13 @@ const InterestTestPage7 = () => {
             // 132 또는 133의 choices 받아오기 (둘 다 동일 리스트라 임의 하나만)
       try {
         // 133(부모님이 원하는 직업)에서 가져오기
-        const rJob = await axios.get(`${API_BASE}/api/interest/questions?q=34&min=133&max=133`);
+        const rJob = await axios.get('/api/interest/questions?q=34&min=133&max=133');
         const qArr = Array.isArray(rJob.data?.result?.questions)
           ? rJob.data.result.questions
           : Array.isArray(rJob.data?.RESULT)
           ? rJob.data.RESULT
           : [];
-        const q = qArr[0];
+        const q = qArr.find(x => Number(x?.no ?? x?.qno ?? x?.id ?? 0) === 133) ?? qArr[0];
         const apiChoices = Array.isArray(q?.choices)
           ? q.choices
               .filter((c) => c && (c.val != null) && (c.text != null))
@@ -126,11 +140,12 @@ const InterestTestPage7 = () => {
       }
       try {
         // 137~145
-        const r2 = await axios.get(`${API_BASE}/api/interest/questions?q=34&min=137&max=145`);
+        const r2 = await axios.get('/api/interest/questions?q=34&min=137&max=145');
         const arr2 = Array.isArray(r2.data?.result?.questions) ? r2.data.result.questions
                    : Array.isArray(r2.data?.RESULT) ? r2.data.RESULT : [];
         const map2 = [...arr2]
           .map(q => ({ no: Number(q.no ?? q.qno ?? q.id ?? 0), text: String(q.text ?? q.title ?? '').trim() }))
+          // ✅ 서버 필터 무시 대비
           .filter(q => q.no >= 137 && q.no <= 145)
           .sort((a,b)=>a.no-b.no)
           .map(q => q.text || '과목');
@@ -266,26 +281,39 @@ const InterestTestPage7 = () => {
     const dec2 = encodeDecision(answers[2][1]);
     arr.push({ no: String(QN.DECISION_1), val: dec1 });
     arr.push({ no: String(QN.DECISION_2), val: dec2 });
-    if (dec2 === '1') {
-      arr.push({ no: String(QN.MAJOR_FIELD), val: String(answers[2][2]) }); // "인문" 등(텍스트)
-    }
 
-    // 3) 132/133 직업 — 숫자코드를 실제 텍스트로 변환
-    const myJob = jobCodeToText(answers[3][0] || '62');      // 비어있으면 "아직 결정 못함"
-    const parentJob = jobCodeToText(answers[3][1] || '62');  // 동일
-    arr.push({ no: String(QN.MY_JOB), val: myJob });
+    if (dec2 === '1') {
+      // 전공 계열은 "숫자코드 1~7"만 허용
+      const label = String(answers[2][2] || '');
+      const code = MAJOR_FIELD_CODES[label];
+      if (!code) {
+        // 선택 누락되면 바로 사용자에게 알려 오류 방지
+        const e = new Error('MAJOR_FIELD_MISSING');
+        e.userMessage = '2-3. 전공 계열을 선택해 주세요.';
+        throw e;
+      }
+      arr.push({ no: String(QN.MAJOR_FIELD), val: code });
+    }
+    // 주의: dec2 === '2' (결정못함)이면 131은 절대 넣지 마세요 (여기서 아무 것도 안 함)
+
+
+    // 3) 132/133 직업 — 미선택은 "-" 권장, 선택 시 라벨 텍스트 사용
+    const myJob     = answers[3][0] ? jobCodeToText(answers[3][0]) : "-";
+    const parentJob = answers[3][1] ? jobCodeToText(answers[3][1]) : "-";
+    arr.push({ no: String(QN.MY_JOB),     val: myJob });
     arr.push({ no: String(QN.PARENT_JOB), val: parentJob });
 
-    // 4) 134/135 과목 1·2순위 — 커리어넷 예시에 맞게 콤마로 1개 값 전송
+    // 4) 134/135 과목 1·2순위 — "과목1,과목2" (이미 유효성 검사로 둘 다 선택 보장)
     const like1 = subjCodeToText(answers[4][0][0]);
     const like2 = subjCodeToText(answers[4][0][1]);
     const dislike1 = subjCodeToText(answers[4][1][0]);
     const dislike2 = subjCodeToText(answers[4][1][1]);
-    arr.push({ no: String(QN.LIKE_SUBJ), val: `${like1},${like2}` });
+    arr.push({ no: String(QN.LIKE_SUBJ),    val: `${like1},${like2}` });
     arr.push({ no: String(QN.DISLIKE_SUBJ), val: `${dislike1},${dislike2}` });
 
-    // 5) 136
+    // 5) 136: 만족도(1~5)
     arr.push({ no: String(QN.SATISFACTION), val: String(answers[5][0]) });
+
 
     // 6) 137~145
     for (let i = 0; i < 9; i++) {
@@ -312,78 +340,106 @@ const InterestTestPage7 = () => {
       answers: arr,
     };
   };
+  
 
   const checkAndSubmit = async () => {
-    // 7페이지 자체 검증
-    const v = validatePage7();
-    if (!v.ok) {
-      alert(v.msg);
-      questionRefs.current[v.key]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const v = validatePage7();
+  if (!v.ok) {
+    alert(v.msg);
+    questionRefs.current[v.key]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  let payload;
+  try {
+    payload = buildV2Payload();
+  } catch (e) {
+    if (e.message === 'MISSING_1_120') {
+      alert(`1~6페이지 응답이 누락되었습니다.\n다시 돌아가서 완료해 주세요.\n(누락: ${e.missing.slice(0,10).join(', ')}${e.missing.length>10?' 외':''})`);
+      return;
+    }
+    console.error(e);
+    alert('제출 페이로드 구성 중 오류가 발생했습니다.');
+    return;
+  }
+
+  try {
+    // 1) 문자열 백업 먼저 생성 (❗ 선언 전에 절대 쓰지 말기)
+    const answersStr = Array.isArray(payload.answers)
+      ? payload.answers.map(({ no, val }) => `${no}=${val}`).join(' ')
+      : '';
+
+    // 2) 백업 문자열 포함한 실제 전송 payload
+    const payloadWithLegacy = { ...payload, answersString: answersStr };
+
+    // 3) 디버그 로그 (answersStr 사용은 여기서 OK)
+    console.log('[v2 payload preview]', {
+      ...payloadWithLegacy,
+      answers_type: Array.isArray(payload.answers) ? 'array' : typeof payload.answers,
+      answers_len: Array.isArray(payload.answers) ? payload.answers.length : null,
+      answers_sample: Array.isArray(payload.answers) ? payload.answers.slice(0, 3) : null,
+    });
+
+    // 4) 전송
+    const res = await axios.post(`${API_BASE}/api/interest/submit`, payloadWithLegacy, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    // 결과 URL 처리 동일
+    const urlFromApi =
+      res?.data?.result?.inspct?.reporturl ||
+      res?.data?.RESULT?.url || '';
+
+    let finalUrl = urlFromApi;
+    if (!finalUrl) {
+      const seq =
+        res?.data?.result?.inspct?.inspctseq ||
+        res?.data?.RESULT?.inspctSeq;
+      if (seq) {
+        const encoded = btoa(String(seq));
+        finalUrl = `https://www.career.go.kr/inspct/web/psycho/holland2/report?seq=${encoded}`;
+      }
+    }
+
+    if (!finalUrl) {
+      console.error('❌ 결과 URL을 찾지 못했습니다.', res?.data);
+      alert('결과 URL을 찾지 못했습니다. 콘솔 로그를 확인해주세요.');
       return;
     }
 
-    let payload;
-    try {
-      payload = buildV2Payload();
-    } catch (e) {
-      if (e.message === 'MISSING_1_120') {
-        alert(`1~6페이지 응답이 누락되었습니다.\n다시 돌아가서 완료해 주세요.\n(누락: ${e.missing.slice(0,10).join(', ')}${e.missing.length>10?' 외':''})`);
-        return;
-      }
-      console.error(e);
-      alert('제출 페이로드 구성 중 오류가 발생했습니다.');
-      return;
+    const w = window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    if (!w) {
+      const w2 = window.open('', '_blank', 'noopener,noreferrer');
+      if (w2) w2.location.replace(finalUrl);
+      else alert('팝업이 차단되어 결과지를 새 창으로 열 수 없습니다.\n브라우저 팝업 허용 후 다시 시도해주세요.');
     }
 
-    try {
-      console.log('[v2 payload preview]', payload);
-      const res = await axios.post(`${API_BASE}/api/interest/submit`, payload);
+    localStorage.removeItem('interestAnswersV2');
+    navigate('/testcomplete', { replace: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+  // 기존 콘솔/알럿 위에 "detail"을 확실히 보여주자
+  const detail = err?.response?.data?.detail;
+  console.error('[v2 submit] FULL DETAIL >>>', detail);
+  const rs = detail?.requestSummary;
+  const ub = detail?.upstreamBody;
+  // 핵심 요약을 alert로 바로 보이게
+  alert([
+    '[진단] upstreamStatus=' + (err?.response?.data?.upstreamStatus ?? err?.response?.status),
+    'answersCount=' + (rs?.answersCount),
+    `range=${rs?.minNo}..${rs?.maxNo} has131=${rs?.has131} reqCount=${rs?.requiredCount}`,
+    'decMajor(130)=' + rs?.decMajor,
+    'upstream msg=' + (ub?.message || ub?.error || JSON.stringify(ub)?.slice(0,200))
+  ].join('\n'));
+  // 기존 로그 유지
+  console.error('[v2 submit] error', err?.response?.status, err?.response?.data, detail?.upstreamBody);
+  alert('제출 중 오류가 발생했습니다.\n콘솔 로그의 [FULL DETAIL]를 캡처해 주세요.');
+}
 
-      // 결과 URL 추출
-      const urlFromApi =
-        res?.data?.result?.inspct?.reporturl ||
-        res?.data?.RESULT?.url ||
-        '';
 
-      let finalUrl = urlFromApi;
-      if (!finalUrl) {
-        const seq =
-          res?.data?.result?.inspct?.inspctseq ||
-          res?.data?.RESULT?.inspctSeq;
-        if (seq) {
-          const encoded = btoa(String(seq));
-          finalUrl = `https://www.career.go.kr/inspct/web/psycho/holland2/report?seq=${encoded}`;
-        }
-      }
-
-      if (!finalUrl) {
-        console.error('❌ 결과 URL을 찾지 못했습니다.', res?.data);
-        alert('결과 URL을 찾지 못했습니다. 콘솔 로그를 확인해주세요.');
-        return;
-      }
-
-      console.log('✅ 최종 결과 url:', finalUrl);
-
-      // 1) 새 탭으로 결과지 열기 (팝업 차단 대비)
-      const w = window.open(finalUrl, '_blank', 'noopener,noreferrer');
-      if (!w) {
-        const w2 = window.open('', '_blank', 'noopener,noreferrer');
-        if (w2) {
-          w2.location.replace(finalUrl);
-        } else {
-          alert('팝업이 차단되어 결과지를 새 창으로 열 수 없습니다.\n브라우저 팝업 허용 후 다시 시도해주세요.');
-        }
-      }
-
-      // 2) 원래 페이지는 완료 화면으로 이동
-      localStorage.removeItem('interestAnswersV2'); // 선택사항
-      navigate('/testcomplete', { replace: true });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error('[v2 submit] error', err?.response?.status, err?.response?.data || err.message);
-      alert('제출 중 오류가 발생했습니다.\n콘솔 로그를 확인해주세요.');
-    }
-  };
+  // (선택) echo는 디버그용이면 남겨둬도 됨
+  // await axios.post(`${API_BASE}/api/_debug/echo`, payloadWithLegacy, { headers: { 'Content-Type': 'application/json' } });
+};
 
   // ─────────────────────────────────
   // 렌더 (디자인 그대로, 텍스트만 API 값으로 치환)

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const PAGE_SIZE = 20;
-const API_BASE = 'http://localhost:4000'; // 배포 시 .env 권장
+const API_BASE = ''; // 배포 시 .env 권장
 
 // 디버그용 안전 stringify
 const safeJson = (obj, len = 1000) => {
@@ -99,8 +99,7 @@ const InterestTest = () => {
     const fetchQuestions = async () => {
       try {
         // ★ 1~120만 서버에서 필터해서 받기
-        const url = `${API_BASE}/api/interest/questions?q=34&min=1&max=120`;
-        const res = await axios.get(url);
+        const res = await axios.get('/api/interest/questions?q=34&min=1&max=120');
 
         console.log('[interest raw keys]', Object.keys(res.data || {}));
         console.log('[interest raw preview]', safeJson(res.data, 1500));
@@ -128,8 +127,10 @@ const InterestTest = () => {
         const normalized = (isV2 ? picked.arr.map(normalizeV2Item) : picked.arr.map(normalizeV1Item))
           .filter(q => q.qitemNo && q.question && q.options.length > 0);
 
-        console.log('[interest normalized count]', normalized.length);
-        setAllQuestions(normalized);
+        // ✅ 1~120만 사용 (서버가 min/max를 무시해도 안전)
+        const first120 = normalized.filter(q => q.qitemNo >= 1 && q.qitemNo <= 120);
+        console.log('[interest normalized count]', first120.length);
+        setAllQuestions(first120);
       } catch (err) {
         console.log('fetch error:', err?.response?.status, err?.response?.data || err.message);
         alert('질문 불러오기에 실패했습니다.');
