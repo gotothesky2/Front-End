@@ -1,7 +1,8 @@
 // src/components/RiaSecCards.js
 import React, { useEffect, useMemo, useState } from 'react';
 import '../../styles/RiaSecCards.css';
-import { fetchInterestById } from '../../services/interest';
+import { aiGet } from '../../api/aiApi';
+import AIconfig from '../../api/AIconfig';
 
 const CARD_IMAGES = {
   R: '/img/R.png',
@@ -23,7 +24,7 @@ function toRiasecMapFromApi(d) {
     C: Number(d?.cScore ?? 0),
   };
 
-  // 0~1 범위로 오면 %로 변환
+  // 0~1 스케일이면 %로 변환
   const maxVal = Math.max(...Object.values(raw));
   const toFixed1 = (v) => +v.toFixed(1);
 
@@ -54,18 +55,28 @@ export default function RiaSecCards({ hmtId }) {
 
   useEffect(() => {
     if (!hmtId) { setLoading(false); return; }
+
+    const controller = new AbortController();
     (async () => {
       try {
         setLoading(true);
         setErr('');
-        const data = await fetchInterestById(hmtId); // GET /hmt/{id} → { rScore, ... }
-        setScores(toRiasecMapFromApi(data));
+
+        // ★ AIconfig.INTEREST.CHECK_HMT 사용 (예: '/hmt/:id' 형태)
+        const url = AIconfig.INTEREST.CHECK_HMT.replace(':id', String(hmtId));
+        const res = await aiGet(url, { signal: controller.signal });
+
+        // 응답 정규화: { success, data:{...} } | { data:{...} } | {...}
+        const payload = res?.data?.data ?? res?.data ?? res;
+        setScores(toRiasecMapFromApi(payload));
       } catch (e) {
         setErr(e?.response?.data?.message || '흥미검사 카드 불러오기 실패');
       } finally {
         setLoading(false);
       }
     })();
+
+    return () => controller.abort();
   }, [hmtId]);
 
   // 상위 1, 2위
@@ -78,6 +89,7 @@ export default function RiaSecCards({ hmtId }) {
 
   if (loading) return <div>카드 불러오는 중...</div>;
   if (err) return <div style={{ color: '#c00' }}>{err}</div>;
+  if (!hmtId) return null;
 
   return (
     <div className="riasec-container">

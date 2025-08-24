@@ -21,14 +21,14 @@ const AIconfig = {
   INTEREST: {
     MAKE_HMT: `${BASE_URL}/hmt`,
     MY_HMT: `${BASE_URL}/hmt/my`,
-    CHECK_HMT: (hmt_id) => `${BASE_URL}/hmt/${hmt_id}`,
+    CHECK_HMT: (id) => `${BASE_URL}/hmt/${id}`,
     DELETE_HMT: (hmt_id) => `${BASE_URL}/hmt/${hmt_id}`,
   },
 
     APTITUDE: {
         MAKE_CST: `${BASE_URL}/cst`,
         MY_CST: `${BASE_URL}/cst/my`,
-        CHECK_CST: (cst_id) => `${BASE_URL}/cst/${cst_id}`,
+        CHECK_CST: (id) => `${BASE_URL}/cst/${id}`,
         DELETE_CST: (cst_id) => `${BASE_URL}/cst/${cst_id}`,
     },
 

@@ -15,23 +15,13 @@ const splitToLines = (text) =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-export default function ScoreTrendText({ lines }) {
-  const fromStorage = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('last_ai_report');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.scoreReport?.content || null;
-    } catch {
-      return null;
-    }
-  }, []);
-
+export default function ScoreTrendText({ text, lines }) {
   const finalLines = useMemo(() => {
-    if (lines?.length) return lines;
-    if (fromStorage) return splitToLines(fromStorage);
+    if (Array.isArray(lines) && lines.length) return lines;
+    if (Array.isArray(text)) return text.length ? text : DUMMY_TEXT;
+    if (typeof text === 'string' && text.trim()) return splitToLines(text);
     return DUMMY_TEXT;
-  }, [lines, fromStorage]);
+  }, [text, lines]);
 
   return (
     <ul className="scoretrend-text">

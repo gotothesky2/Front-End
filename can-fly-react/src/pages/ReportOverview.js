@@ -1,5 +1,6 @@
 // src/pages/ReportOverview.jsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/ReportOverview.css';
 import { fetchAllAiReports } from '../api/aireport';
 
@@ -9,56 +10,42 @@ const TERMS = [1, 2];
 
 // 서버 아이템 → 화면용 정규화
 function normalizeItem(raw) {
+  // /aireport/me 응답 스키마 기준
+  const id = raw?.id ?? raw?._id ?? raw?.reportId ?? null;
+
+  const grade = Number(raw?.reportGradeNum ?? raw?.grade ?? 1);
+  const term  = Number(raw?.reportTermNum  ?? raw?.term  ?? 1);
+
   // 날짜
   const dateStr =
-    raw?.createdAt ||
     raw?.created_at ||
+    raw?.createdAt ||
     raw?.date ||
     raw?.datetime ||
     raw?.created ||
     null;
 
-  // 타입(적성/흥미) 추론
-  let type =
-    raw?.type || raw?.category || raw?.kind || raw?.examType || raw?.reportType || '';
-
-  if (!type) {
-    const hint = `${raw?.title ?? ''} ${raw?.name ?? ''} ${raw?.slug ?? ''}`.toLowerCase();
-    if (hint.includes('적성') || hint.includes('aptitude') || hint.includes('cst')) type = 'aptitude';
-    else if (hint.includes('흥미') || hint.includes('interest') || hint.includes('hmt')) type = 'interest';
-  }
-
-  // 학년/학기
-  let grade = raw?.grade ?? raw?.userGrade ?? raw?.gradeYear ?? raw?.schoolGrade ?? null;
-  let term  = raw?.term  ?? raw?.semester  ?? raw?.schoolTerm  ?? raw?.userTerm   ?? null;
-
-  // 기본값 보정
-  grade = Number(grade);
-  if (!GRADES.includes(grade)) grade = 1;
-  term = Number(term);
-  if (!TERMS.includes(term)) term = 1;
-
-  // 링크
-  const url =
-    raw?.url || raw?.link || raw?.fileUrl || raw?.pdfUrl ||
-    raw?.reportUrl || raw?.downloadUrl || null;
-
-  // 날짜 표기
   const dateText = dateStr
     ? new Date(dateStr).toLocaleString('ko-KR', {
         year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
       })
     : '-';
 
   return {
-    id: raw?.id ?? raw?._id ?? raw?.reportId ?? `${Math.random()}`,
-    type: type === 'interest' ? 'interest' : 'aptitude',
-    grade, term, dateText, url,
+    id,
+    grade: GRADES.includes(grade) ? grade : 1,
+    term:  TERMS.includes(term) ? term : 1,
+    dateText,
+    // aireport 리스트는 단일 리포트이므로 타입 표기를 굳이 나누지 않음
+    // (UI 라벨에 쓰려면 '적성' 고정 혹은 서버 확장 시에 맞춰 변경)
+    type: 'aptitude',
   };
 }
 
 const ReportOverview = () => {
+  const navigate = useNavigate();
+
   // grade → term → items
   const [byGrade, setByGrade] = useState(() => {
     const init = {};
@@ -71,15 +58,12 @@ const ReportOverview = () => {
   const [errMsg, setErrMsg] = useState('');
 
   const fetchReports = async () => {
-    console.log("[RO] fetchReports called");
     setLoading(true);
     setErrMsg('');
     try {
-      console.log("[RO] before fetchAllAiReports");
-      const list = await fetchAllAiReports();
-      console.log("[RO] after fetchAllAiReports:", Array.isArray(list) ? list.length : list);
-
-      const normalized = list.map(normalizeItem);
+      const list = await fetchAllAiReports(); // 이미 /aireport/me 우선, fallback 내장
+      const array = Array.isArray(list) ? list : [];
+      const normalized = array.map(normalizeItem).filter(it => it.id);
 
       const bucket = {};
       GRADES.forEach(g => {
@@ -92,8 +76,7 @@ const ReportOverview = () => {
         bucket[g].terms[t].push({
           id: it.id,
           dateText: it.dateText,
-          url: it.url,
-          type: it.type, // 'aptitude' | 'interest'
+          type: it.type, // 현재는 'aptitude' 고정
         });
       }
 
@@ -106,7 +89,7 @@ const ReportOverview = () => {
 
       setByGrade(bucket);
     } catch (e) {
-      console.error("[RO] fetchReports error:", e?.response?.status, e?.response?.data || e.message);
+      console.error("[ReportOverview] fetchReports error:", e?.response?.status, e?.response?.data || e.message);
       setErrMsg('결과를 불러오지 못했습니다.');
       const empty = {};
       GRADES.forEach(g => {
@@ -119,7 +102,6 @@ const ReportOverview = () => {
   };
 
   useEffect(() => {
-    console.log("[RO] mounted");
     fetchReports();
   }, []);
 
@@ -128,11 +110,6 @@ const ReportOverview = () => {
     if (errMsg)  return <div style={{ padding: 12, color: '#c00' }}>{errMsg}</div>;
     return null;
   }, [loading, errMsg]);
-
-  const openPdf = (url) => {
-    if (!url) return;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <div className="test-results">
@@ -160,11 +137,12 @@ const ReportOverview = () => {
                       <div
                         key={item.id}
                         className="pdf-item"
-                        role={item.url ? 'button' : undefined}
-                        onClick={() => openPdf(item.url)}
-                        title={item.url ? '열기' : undefined}
+                        role="button"
+                        onClick={() => navigate(`/report/${item.id}`)}
+                        title="열기"
                       >
                         <span className="pdf-date">
+                          {/* 타입 라벨: 필요 시 '흥미/적성'으로 변경 가능 */}
                           [{item.type === 'interest' ? '흥미' : '적성'}] {item.dateText}
                         </span>
                         <img src="/icon/right_arrow.jpg" alt="arrow" className="arrow-icon rotated" />
@@ -188,9 +166,9 @@ const ReportOverview = () => {
                       <div
                         key={item.id}
                         className="pdf-item"
-                        role={item.url ? 'button' : undefined}
-                        onClick={() => openPdf(item.url)}
-                        title={item.url ? '열기' : undefined}
+                        role="button"
+                        onClick={() => navigate(`/report/${item.id}`)}
+                        title="열기"
                       >
                         <span className="pdf-date">
                           [{item.type === 'interest' ? '흥미' : '적성'}] {item.dateText}
@@ -211,3 +189,4 @@ const ReportOverview = () => {
 };
 
 export default ReportOverview;
+

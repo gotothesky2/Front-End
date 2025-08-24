@@ -5,7 +5,8 @@ import {
   fetchTokenCount,
   useTokens as apiUseTokens, // PATCH /users/token  (amount: -cost)
 } from '../api/client';
-import { createAiReport } from '../api/aireport';
+import { createAiReport } from '../api/realaireport';
+import { useNavigate } from 'react-router-dom';
 
 const ReportModal = ({ isOpen, onClose }) => {
   const [grade, setGrade] = useState('1학년');
@@ -16,6 +17,8 @@ const ReportModal = ({ isOpen, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   // 학년별 차감량
   const costByGrade = {
@@ -51,7 +54,7 @@ const ReportModal = ({ isOpen, onClose }) => {
     })();
   }, [isOpen]);
 
-  // ✅ '예' 클릭 → (1) 토큰 확인 → (2) AiReport 생성 → (3) 토큰 차감 → (4) 저장 후 이동
+  // ✅ '예' 클릭 → (1) 토큰 확인 → (2) AiReport 생성 → (3) 토큰 차감 → (4) 상세 페이지로 이동
   const handleConfirm = async () => {
     setError('');
     if (tokens < cost) {
@@ -69,15 +72,29 @@ const ReportModal = ({ isOpen, onClose }) => {
     setSubmitting(true);
     try {
       // (2) AiReport 생성
-      //makeRes에 HmtID, CstID 있을테니 값 뽑아내서 radar, scatter, riaseccard에 넣기
-      const makeRes = await createAiReport({ reportGradeNum, reportTermNum });
+      // 필요 시 서버 스펙에 맞게 payload 키를 조정하세요. (예: HmtID/CstID 필요하면 포함)
+      const makeRes = await createAiReport({ reportGradeNum, reportTermNum, hasInput });
       if (!makeRes?.success) {
         setError(makeRes?.message || '레포트 생성 실패');
         setSubmitting(false);
         return;
       }
 
-      const created = makeRes.data; // 서버가 내려준 생성된 보고서
+      const created = makeRes.data; // 서버가 내려준 생성된 보고서(POST 응답 스키마)
+      // 응답에서 id를 유연하게 추출
+      const reportId =
+        created?.id ??
+        created?.Id ??
+        created?.reportId ??
+        created?.reportID ??
+        created?.data?.id; // 혹시 중첩 구조일 대비
+
+      if (!reportId) {
+        setError('생성 응답에 report id가 없습니다.');
+        setSubmitting(false);
+        return;
+      }
+
       // (3) 토큰 차감
       const tokenRes = await apiUseTokens(cost);
       if (!tokenRes.ok) {
@@ -86,18 +103,8 @@ const ReportModal = ({ isOpen, onClose }) => {
         return;
       }
 
-      // (4) 생성 결과를 로컬스토리지에 저장 (페이지에서 사용)
-      try {
-        localStorage.setItem('last_ai_report', JSON.stringify(created));
-        // hasInput 여부도 보관하고 싶다면:
-        localStorage.setItem('last_ai_report_hasInput', JSON.stringify(hasInput));
-      } catch (e) {
-        console.warn('localStorage 저장 중 경고:', e);
-      }
-
-      // 이동(선호하는 경로로 변경 가능)
-      // 레포트 페이지에서 읽어가도록 보고서 페이지로 이동 권장
-      window.location.href = '/report'; // 또는 '/mypage/report' 등 실제 경로
+      // (4) ✅ 로컬스토리지 쓰지 않고, 상세 페이지(/report/:id)로 이동
+      navigate(`/report/${reportId}`);
     } catch (err) {
       console.error('레포트 생성 에러:', err);
       setError('레포트 생성 중 오류가 발생했습니다.');

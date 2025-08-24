@@ -5,10 +5,23 @@ import {
   RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend,
 } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
-import { fetchInterestById } from '../../services/interest';
+import { aiGet } from '../../api/aiApi';
+import AIconfig from '../../api/AIconfig';
 
-// 데이터 라벨 플러그인
-const DataLabelPlugin = {
+// --- 여기 붙여넣기 ---
+function buildUrlWithId(rawPath, id, opts) {
+  const sid = String(id);
+  if (!rawPath || typeof rawPath !== 'string') return sid;
+  let url = rawPath.replace(/:id\b/g, sid);
+  (opts?.placeholderKeys ?? ['id','hmtId','cstId']).forEach(k => {
+    url = url.replace(new RegExp(`\\{${k}\\}`, 'g'), sid);
+  });
+  if (!url.match(new RegExp(`/${sid}(\\b|$)`))) url = url.endsWith('/') ? url + sid : `${url}/${sid}`;
+  return url;
+}
+// ---------------------
+
+const DataLabelPlugin = { /* (기존 그대로) */ 
   id: 'DataLabelPlugin',
   afterDatasetsDraw(chart) {
     const { ctx } = chart;
@@ -31,23 +44,13 @@ const DataLabelPlugin = {
   },
 };
 
-ChartJS.register(
-  RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, DataLabelPlugin
-);
+ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, DataLabelPlugin);
 
-const LABELS = ['R(현실형)','I(탐구형)','A(예술형)','S(사회형)','E(기업형)','C(관습형)'];
+const LABELS = ['R(현실형)','I(탐구형)','A(예술형)','S(사회형)','E(진취형)','C(관습형)'];
 const ORDER  = ['R','I','A','S','E','C'];
 
-// data 객체({ rScore, ... }) → R/I/A/S/E/C 배열
 function toRiasecArray(data) {
-  const map = {
-    R: data?.rScore,
-    I: data?.iScore,
-    A: data?.aScore,
-    S: data?.sScore,
-    E: data?.eScore,
-    C: data?.cScore,
-  };
+  const map = { R: data?.rScore, I: data?.iScore, A: data?.aScore, S: data?.sScore, E: data?.eScore, C: data?.cScore };
   let arr = ORDER.map(k => {
     const n = Number(map[k] ?? 0);
     return Number.isFinite(n) ? +n.toFixed(1) : 0;
@@ -64,19 +67,35 @@ export default function AptitudeRadar({ hmtId }) {
 
   useEffect(() => {
     if (!hmtId) { setLoading(false); return; }
+    const controller = new AbortController();
+
     (async () => {
       try {
         setLoading(true);
         setErr('');
-        // ★ 여기서 CHECK_HMT 사용한 서비스 호출
-        const data = await fetchInterestById(hmtId);
-        setScores(toRiasecArray(data));
+
+        // ✅ URL 강건하게 만들기
+        const url = buildUrlWithId(AIconfig.INTEREST.CHECK_HMT, hmtId, { placeholderKeys: ['id','hmtId'] });
+        // 디버깅 로깅(필요시 주석 처리)
+        // console.log('[HMT GET]', url);
+
+        const res = await aiGet(url, { signal: controller.signal });
+        const payload = res?.data?.data ?? res?.data ?? res;
+        if (!payload) throw new Error('empty payload');
+
+        setScores(toRiasecArray(payload));
       } catch (e) {
-        setErr(e?.response?.data?.message || '흥미검사 결과 불러오기 실패');
+        // 개발 편의: 상태/메시지 한 줄로
+        const status = e?.response?.status;
+        const msg = e?.response?.data?.message || e.message || '흥미검사 결과 불러오기 실패';
+        setErr(msg);
+        // console.error('[HMT ERROR]', status, msg);
       } finally {
         setLoading(false);
       }
     })();
+
+    return () => controller.abort();
   }, [hmtId]);
 
   const data = useMemo(() => ({
