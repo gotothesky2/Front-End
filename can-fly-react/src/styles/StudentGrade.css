@@ -197,6 +197,7 @@
   font-size: 16px;
   font-weight: 600;
   border-radius: 8px 8px 0 0;
+  font-family: 'KakaoBold', sans-serif;
 }
 
 .grade-chart-underline {
@@ -244,6 +245,7 @@
   font-size: 14px;
   cursor: pointer;
   color: #03178C;
+  font-family: 'KakaoRegular', sans-serif;
 }
 
 .grade-trend-tab:first-child {

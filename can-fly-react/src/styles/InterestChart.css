@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px; /* 카드들 사이 여백 */
+  font-family: 'KakaoRegular', sans-serif;
 }
 
 /* 각 카드(wrapper) */
@@ -21,6 +22,7 @@
   font-weight: bold;
   font-size: 16px;
   white-space: nowrap;
+  font-family: 'KakaoBold', sans-serif;
 }
 
 /* 가운데 차트 영역: flex-grow로 늘려서 막대가 가운데에서 최대한 채워짐 */
@@ -40,6 +42,7 @@
   font-weight: bold;
   font-size: 24px;
   white-space: nowrap;
+  font-family: 'KakaoBold', sans-serif;
 }
 
 

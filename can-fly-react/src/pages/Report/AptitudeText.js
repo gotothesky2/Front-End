@@ -1,20 +1,19 @@
 import React from 'react';
 import '../../styles/AptitudeText.css';
 
-// 백엔드에서 받아올 “종합 텍스트” 더미
-const DUMMY_TEXT = [
-  '동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라 만세 …',
-  '남산 위에 저 소나무 철갑을 두른 듯 바람 서리 불변함은 우리 기상일세 …',
-  '가을 하늘 공활한데 높고 구름 없이 밝은 달은 우리 가슴 일편단심일세 …',
-  '이 기상과 이 맘으로 충성을 다하여 괴로우나 즐거우나 나라 사랑하세 …',
-];
-
-export default function AptitudeText({ lines = DUMMY_TEXT }) {
+export default function AptitudeText() {
   return (
-    <ul className="aptitude-text">
-      {lines.map((line, idx) => (
-        <li key={idx}>{line}</li>
-      ))}
-    </ul>
-  );
+    <div className="aptitude-text">
+      <h3>적성·흥미 검사 결과 분석</h3>
+      <p>
+        학생의 적성과 흥미를 종합적으로 분석한 결과, 탐구형(I)과 기업형(E) 성향이 두드러집니다. 
+        탐구형 성향은 논리적 사고와 분석적 접근을 선호하며, 이학/공학/의학계열의 학과에 적합합니다. 
+        기업형 성향은 리더십과 목표지향성을 보여주며, 경상/사회/법/정치/행정계열의 학과가 적합합니다.
+      </p>
+      <p>
+        또한 예술시각능력과 자연친화력에서 높은 적성을 보여, 예술/디자인/미술계열과 자연/생명/농림/환경계열의 학과도 고려해볼 수 있습니다. 
+        이러한 결과를 바탕으로 학생에게는 수학과, 컴퓨터공학과, 시각디자인학과, 생명과학과, 환경공학과 등을 추천합니다.
+      </p>
+    </div>
+  )
 }
