@@ -1,5 +1,5 @@
 // src/api/AIconfig.js
-const BASE_URL = 'http://43.200.79.118';
+const BASE_URL = 'https://43.200.79.118';
 
 const AIconfig = {
   API_URL: BASE_URL,
