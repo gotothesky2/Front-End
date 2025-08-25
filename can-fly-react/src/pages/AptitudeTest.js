@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/AptitudeTest.css";
+import {get, post} from "../api/Api";
 
 const LS_KEY = "aptitude_v1_progress"; // 임시저장 키
 
@@ -26,18 +27,11 @@ const AptitudeTest = () => {
 
   // 질문 불러오기 + 임시저장 복원
   useEffect(() => {
-    console.log("REACT_APP_API_BASE =", process.env.REACT_APP_API_BASE);
-    console.log(
-      "axios.defaults.baseURL =",
-      require("axios").default?.defaults?.baseURL
-    );
-    console.log("window.location.origin =", window.location.origin);
-
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get("/api/questions?q=21");
-        const questionData = Array.isArray(res.data?.RESULT)
-          ? res.data.RESULT
+        const res = await get("https://www.career.go.kr/inspct/openapi/test/questions?apikey=69611c6585da333774ecf91966fc17f0&q=21");
+        const questionData = Array.isArray(res.RESULT)
+          ? res.RESULT
           : [];
 
         // 응답에 qestrnSeq가 있으면 우선 반영
@@ -163,6 +157,7 @@ const AptitudeTest = () => {
           .trim();
 
       const payload = {
+        apikey: "69611c6585da333774ecf91966fc17f0",
         qestrnSeq: qestrnSeq || "21",
         trgetSe: "100207",
         gender: selectedGender === "female" ? "100324" : "100323",
@@ -172,11 +167,17 @@ const AptitudeTest = () => {
         answers: toAptitudeAnswers(answers), // ← 여기만 확실히!
       };
 
-      const res = await axios.post("/api/aptitude/submit", payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      console.log("제출 응답:", res.data);
+      const res = await axios.post(
+        `https://www.career.go.kr/inspct/openapi/test/report`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            withCredentials: false,
+          },
+        }
+      );
 
       const result = res?.data?.RESULT || res?.data?.result || {};
       const urlFromApi = result?.url || "";
