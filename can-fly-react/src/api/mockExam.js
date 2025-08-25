@@ -18,7 +18,7 @@ export async function getAllMockExams(params = {}) {
 export async function postMockExam(payload) {
   // 절대경로를 이미 쓰고 있다면 그대로 두세요.
   const res = await ai.post(
-    'http://canfly.ap-northeast-2.elasticbeanstalk.com/users/grades/mock/excel',
+    'https://www.can-fly.shop/',
     payload
   );
   return res?.data;
