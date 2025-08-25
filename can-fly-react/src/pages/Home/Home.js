@@ -24,7 +24,7 @@ const Home = () => {
 
   const handleLogin = async () => {
     try {
-      const redirectUrl = "http://localhost:3000";
+      const redirectUrl = "https://can-fly2.netlify.app/";
       const oauthUrl = `http://canfly.ap-northeast-2.elasticbeanstalk.com/oauth2/authorization/kakao?front_redirect=${redirectUrl}`;
       window.location.href = oauthUrl;
     } catch (error) {
