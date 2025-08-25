@@ -15,6 +15,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `${token}`;
     }
+    config.headers.Accept = "*/*";
     return config;
   },
   (error) => Promise.reject(error)
@@ -115,6 +116,5 @@ export const patch = async (endpoint, data = {}, options = {}) => {
     throw error;
   }
 };
-
 
 export default api;

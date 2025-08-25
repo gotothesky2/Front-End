@@ -1,7 +1,7 @@
 .test-results {
   margin-top: 70px;
   padding: 40px;
-  font-family: 'Pretendard', sans-serif;
+  font-family: 'KakaoRegular', sans-serif;
 }
 
 .main-title {
@@ -53,8 +53,6 @@
   justify-content: flex-start;
 }
 
-
-
 .pdf-list {
   display: flex;
   flex-direction: column;
@@ -69,8 +67,23 @@
   border-radius: 999px;
   padding: 12px 16px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
+.pdf-item.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdf-item.clickable:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.pdf-item.clickable:active {
+  transform: translateY(0);
+}
 
 .arrow-icon {
   width: 18px;
@@ -82,4 +95,125 @@
   flex: 1;
   font-size: 14px;
   color: #333;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-body p {
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+.report-content,
+.report-score,
+.report-details {
+  margin-bottom: 24px;
+}
+
+.report-score p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #03178C;
+}
+
+.score-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.score-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.score-value {
+  font-weight: 600;
+  color: #03178C;
+}
+
+.no-content {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.no-content p {
+  margin: 0;
+  font-size: 16px;
 }
