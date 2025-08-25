@@ -394,7 +394,7 @@ const InterestTestPage7 = () => {
       });
     }
 
-    // 2) 129/130 결정, 131 전공계열(130이 '결정함'이면 코드, '결정못함'이면 "-")
+    // 2) 129/130 결정, 131 전공계열(130이 '결정함'이면 **라벨 텍스트**, '결정못함'이면 "-")
     const dec1 = encodeDecision(answers[2][0]);
     const dec2 = encodeDecision(answers[2][1]);
     arr.push({ no: String(QN.DECISION_1), val: dec1 });
@@ -402,30 +402,32 @@ const InterestTestPage7 = () => {
 
     let majorVal = "-"; // 기본은 결정못함 처리
     if (dec2 === "1") {
-      const label = String(answers[2][2] || "");
-      const code = MAJOR_FIELD_CODES[label];
-      if (!code) {
+      const label = String(answers[2][2] || ""); // 인문/사회/교육/공학/자연/의약/예체능
+      if (!label) {
         const e = new Error("MAJOR_FIELD_MISSING");
         e.userMessage = "2-3. 전공 계열을 선택해 주세요.";
         throw e;
       }
-      majorVal = code; // 결정함이면 1~7 코드
+      // ✅ 131은 '라벨 텍스트'로 전송
+      majorVal = label;
     }
     arr.push({ no: String(QN.MAJOR_FIELD), val: majorVal });
 
-    // 3) 132/133 직업 — 미선택은 "-", 선택 시 **라벨 텍스트** 전송
+    // 3) 132/133 직업 — 미선택은 "-", 선택 시 **숫자 코드("1"~"62")** 전송
+    // 3) 132/133 직업 — 미선택은 "-", 선택 시 **직업명 텍스트** 전송
     const myJob = answers[3][0] ? jobCodeToText(answers[3][0]) : "-";
     const parentJob = answers[3][1] ? jobCodeToText(answers[3][1]) : "-";
     arr.push({ no: String(QN.MY_JOB), val: myJob });
     arr.push({ no: String(QN.PARENT_JOB), val: parentJob });
 
-    // 4) 134/135 과목 1·2순위 — **라벨 텍스트** "과목1,과목2"
-    const like1 = subjCodeToText(answers[4][0][0]);
-    const like2 = subjCodeToText(answers[4][0][1]);
+    // 4) 134/135 과목 1·2순위 — **숫자 코드** "1,2" 형식으로 전송
+    const like1 = subjCodeToText(answers[4][0][0]);   // 예: "국어"
+    const like2 = subjCodeToText(answers[4][0][1]);   // 예: "수학"
     const dislike1 = subjCodeToText(answers[4][1][0]);
     const dislike2 = subjCodeToText(answers[4][1][1]);
-    arr.push({ no: String(QN.LIKE_SUBJ), val: `${like1},${like2}` });
+    arr.push({ no: String(QN.LIKE_SUBJ), val: `${like1},${like2}` });       // no=134
     arr.push({ no: String(QN.DISLIKE_SUBJ), val: `${dislike1},${dislike2}` });
+
 
     // 5) 136: 만족도(1~5) — **숫자 문자열**
     arr.push({ no: String(QN.SATISFACTION), val: String(answers[5][0]) });
@@ -462,6 +464,9 @@ const InterestTestPage7 = () => {
       trgetSe: "100207", // 고등학생
       gender: "100323",
       grade: "2",
+      name:"",
+      email:"",
+
       school: "학교명",
       startDtm: Date.now(),
       answers: arr,
