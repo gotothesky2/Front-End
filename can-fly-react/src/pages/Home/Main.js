@@ -43,7 +43,7 @@ const steps = [
 ];
 
 // STEP 1~3 이동 경로만 정의 (STEP 4는 링크 없음)
-const actionLinks = ["/AptitudeTest", "/GradeInput", "/Departmentselection"];
+const actionLinks = ["/Test", "/GradeInput", "/Departmentselection"];
 
 const Main = () => {
   const [isReportOpen, setReportOpen] = useState(false);

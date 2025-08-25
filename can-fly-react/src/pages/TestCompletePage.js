@@ -5,7 +5,7 @@ import { aiPdfPost } from "../api/aiApi";
 import AIconfig from "../api/AIconfig";
 
 // ✅ 추가: 자동 리다이렉트를 위한 훅
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const TestCompletePage = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -16,6 +16,8 @@ const TestCompletePage = () => {
   // ✅ 추가: AptitudeTest에서 전달되는 결과 URL
   const { state } = useLocation();
   const resultUrl = state?.resultUrl;
+
+  const navigate = useNavigate();
 
   // ✅ 추가: 결과 URL이 있으면 자동 이동 (기존 기능에 영향 없음)
   useEffect(() => {
@@ -158,9 +160,14 @@ const TestCompletePage = () => {
           />
         </div>
 
-        <button className="save-button" onClick={handleUploadClick} disabled={loading}>
-          {loading ? "저장 중..." : "저장 하기"}
-        </button>
+        <div className="button-group" style={{ display: "flex", gap: 12 }}>
+          <button className="save-button" onClick={handleUploadClick} disabled={loading}>
+            {loading ? "저장 중..." : "저장 하기"}
+          </button>
+          <button className="save-button" onClick={() => navigate("/")}>
+            메인으로
+          </button>
+        </div>
       </div>
     </div>
   );
