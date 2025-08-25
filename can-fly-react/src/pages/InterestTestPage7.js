@@ -455,16 +455,18 @@ const InterestTestPage7 = () => {
         sample131: arr.find((x) => String(x.no) === "131"),
       });
     }
+  
 
     // ★ v2 루트 키는 camelCase로
     return {
-      qno: 34, // 33/34 중 사용 중인 번호
-      trgetSe: "100207", // 고등학생
-      gender: "100323",
-      grade: "2",
-      school: "학교명",
-      startDtm: Date.now(),
+      apikey: "69611c6585da333774ecf91966fc17f0",
       answers: arr,
+      gender: "100324",
+      grade: "1",
+      qno: 34,
+      school: "오성고등학교", // 33/34 중 사용 중인 번호
+      startDtm: Date.now(),
+      trgetSe: "100207", // 고등학생
     };
   };
 
