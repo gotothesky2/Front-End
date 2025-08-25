@@ -1,4 +1,4 @@
-const BASE_URL = 'http://canfly.ap-northeast-2.elasticbeanstalk.com';
+const BASE_URL = 'https://www.can-fly.shop/';
 
 const config = {
     API_URL: BASE_URL,

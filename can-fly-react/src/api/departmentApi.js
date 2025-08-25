@@ -1,7 +1,7 @@
 // ✅ departmentApi.js
 import axios from "axios";
 
-const BASE_URL = "http://canfly.ap-northeast-2.elasticbeanstalk.com";
+const BASE_URL = "https://www.can-fly.shop/";
 
 const getAccessToken = () => {
   const token = localStorage.getItem("accessToken");

@@ -10,6 +10,7 @@ import { useCookies } from "react-cookie";
 import config from "../../config"; // 사용하지 않으면 삭제해도 무방
 import EduProfileModal from "../../components/EduProfileModal";
 
+
 import { fetchMe, requestLogout, updateUserProfile } from "../../api/client";
 
 const normalizeToken = (t) => (t ? t.replace(/^Bearer\s+/i, "").trim() : "");
@@ -25,7 +26,7 @@ const Home = () => {
   const handleLogin = async () => {
     try {
       const redirectUrl = "https://can-fly2.netlify.app/";
-      const oauthUrl = `http://canfly.ap-northeast-2.elasticbeanstalk.com/oauth2/authorization/kakao?front_redirect=${redirectUrl}`;
+      const oauthUrl = `https://www.can-fly.shop/oauth2/authorization/kakao?front_redirect=${redirectUrl}`;
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("로그인 실패:", error?.response || error?.message);
